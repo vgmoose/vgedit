@@ -1,0 +1,12 @@
+GUI :=		libs/hb-appstore/gui/InputEvents.cpp libs/hb-appstore/gui/Element.cpp libs/hb-appstore/gui/TextElement.cpp libs/hb-appstore/gui/ImageElement.cpp libs/hb-appstore/gui/ImageCache.cpp
+
+RAPIDJSON :=	libs/hb-appstore/libs/get/src/libs/rapidjson/include
+
+all:
+	g++ -g -std=gnu++14 *.cpp gui/*.cpp ${GUI} -lSDL2 -lSDL2main -lSDL2_image -lSDL2_ttf -lSDL2_gfx -I /usr/local/include -I ${RAPIDJSON} -lcurl -lz -o vgedit.exe -fstack-protector-all -DPC
+
+macos:
+	g++ -g -std=gnu++14 *.cpp gui/*.cpp ${GUI} -lSDL2 -lSDL2main -lSDL2_gfx -lSDL2_image -lSDL2_ttf -framework Cocoa -I /usr/local/include  -I ${RAPIDJSON} -lcurl -lz -o vgedit.exe -fstack-protector-all -O0 -DPC
+
+clean:
+	rm *.o *.bin
