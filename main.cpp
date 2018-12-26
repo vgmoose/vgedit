@@ -1,4 +1,5 @@
 #include "gui/MainDisplay.hpp"
+#include "edit/Editor.hpp"
 
 int main(int argc, char* argv[])
 {
@@ -7,6 +8,9 @@ int main(int argc, char* argv[])
 
 	// the main inuput handler
 	InputEvents* events = new InputEvents();
+
+  // create the editor instance
+  Editor* editor = new Editor((argc > 1) ? argv[1] : "tmp.txt");
 
 	bool running = true;
 	while (running)
