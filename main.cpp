@@ -1,16 +1,20 @@
 #include "gui/MainDisplay.hpp"
-#include "edit/Editor.hpp"
+#include "gui/EditorView.hpp"
+#include "libs/hb-appstore/gui/Element.hpp"
 
 int main(int argc, char* argv[])
 {
 	// initialize main title screen
 	MainDisplay* display = new MainDisplay();
 
-	// the main inuput handler
+	// the main input handler
 	InputEvents* events = new InputEvents();
 
   // create the editor instance
   Editor* editor = new Editor((argc > 1) ? argv[1] : "tmp.txt");
+
+  EditorView* editorView = new EditorView(editor);
+  display->elements.push_back(editorView);
 
 	bool running = true;
 	while (running)

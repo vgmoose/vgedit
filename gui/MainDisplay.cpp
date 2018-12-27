@@ -49,31 +49,16 @@ MainDisplay::MainDisplay()
 	{
 		if (SDL_JoystickOpen(i) == NULL)
 		{
-			//                printf("SDL_JoystickOpen: %s\n", SDL_GetError());
 			SDL_Quit();
 			return;
 		}
 	}
 
-	// set up the SDL needsRender event
-	this->needsRender.type = SDL_USEREVENT;
-
-
 	this->error = 0;
-
-	// create the first two elements (icon and app title)
-	ImageElement* icon = new ImageElement(ROMFS "res/icon.png");
-	icon->position(330 + this->error * 140, 255 - this->error * 230);
-	icon->resize(70 - this->error * 35, 70 - this->error * 35);
-	this->elements.push_back(icon);
-
-	TextElement* title = new TextElement("Homebrew App Store", 50 - this->error * 25);
-	title->position(415 + this->error * 100, 255 - this->error * 230);
-	this->elements.push_back(title);
 
 	if (this->error)
 	{
-	
+    
 	}
 }
 
@@ -81,8 +66,9 @@ bool MainDisplay::process(InputEvents* event)
 {
   if (MainDisplay::subscreen)
     return MainDisplay::subscreen->process(event);
+
   // keep processing child elements
-  return super::process(event);
+  return super::process(event) || showingSplash;
 }
 
 void MainDisplay::render(Element* parent)
@@ -90,12 +76,12 @@ void MainDisplay::render(Element* parent)
 	// set the background color
 	MainDisplay::background(0x42, 0x45, 0x48);
 
-	if (MainDisplay::subscreen)
-	{
-		MainDisplay::subscreen->render(this);
-		this->update();
-		return;
-	}
+	// if (MainDisplay::subscreen)
+	// {
+	// 	MainDisplay::subscreen->render(this);
+	// 	this->update();
+	// 	return;
+	// }
 
 	// render the rest of the subelements
 	super::render(this);

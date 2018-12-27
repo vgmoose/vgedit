@@ -23,7 +23,6 @@ public:
 	bool error = false;
 
 	int lastFrameTime = 99;
-	SDL_Event needsRender;
 
 	bool showingSplash = true;
 	int count = 0;
