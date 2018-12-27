@@ -30,7 +30,6 @@ void TextInputElement::updateText(const char* text)
 
 	SDL_Texture* texture = SDL_CreateTextureFromSurface(MainDisplay::mainRenderer, surf);
 	SDL_FreeSurface(surf);
-	// TTF_CloseFont(font);
 
   textSurface = texture;
 
@@ -69,6 +68,9 @@ void TextInputElement::render(Element* parent)
 
   SDL_SetRenderDrawColor(parent->renderer, 0xDD, 0xDD, 0xDD, 0xFF);
   SDL_RenderFillRect(parent->renderer, &cursor_pos);
+
+  // SDL_SetRenderDrawColor(parent->renderer, 0x00, 0x00, 0x00, 0xFF);
+  // SDL_RenderDrawLine(parent->renderer, cursor_pos.x, cursor_pos.y, cursor_pos.x, cursor_pos.y + cursor_pos.h);
 
 	SDL_RenderCopy(MainDisplay::mainRenderer, this->textSurface, NULL, &textLocation);
 }

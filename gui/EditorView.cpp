@@ -21,30 +21,45 @@ void EditorView::render(Element* parent)
   super::render(parent);
 }
 
-bool EditorView::process(InputEvents* e)
+void EditorView::reset_bounds()
 {
   int selected_x = mainTextField->selected_x;
   int selected_y = mainTextField->selected_y;
 
+  selected_y = selected_y < 0 ? 0 : selected_y;
+  selected_y = selected_y > editor->lines.size()-1 ? editor->lines.size()-1 : selected_y;
+  selected_x = selected_x < 0 ? 0 : selected_x;
+  selected_x = selected_x > editor->lines[selected_y].size()-1 ? editor->lines[selected_y].size()-1  : selected_x;
+
+  mainTextField->selected_x = selected_x;
+  mainTextField->selected_y = selected_y;
+}
+
+bool EditorView::process(InputEvents* e)
+{
   if (e->pressed(LEFT_BUTTON | RIGHT_BUTTON | UP_BUTTON | DOWN_BUTTON))
   {
     if (e->pressed(LEFT_BUTTON))
-      selected_x -= 1;
+      mainTextField->selected_x -= 1;
     if (e->pressed(RIGHT_BUTTON))
-      selected_x += 1;
+      mainTextField->selected_x += 1;
     if (e->pressed(UP_BUTTON))
-      selected_y -= 1;
+      mainTextField->selected_y -= 1;
     if (e->pressed(DOWN_BUTTON))
-      selected_y += 1;
-    
-    selected_y = selected_y < 0 ? 0 : selected_y;
-    selected_y = selected_y > editor->lines.size()-1 ? editor->lines.size()-1 : selected_y;
-    selected_x = selected_x < 0 ? 0 : selected_x;
-    selected_x = selected_x > editor->lines[selected_y].size()-1 ? editor->lines[selected_y].size()-1  : selected_x;
+      mainTextField->selected_y += 1;
 
-    mainTextField->selected_x = selected_x;
-    mainTextField->selected_y = selected_y;
+    reset_bounds();
     return true;
   }
+
+  if (e->pressed(START_BUTTON))
+    editor->save();
+
+  if (e->pressed(B_BUTTON))
+    editor->del(mainTextField->selected_y, mainTextField->selected_x, 1);
+
+  reset_bounds();
+  mainTextField->updateText(editor->contents());
+
   return false;
 }

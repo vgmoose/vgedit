@@ -32,13 +32,13 @@ int main(int argc, char* argv[])
 			atLeastOneNewEvent = true;
 
     	// quit on enter/start
-      if (events->held(START_BUTTON))
+      if (events->held(SELECT_BUTTON))
         running = false;
 		}
 
 		// one more event update if nothing changed or there were no previous events seen
 		// needed to non-input related processing that might update the screen to take place
-		if ((!atLeastOneNewEvent && !viewChanged) || display->showingSplash)
+		if ((!atLeastOneNewEvent && !viewChanged) )
 		{
 			events->update();
 			viewChanged |= display->process(events);

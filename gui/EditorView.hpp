@@ -13,4 +13,6 @@ class EditorView : public Element
   TextInputElement* mainTextField;
   bool process(InputEvents* e);
   void render(Element* parent);
+
+  void reset_bounds();
 };

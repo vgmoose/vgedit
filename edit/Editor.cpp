@@ -2,6 +2,8 @@
 
 Editor::Editor(const char* filename)
 {
+  this->filename = filename;
+
   if (filename != NULL)
     this->open(filename);
 }
@@ -35,12 +37,25 @@ int Editor::open(const char* filename)
     return -1;
   }
 
+  // TODO: check and prompt for hex files
+
+	internal_load_from_stream(&input);
+
+  input.close();
+	
+  // file loaded successfully
+	return 0;
+}
+
+void Editor::internal_load_from_stream(istream* input)
+{
+  // clear any existing lines structure
+  lines.clear();
+  
   // current line being read
   string line;
 
-  // TODO: check and prompt for hex files
-
-	while (getline(input, line))
+  while (getline(*input, line))
 	{
     // vector representing this line
 		vector<char> cur;
@@ -56,7 +71,42 @@ int Editor::open(const char* filename)
     // add this line to the editor
 		lines.push_back(cur);
 	}
-	
-  // file loaded successfully
-	return 0;
+}
+
+void Editor::update_lists()
+{
+  // TODO: if we're going to update vectors like this every time, we
+  // might as well not bother using vectors at all...
+  stringstream s;
+  s << contents();
+  internal_load_from_stream(&s);
+}
+
+bool Editor::save()
+{
+  ofstream output;
+  output.open(filename);
+
+  for (auto& line : lines)
+    for (auto& letter : line)
+      output << letter;
+  
+  output.close();
+  return true;
+}
+
+bool Editor::del(int line, int pos, int size)
+{
+  // TODO: take in a Selection instead and work accordingly
+
+  auto target = lines[line].begin() + pos;
+
+  if (size == 1)
+    lines[line].erase(target);
+  else
+    lines[line].erase(target, target + size);
+
+  update_lists();
+
+  return true;
 }
