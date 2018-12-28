@@ -4,17 +4,10 @@ Editor::Editor(const char* filename)
 {
   this->filename = filename;
 
-  if (filename != NULL)
-    this->open(filename);
-  else
+  if (filename == NULL)
     filename = "test.txt";
 
-  if (lines.size() == 0 || lines[0].size() == 0)
-  {
-    vector<char> endline;
-    endline.push_back('\n');
-    lines.push_back(endline);
-  }
+  this->open(filename);
 }
 
 const char* Editor::contents()
@@ -80,6 +73,14 @@ void Editor::internal_load_from_stream(istream* input)
     // add this line to the editor
 		lines.push_back(cur);
 	}
+
+  // prevent empty files
+  if (lines.size() == 0 || lines[0].size() == 0)
+  {
+    vector<char> endline;
+    endline.push_back('\n');
+    lines.push_back(endline);
+  }
 }
 
 void Editor::update_lists()
@@ -107,6 +108,10 @@ bool Editor::save()
 bool Editor::type(int line, int pos, const char input)
 {
   // TODO: handle vertical selections
+
+  // if "overwrite" is on, delete what's under us first, given it's not the end of the line
+  if (overwriteMode && pos < lines[line].size() - 1)
+    lines[line].erase(lines[line].begin() + pos);
 
   lines[line].insert(lines[line].begin() + pos, input);
   return true;

@@ -60,6 +60,9 @@ void Keyboard::render(Element* parent)
 		}
 		else
 		{
+      SDL_SetRenderDrawColor(parent->renderer, 0xff, 0xff, 0xff, 0xff); // TODO: matches the DEEP_HIGHLIGHT color
+			SDL_RenderFillRect(parent->renderer, &dimens2);
+
 			// border
 			for (int z = 4; z >= 0; z--)
 			{

@@ -69,6 +69,9 @@ bool EditorView::copySelection()
 
 bool EditorView::pasteSelection()
 {
+  if (copiedText == NULL)
+    return false;
+
   for (char& letter : *copiedText)
     editor->type(mainTextField->selected_y, mainTextField->selected_x++, letter);
 
@@ -107,6 +110,20 @@ bool EditorView::process(InputEvents* e)
   // delete what's under the current selection (not backspace)
   if (e->pressed(B_BUTTON))
   {
+    // in insert mode, delete is a "backspace-style" action, and moves the cursor left if it can
+    if (mainTextField->insertMode)
+    {
+      if (mainTextField->selected_x > 0)
+      {
+        mainTextField->selected_x--;
+      }
+      else
+      {
+        // TODO: delete the last newline on the previous line (joining this line and the earlier one)
+        return false;
+      }
+    } 
+
     editor->del(mainTextField->selected_y, mainTextField->selected_x, mainTextField->selected_width);
     syncText();
     return true;
@@ -126,16 +143,36 @@ bool EditorView::process(InputEvents* e)
     return true;
   }
 
-  if (e->released(X_BUTTON))
+  if (keyboard == NULL)
   {
-    copySelection();
-    return true;
-  }
+    if (e->released(X_BUTTON))
+    {
+      copySelection();
+      return true;
+    }
 
     if (e->released(Y_BUTTON))
+    {
+      pasteSelection();
+      return true;
+    }
+  }
+  else
   {
-    pasteSelection();
-    return true;
+    if (e->released(X_BUTTON))
+    {
+      editor->overwriteMode = !editor->overwriteMode;
+      return true;
+    }
+
+    if (e->released(Y_BUTTON))
+    {
+      keyboard->wipeElements();
+      elements.erase(std::remove(elements.begin(), elements.end(), keyboard), elements.end());
+      keyboard = NULL;
+      mainTextField->insertMode = false;
+      return true;
+    }
   }
 
   if (e->pressed(L_BUTTON | R_BUTTON | ZL_BUTTON | ZR_BUTTON))

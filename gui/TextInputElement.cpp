@@ -1,5 +1,6 @@
 #include "TextInputElement.hpp"
 #include "MainDisplay.hpp"
+#include "../edit/Editor.hpp"
 
 TextInputElement::TextInputElement(const char* text)
 {
@@ -66,7 +67,7 @@ void TextInputElement::render(Element* parent)
   SDL_Rect cursor_pos = { textLocation.x + selected_x * w - 2, textLocation.y + selected_y * h - 2,
                           selected_width * w + 4, selected_height * h + 4 };
 
-  if (insertMode)
+  if (insertMode) // TODO: downcasting is bad
   {
     // traditional line cursor, between characters
     SDL_SetRenderDrawColor(parent->renderer, 0x00, 0x00, 0x00, 0xFF);

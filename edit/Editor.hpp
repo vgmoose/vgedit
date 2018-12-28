@@ -21,6 +21,7 @@ class Editor
   // all lines in current file
   vector<vector<char>> lines;
   const char* filename = NULL;
+  bool overwriteMode = false;
 
   private:
   void internal_load_from_stream(istream* input);
