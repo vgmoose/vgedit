@@ -6,6 +6,15 @@ Editor::Editor(const char* filename)
 
   if (filename != NULL)
     this->open(filename);
+  else
+    filename = "test.txt";
+
+  if (lines.size() == 0 || lines[0].size() == 0)
+  {
+    vector<char> endline;
+    endline.push_back('\n');
+    lines.push_back(endline);
+  }
 }
 
 const char* Editor::contents()
@@ -22,7 +31,7 @@ const char* Editor::contents()
     delete text;
 
   text = new std::string(s.str());
-  return text->c_str();;
+  return text->c_str();
 }
 
 int Editor::open(const char* filename)
@@ -92,6 +101,14 @@ bool Editor::save()
       output << letter;
   
   output.close();
+  return true;
+}
+
+bool Editor::type(int line, int pos, const char input)
+{
+  // TODO: handle vertical selections
+
+  lines[line].insert(lines[line].begin() + pos, input);
   return true;
 }
 

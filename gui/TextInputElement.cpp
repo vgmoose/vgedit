@@ -66,11 +66,18 @@ void TextInputElement::render(Element* parent)
   SDL_Rect cursor_pos = { textLocation.x + selected_x * w - 2, textLocation.y + selected_y * h - 2,
                           selected_width * w + 4, selected_height * h + 4 };
 
-  SDL_SetRenderDrawColor(parent->renderer, 0xDD, 0xDD, 0xDD, 0xFF);
-  SDL_RenderFillRect(parent->renderer, &cursor_pos);
-
-  // SDL_SetRenderDrawColor(parent->renderer, 0x00, 0x00, 0x00, 0xFF);
-  // SDL_RenderDrawLine(parent->renderer, cursor_pos.x, cursor_pos.y, cursor_pos.x, cursor_pos.y + cursor_pos.h);
+  if (insertMode)
+  {
+    // traditional line cursor, between characters
+    SDL_SetRenderDrawColor(parent->renderer, 0x00, 0x00, 0x00, 0xFF);
+    SDL_RenderDrawLine(parent->renderer, cursor_pos.x + 2, cursor_pos.y, cursor_pos.x + 2, cursor_pos.y + cursor_pos.h);
+  }
+  else
+  {
+    // highlight cursor for overview screen
+    SDL_SetRenderDrawColor(parent->renderer, 0xDD, 0xDD, 0xDD, 0xFF);
+    SDL_RenderFillRect(parent->renderer, &cursor_pos);
+  }
 
 	SDL_RenderCopy(MainDisplay::mainRenderer, this->textSurface, NULL, &textLocation);
 }

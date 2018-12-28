@@ -1,4 +1,5 @@
 #include "EditorView.hpp"
+#include "Keyboard.hpp"
 
 EditorView::EditorView(Editor* editor)
 {
@@ -26,6 +27,7 @@ void EditorView::reset_bounds()
   int selected_x = mainTextField->selected_x;
   int selected_y = mainTextField->selected_y;
 
+  // adjust the bounds of the cursor
   selected_y = selected_y < 0 ? 0 : selected_y;
   selected_y = selected_y > editor->lines.size()-1 ? editor->lines.size()-1 : selected_y;
   selected_x = selected_x < 0 ? 0 : selected_x;
@@ -33,11 +35,57 @@ void EditorView::reset_bounds()
 
   mainTextField->selected_x = selected_x;
   mainTextField->selected_y = selected_y;
+
+  int selected_width = mainTextField->selected_width;
+  int selected_height= mainTextField->selected_height;
+  
+  // adjust the bounds of the selection
+  selected_height = selected_height < 1 ? 1 : selected_height;
+  selected_height = selected_height > editor->lines.size()-selected_y ? editor->lines.size()-selected_y : selected_height;
+
+  selected_width = selected_width < 1 ? 1 : selected_width;
+  selected_width = selected_width > editor->lines[selected_y].size()-selected_x ? editor->lines[selected_y].size()-selected_x : selected_width;
+
+  mainTextField->selected_width = selected_width;
+  mainTextField->selected_height = selected_height;
+}
+
+bool EditorView::copySelection()
+{
+  // TODO: handle vertical selections (abstract into Selection class?)
+
+  if (copiedText)
+    delete copiedText;
+
+  stringstream s;
+  int sx = mainTextField->selected_x;
+  int sy = mainTextField->selected_y;
+  for (int x = sx; x < sx + mainTextField->selected_width; x++)
+    s << editor->lines[sy][x];
+
+  copiedText = new std::string(s.str());
+  return true;
+}
+
+bool EditorView::pasteSelection()
+{
+  for (char& letter : *copiedText)
+    editor->type(mainTextField->selected_y, mainTextField->selected_x++, letter);
+
+  syncText();
+  return true;
+}
+
+void EditorView::syncText()
+{
+  reset_bounds();
+  mainTextField->updateText(editor->contents());
 }
 
 bool EditorView::process(InputEvents* e)
 {
-  if (e->pressed(LEFT_BUTTON | RIGHT_BUTTON | UP_BUTTON | DOWN_BUTTON))
+  // move the cursoraround the editor 
+  if (keyboard == NULL && e->pressed(LEFT_BUTTON | RIGHT_BUTTON | UP_BUTTON | DOWN_BUTTON))
   {
     if (e->pressed(LEFT_BUTTON))
       mainTextField->selected_x -= 1;
@@ -52,14 +100,59 @@ bool EditorView::process(InputEvents* e)
     return true;
   }
 
-  if (e->pressed(START_BUTTON))
+  // perform a save
+  if (e->released(START_BUTTON))
     editor->save();
 
+  // delete what's under the current selection (not backspace)
   if (e->pressed(B_BUTTON))
-    editor->del(mainTextField->selected_y, mainTextField->selected_x, 1);
+  {
+    editor->del(mainTextField->selected_y, mainTextField->selected_x, mainTextField->selected_width);
+    syncText();
+    return true;
+  }
 
-  reset_bounds();
-  mainTextField->updateText(editor->contents());
+  // bring up the keyboard
+  if (keyboard == NULL && e->released(A_BUTTON))
+  {
+    keyboard = new Keyboard(this);
+    this->elements.push_back(keyboard);
 
-  return false;
+    // force selection to be width 1 (more than 1 doesn't make sense in insert mode)
+    // (but it does make sense for vertical selections, to type on multiple lines)
+    mainTextField->selected_width = 1;
+    mainTextField->insertMode = true;
+
+    return true;
+  }
+
+  if (e->released(X_BUTTON))
+  {
+    copySelection();
+    return true;
+  }
+
+    if (e->released(Y_BUTTON))
+  {
+    pasteSelection();
+    return true;
+  }
+
+  if (e->pressed(L_BUTTON | R_BUTTON | ZL_BUTTON | ZR_BUTTON))
+  {
+    // move the bounds of the selection
+    if (e->pressed(L_BUTTON))
+      mainTextField->selected_width -= 1;
+    if (e->pressed(R_BUTTON))
+      mainTextField->selected_width += 1;
+    if (e->pressed(ZL_BUTTON))
+      mainTextField->selected_height -= 1;
+    if (e->pressed(ZR_BUTTON))
+      mainTextField->selected_height += 1;
+
+    reset_bounds();
+    return true;
+  }
+
+  return super::process(e);
 }

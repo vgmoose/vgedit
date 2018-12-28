@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
 
 		// one more event update if nothing changed or there were no previous events seen
 		// needed to non-input related processing that might update the screen to take place
-		if ((!atLeastOneNewEvent && !viewChanged) )
+		if ((!atLeastOneNewEvent && !viewChanged) || display->showingSplash)
 		{
 			events->update();
 			viewChanged |= display->process(events);
@@ -58,6 +58,8 @@ int main(int argc, char* argv[])
 			if (delayTime < 16)
 				SDL_Delay(16 - delayTime);
 		}
+
+    MainDisplay::mainDisplay->showingSplash = false;
 	}
 
 	quit();

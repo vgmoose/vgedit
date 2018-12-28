@@ -12,6 +12,8 @@ class TextInputElement : public Element
   int selected_width = 1;
   int selected_height = 1;
 
+  bool insertMode = false;
+
   int letter_width = 10;
   int letter_height = 20;
 

@@ -15,6 +15,7 @@ class Editor
   // all utility functions
   const char* contents();
   bool save();
+  bool type(int line, int pos, const char input);
   bool del(int line, int pos, int size);
 
   // all lines in current file
