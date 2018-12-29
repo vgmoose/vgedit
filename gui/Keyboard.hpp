@@ -18,12 +18,20 @@ public:
 
   EditorView * editorView = NULL;
 
-	// draw a qwerty keyboard
-	std::string row1 = "Q W E R T Y U I O P";
-	std::string row2 = "A S D F G H J K L";
-	std::string row3 = "Z X C V B N M";
+	// information representing a default qwerty keyboard, lower and upper
+  // alongside default keyboards will also be: tab, caps lock, return, delete, and shifts
+  const char* lower_keys = "`1234567890-=qwertyuiop[]\\asdfghjkl;'zxcvbnm,./";
+  const char* upper_keys = "~!@#$\%^&*()_+QWERTYUIOP{}|ASDFGHJKL:\"ZXCVBNM<>?";
+  int breaks[4] = { 13, 13, 11, 10 };
 
-	std::vector<std::string> rows;
+  // the rest of the keys will be dynamically drawn by going through hex iterations
+  // these keyboards will fill the extra space with more characters
+
+	std::vector<std::string*> rows;
+
+  bool shiftOn = false;
+  bool capsOn = false;
+  int mode = 0;   // the mode of which keyboard type we're on (first is special and has shift)
 
 	// the currently selected row and index
 	int curRow = -1;
@@ -57,4 +65,5 @@ public:
 	void backspace();
 	void type(int y, int x);
 	void updateView();
+  void generateKeyboard();
 };

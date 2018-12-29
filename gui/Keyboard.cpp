@@ -3,8 +3,8 @@
 
 Keyboard::Keyboard(EditorView* editorView)
 {
-	this->x = 240;
-	this->y = 417;
+	this->x = 20;
+	this->y = 300;
 
   this->editorView = editorView;
 
@@ -19,7 +19,7 @@ void Keyboard::render(Element* parent)
 	if (hidden)
 		return;
 
-	SDL_Rect dimens = { this->x, this->y, this->width, this->height };
+	SDL_Rect dimens = { this->x, this->y, this->width + 305, this->height + 100};
 
 	this->window = parent->window;
 	this->renderer = parent->renderer;
@@ -27,8 +27,8 @@ void Keyboard::render(Element* parent)
 	SDL_SetRenderDrawColor(parent->renderer, 0xf9, 0xf9, 0xf9, 0xFF);
 	SDL_RenderFillRect(parent->renderer, &dimens);
 
-	for (int y = 0; y < 3; y++)
-		for (int x = 0; x < 10 - y - (y == 2); x++)
+	for (int y = 0; y < rows.size(); y++)
+		for (int x = 0; x < rows[y]->size()/2+1; x++)
 		{
 			SDL_Rect dimens2 = { this->x + kXPad + x * kXOff + y * yYOff, this->y + kYPad + y * ySpacing, keyWidth, keyWidth };
 			SDL_SetRenderDrawColor(parent->renderer, 0xf4, 0xf4, 0xf4, 0xff);
@@ -109,7 +109,8 @@ bool Keyboard::process(InputEvents* event)
 		if (curRow < 0 && index < 0)
 		{
 			// switched into keyboard, set to 0 and return
-			curRow = index = 0;
+			curRow = 1;
+      index = 0;
 			return true;
 		}
 
@@ -119,9 +120,9 @@ bool Keyboard::process(InputEvents* event)
 			index += (event->held(RIGHT_BUTTON) - event->held(LEFT_BUTTON));
 
 			if (curRow < 0) curRow = 0;
-			if (index < (0 - curRow == 2)) index = -1 * (curRow == 2);
-			if (curRow > 2) curRow = 2;
-			if (index > 10 - curRow - 1) index = 10 - curRow - 1;
+			if (index < -1 * (curRow >= 2)) index = -1 * (curRow >= 2);
+			if (curRow >= rows.size()) curRow = rows.size() - 1;
+			if (index >= rows[curRow]->size()/2+1) index = rows[curRow]->size()/2;
 
 			if (event->held(A_BUTTON))
 			{
@@ -143,10 +144,12 @@ bool Keyboard::process(InputEvents* event)
 		return false;
 	}
 
-	if (event->isTouchDown() && event->touchIn(this->x, this->y, width, height))
+  int extWidth = width + 305;
+
+	if (event->isTouchDown() && event->touchIn(this->x, this->y, extWidth, height))
 	{
-		for (int y = 0; y < 3; y++)
-			for (int x = 0; x < 10 - y - (y == 2); x++)
+		for (int y = 0; y < rows.size(); y++)
+			for (int x = 0; x < rows[y]->size()/2+1; x++)
 				if (event->touchIn(this->x + kXPad + x * kXOff + y * yYOff, this->y + kYPad + y * ySpacing, keyWidth, keyWidth))
 				{
 					ret |= true;
@@ -163,11 +166,11 @@ bool Keyboard::process(InputEvents* event)
 		curRow = -1;
 		index = -1;
 
-		if (event->touchIn(this->x, this->y, width, height))
+		if (event->touchIn(this->x, this->y, extWidth, height))
 		{
 
-			for (int y = 0; y < 3; y++)
-				for (int x = 0; x < 10 - y - (y == 2); x++)
+			for (int y = 0; y < rows.size(); y++)
+				for (int x = 0; x < rows[y]->size()/2+1; x++)
 					if (event->touchIn(this->x + kXPad + x * kXOff + y * yYOff, this->y + kYPad + y * ySpacing, keyWidth, keyWidth))
 					{
 						ret |= true;
@@ -235,17 +238,15 @@ void Keyboard::updateSize()
 	dWidth = (int)(1.4125 * textSize);
 	sWidth = (int)(1.91875 * textSize);
 
-	// set up the three rows into one vector
-	this->rows = std::vector<std::string>();
-	rows.push_back(row1);
-	rows.push_back(row2);
-	rows.push_back(row3);
+	// set up the keys vector based on the current keyboard selection
+	generateKeyboard();
+
 	SDL_Color gray = { 0x52, 0x52, 0x52, 0xff };
 
 	// go through and draw each of the three rows at the right position
 	for (int x = 0; x < rows.size(); x++)
 	{
-		TextElement* rowText = new TextElement(rows[x].c_str(), textSize, &gray, true);
+		TextElement* rowText = new TextElement(rows[x]->c_str(), textSize, &gray, true);
 		rowText->position(kXPad + x * kXOff, kYPad + x * kYOff);
 		this->elements.push_back(rowText);
 	}
@@ -268,7 +269,7 @@ void Keyboard::updateSize()
 
 void Keyboard::type(int y, int x)
 {
-	const char input = std::tolower(rows[y][x * 2]);
+	const char input = (*(rows[y]))[x * 2];
   auto line = editorView->mainTextField->selected_y;
   auto pos = editorView->mainTextField->selected_x;
   editorView->editor->type(line, pos, input);
@@ -291,6 +292,43 @@ void Keyboard::space()
 void Keyboard::updateView()
 {
 
+}
+
+void Keyboard::generateKeyboard()
+{
+  int count = 0;
+  string keys;
+
+  if (mode == 0)
+    keys = string((shiftOn || capsOn) ? upper_keys : lower_keys);
+  else
+  {
+    // depending on the mode, grab a bunch of characters from unicode starting from
+    // upside exclamation mark (U+00A1) and onward https://unicode-table.com/en/
+    // TODO: don't hardcode amount here, or hardcode a better one
+    int offset = 47*(mode - 1) + 0x00a1;
+    char chars[47 + (mode == 2)];
+    for (int x=0; x<47+(mode==2); x++)
+    {
+      chars[x] = offset + x;
+    }
+
+    keys = string(chars);
+  }
+
+  breaks[3] += (mode==2); // one more key for bottom row of mode 2
+
+  for (int& end : breaks)
+  {
+    string* row = new string(keys.substr(count, end));
+    for (int x=1; x<row->size(); x+=2)
+    {
+      row->insert(row->begin() + x, ' ');
+    }
+
+    rows.push_back(row);
+    count += end;
+  }
 }
 
 Keyboard::~Keyboard()
