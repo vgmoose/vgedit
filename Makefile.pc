@@ -1,4 +1,4 @@
-GUI :=		libs/hb-appstore/gui/InputEvents.cpp libs/hb-appstore/gui/Element.cpp libs/hb-appstore/gui/TextElement.cpp libs/hb-appstore/gui/ImageElement.cpp libs/hb-appstore/gui/ImageCache.cpp
+GUI :=		libs/hb-appstore/gui/InputEvents.cpp libs/hb-appstore/gui/Element.cpp libs/hb-appstore/gui/TextElement.cpp libs/hb-appstore/gui/ImageElement.cpp libs/hb-appstore/gui/ImageCache.cpp libs/hb-appstore/gui/ListElement.cpp
 
 RAPIDJSON :=	libs/hb-appstore/libs/get/src/libs/rapidjson/include
 

@@ -1,5 +1,6 @@
 #include "gui/MainDisplay.hpp"
 #include "gui/EditorView.hpp"
+#include "gui/FileBrowser.hpp"
 #include "libs/hb-appstore/gui/Element.hpp"
 
 int main(int argc, char* argv[])
@@ -13,8 +14,11 @@ int main(int argc, char* argv[])
   // create the editor instance
   Editor* editor = new Editor((argc > 1) ? argv[1] : "tmp.txt");
 
-  EditorView* editorView = new EditorView(editor);
-  display->elements.push_back(editorView);
+  // EditorView* editorView = new EditorView(editor);
+  // display->elements.push_back(editorView);
+
+  FileBrowser* fileBrowser = new FileBrowser(".");
+  display->elements.push_back(fileBrowser);
 
 	bool running = true;
 	while (running)

@@ -3,7 +3,7 @@
 
 Keyboard::Keyboard(EditorView* editorView)
 {
-	this->x = 20;
+	this->x = 30;
 	this->y = 300;
 
   this->editorView = editorView;
@@ -126,14 +126,6 @@ bool Keyboard::process(InputEvents* event)
 
 			if (event->held(A_BUTTON))
 			{
-				// on the last row, check for delete or space
-				if (curRow == 2 && (index < 0 || index > 6))
-				{
-					if (index < 0) backspace();
-					if (index > 6) space();
-					updateView();
-					return true;
-				}
 				type(curRow, index);
 			}
 
@@ -258,13 +250,13 @@ void Keyboard::updateSize()
 
 	int textSize2 = (int)((16 / 400.0) * width);
 
-	TextElement* delButton = new TextElement("DEL", textSize2, &gray, false);
-	delButton->position(dPos2, dHeight2);
-	this->elements.push_back(delButton);
+	// TextElement* delButton = new TextElement("DEL", textSize2, &gray, false);
+	// delButton->position(dPos2, dHeight2);
+	// this->elements.push_back(delButton);
 
-	TextElement* spaceButton = new TextElement("SPACE", textSize2, &gray, false);
-	spaceButton->position(sPos2, dHeight2);
-	this->elements.push_back(spaceButton);
+	// TextElement* spaceButton = new TextElement("SPACE", textSize2, &gray, false);
+	// spaceButton->position(sPos2, dHeight2);
+	// this->elements.push_back(spaceButton);
 }
 
 void Keyboard::type(int y, int x)
