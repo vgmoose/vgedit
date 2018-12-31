@@ -78,7 +78,7 @@ void FileBrowser::render(Element* parent)
   if (selected >= 0)
   {
     // draw the cursor for this file
-    SDL_Rect dimens4 = { this->x + (selected % 5)*220 + 100, this->y + (selected / 5)*200 + 100, 210, 210};
+    SDL_Rect dimens4 = { this->x + (selected % 5)*220 + 60, this->y + (selected / 5)*200 + 100, 210, 210};
 	  SDL_SetRenderDrawColor(parent->renderer, 0xaa, 0xaa, 0xaa, 0xff);
 	  SDL_RenderDrawRect(parent->renderer, &dimens4);
   }
