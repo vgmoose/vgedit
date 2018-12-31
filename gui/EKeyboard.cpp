@@ -12,6 +12,24 @@ EKeyboard::EKeyboard(EditorView* editorView)
 
 	// position the EKeyboard based on this x and y
 	updateSize();
+
+
+  // text for space, enter, and symbols
+  SDL_Color grayish = { 0x55, 0x55, 0x55, 0xff };
+  TextElement* spaceText = new TextElement("space", 30, &grayish);
+  SDL_Rect d4 = {this->x+sPos, this->y + dHeight, sWidth, textSize};   // todo: extract out hardcoded rects like this
+  spaceText->position(d4.x + d4.w/2 - spaceText->width/2 - 15, 345);
+  this->elements.push_back(spaceText);
+
+  TextElement* enterText = new TextElement("enter", 30, &grayish);
+  SDL_Rect d3 = {this->x+dPos + 1100, this->y + dHeight + 100, dWidth, textSize};   // todo: extract out hardcoded rects like this
+  enterText->position(d3.x + d3.w/2 - enterText->width/2, 300);
+  this->elements.push_back(enterText);
+
+  // TextElement* spaceText = new TextElement("space", 30, &grayish);
+  // SDL_Rect d4 = {this->x+sPos, this->y + dHeight, sWidth, textSize};   // todo: extract out hardcoded rects like this
+  // spaceText->position(d4.x + d4.w/2 - spaceText->width/2, 200);
+  // this->elements.push_back(spaceText);
 }
 
 void EKeyboard::render(Element* parent)
@@ -40,17 +58,12 @@ void EKeyboard::render(Element* parent)
 	{
 		SDL_Rect dimens2 = { this->x + kXPad + index * kXOff + curRow * yYOff, this->y + kYPad + curRow * ySpacing, keyWidth, keyWidth };
 
-		// if we're on DEL or SPACE, expand the dimens width of the highllighted button
-		if (curRow == 2 && index < 0)
+		// if we're on SPACE, expand the dimens width of the highllighted button
+		if (curRow >= rows.size())
 		{
-			SDL_Rect dimens3 = { this->x + dPos, this->y + dHeight, dWidth, textSize };
-			dimens2 = dimens3;
+			SDL_Rect dimens4 = { this->x + sPos, this->y + dHeight, sWidth, textSize };
+			dimens2 = dimens4;
 		}
-		// if (curRow == 2 && index > 6)
-		// {
-		// 	SDL_Rect dimens4 = { this->x + sPos, this->y + dHeight, sWidth, textSize };
-		// 	dimens2 = dimens4;
-		// }
 
 		// draw the currently selected tile if these index things are set
 		if (touchMode)
@@ -80,9 +93,9 @@ void EKeyboard::render(Element* parent)
 	//   SDL_SetRenderDrawColor(parent->renderer, 0xff, 0xaa, 0xaa, 0xff);
 	//   SDL_RenderFillRect(parent->renderer, &dimens3);
 	//
-	//   SDL_Rect dimens4 = {this->x+sPos, this->y + dHeight, sWidth, textSize};
-	//   SDL_SetRenderDrawColor(parent->renderer, 0xff, 0xaa, 0xaa, 0xff);
-	//   SDL_RenderFillRect(parent->renderer, &dimens4);
+	  SDL_Rect dimens4 = {this->x+sPos, this->y + dHeight, sWidth, textSize};
+	  SDL_SetRenderDrawColor(parent->renderer, 0xf4, 0xf4, 0xf4, 0xff);
+	  SDL_RenderFillRect(parent->renderer, &dimens4);
 
 	super::render(this);
 }
@@ -120,12 +133,22 @@ bool EKeyboard::process(InputEvents* event)
 			index += (event->held(RIGHT_BUTTON) - event->held(LEFT_BUTTON));
 
 			if (curRow < 0) curRow = 0;
-			if (index < -1 * (curRow >= 2)) index = -1 * (curRow >= 2);
-			if (curRow >= rows.size()) curRow = rows.size() - 1;
-			if (index >= rows[curRow]->size()/2+1) index = rows[curRow]->size()/2;
+			if (index < 0) index = 0;
+			if (curRow >= rows.size() + 1) curRow = rows.size();    // +1 for bottom "row" (space, language, enter)
+      if (curRow >= rows.size())
+        index = 1;
+      else if (index > rows[curRow]->size()/2)
+        index = rows[curRow]->size()/2;
 
 			if (event->held(A_BUTTON))
 			{
+        // space bar
+        if (curRow >= rows.size())
+        {
+          just_type(' ');
+          return true;
+        }
+
 				type(curRow, index);
 			}
 
@@ -138,7 +161,7 @@ bool EKeyboard::process(InputEvents* event)
 
   int extWidth = width + 305;
 
-	if (event->isTouchDown() && event->touchIn(this->x, this->y, extWidth, height))
+	if (event->isTouchDown() && event->touchIn(this->x, this->y, extWidth, height + 200))
 	{
 		for (int y = 0; y < rows.size(); y++)
 			for (int x = 0; x < rows[y]->size()/2+1; x++)
@@ -158,7 +181,7 @@ bool EKeyboard::process(InputEvents* event)
 		curRow = -1;
 		index = -1;
 
-		if (event->touchIn(this->x, this->y, extWidth, height))
+		if (event->touchIn(this->x, this->y, extWidth, height + 200))
 		{
 
 			for (int y = 0; y < rows.size(); y++)
@@ -169,16 +192,16 @@ bool EKeyboard::process(InputEvents* event)
 						type(y, x);
 					}
 
-			if (event->touchIn(this->x + dPos, this->y + dHeight, dWidth, textSize))
-			{
-				ret |= true;
-				backspace();
-			}
+			// if (event->touchIn(this->x + dPos, this->y + dHeight, dWidth, textSize))
+			// {
+			// 	ret |= true;
+			// 	backspace();
+			// }
 
 			if (event->touchIn(this->x + sPos, this->y + dHeight, sWidth, textSize))
 			{
 				ret |= true;
-				space();
+				just_type(' ');
 			}
 
 			if (ret)
@@ -196,6 +219,7 @@ bool EKeyboard::process(InputEvents* event)
 void EKeyboard::updateSize()
 {
 	this->elements.clear();
+  rows.clear();
 
 	this->width = 900;
 	this->height = (304 / 900.0) * width;
@@ -224,11 +248,11 @@ void EKeyboard::updateSize()
 
 	// delete and space key dimensions
 	dPos = (int)((13 / 400.0) * width);
-	dHeight = (int)((85 / 135.0) * height);
-	sPos = (int)((326 / 400.0) * width);
+	dHeight = (int)((85 / 135.0) * height) + 145;
+	sPos = (int)((150 / 400.0) * width);
 
 	dWidth = (int)(1.4125 * textSize);
-	sWidth = (int)(1.91875 * textSize);
+	sWidth = (int)(7.5 * textSize);
 
 	// set up the keys vector based on the current EKeyboard selection
 	generateEKeyboard();
@@ -262,6 +286,16 @@ void EKeyboard::updateSize()
 void EKeyboard::type(int y, int x)
 {
 	const char input = (*(rows[y]))[x * 2];
+  auto line = editorView->mainTextField->selected_y;
+  auto pos = editorView->mainTextField->selected_x;
+  editorView->editor->type(line, pos, input);
+
+  editorView->mainTextField->selected_x++;
+  editorView->syncText();
+}
+
+void EKeyboard::just_type(const char input)
+{
   auto line = editorView->mainTextField->selected_y;
   auto pos = editorView->mainTextField->selected_x;
   editorView->editor->type(line, pos, input);

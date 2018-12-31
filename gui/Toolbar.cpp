@@ -12,10 +12,10 @@ Toolbar::Toolbar(const char* path)
   // toolbar actions
   // TODO: make real touchable buttons, move handler logic here
   actions = new TextElement("(-) Exit    (+) Save    (x) Copy    (y) Paste    (l/r) Select    (b) Delete    (a) Type", 18, &white);
-  actions->position(600, 10);
+  actions->position(620, 10);
 
-  keyActions = new TextElement("(-) Exit    (+) Save    (x) Caps    (y) Paste    (l/r) Move    (b) Backspace    (a) Type", 18, &white);
-  keyActions->position(600, 10);
+  keyActions = new TextElement("(-) Exit    (+) Save    (x) Caps    (y) Stow Keyboard    (b) Backspace    (a) Type", 18, &white);
+  keyActions->position(610, 10);
 }
 
 void Toolbar::setModified(bool modified)
@@ -25,7 +25,13 @@ void Toolbar::setModified(bool modified)
   std::string text;
   text += path;
   text += (modified ? "*" : "");
-  pathE->textSurface = pathE->renderText(text, 15, NORMAL, 0);
+  pathE->textSurface = pathE->renderText(text, 20, MONOSPACED, 0);
+
+  // TODO: have TextElement easier to update...
+  int w, h;
+  SDL_QueryTexture(pathE->textSurface, NULL, NULL, &w, &h);
+	pathE->width = w;
+	pathE->height = h;
 }
 
 void Toolbar::render(Element* parent)

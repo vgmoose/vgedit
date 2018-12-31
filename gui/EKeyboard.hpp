@@ -15,6 +15,7 @@ public:
 
 	// setup field variables
 	void updateSize();
+  void just_type(const char input);
 
   EditorView * editorView = NULL;
 

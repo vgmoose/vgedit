@@ -88,6 +88,7 @@ void EditorView::syncText()
 {
   reset_bounds();
   mainTextField->updateText(editor->contents());
+  toolbar->setModified(true);
 }
 
 bool EditorView::process(InputEvents* e)
@@ -110,7 +111,11 @@ bool EditorView::process(InputEvents* e)
 
   // perform a save
   if (e->released(START_BUTTON))
+  {
+    toolbar->setModified(false);
     editor->save();
+    return true;
+  }
 
   // delete what's under the current selection (not backspace)
   if (e->pressed(B_BUTTON))
@@ -162,18 +167,16 @@ bool EditorView::process(InputEvents* e)
       copySelection();
       return true;
     }
-
-    if (e->released(Y_BUTTON))
-    {
-      pasteSelection();
-      return true;
-    }
   }
   else
   {
     if (e->released(X_BUTTON))
     {
-      editor->overwriteMode = !editor->overwriteMode;
+      // editor->overwriteMode = !editor->overwriteMode;
+      // TODO: add overwrite mode back when hex editor is here
+
+      keyboard->shiftOn = !keyboard->shiftOn;
+      keyboard->updateSize();
       return true;
     }
 
@@ -184,6 +187,12 @@ bool EditorView::process(InputEvents* e)
       toolbar->keyboardShowing = false;
       return true;
     }
+  }
+
+  if (e->released(Y_BUTTON))
+  {
+    pasteSelection();
+    return true;
   }
 
   if (e->pressed(L_BUTTON | R_BUTTON | ZL_BUTTON | ZR_BUTTON))
