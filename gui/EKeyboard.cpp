@@ -12,24 +12,6 @@ EKeyboard::EKeyboard(EditorView* editorView)
 
 	// position the EKeyboard based on this x and y
 	updateSize();
-
-
-  // text for space, enter, and symbols
-  SDL_Color grayish = { 0x55, 0x55, 0x55, 0xff };
-  TextElement* spaceText = new TextElement("space", 30, &grayish);
-  SDL_Rect d4 = {this->x+sPos, this->y + dHeight, sWidth, textSize};   // todo: extract out hardcoded rects like this
-  spaceText->position(d4.x + d4.w/2 - spaceText->width/2 - 15, 345);
-  this->elements.push_back(spaceText);
-
-  TextElement* enterText = new TextElement("enter", 30, &grayish);
-  SDL_Rect d3 = {this->x+dPos + 1100, this->y + dHeight + 100, dWidth, textSize};   // todo: extract out hardcoded rects like this
-  enterText->position(d3.x + d3.w/2 - enterText->width/2, 300);
-  this->elements.push_back(enterText);
-
-  // TextElement* spaceText = new TextElement("space", 30, &grayish);
-  // SDL_Rect d4 = {this->x+sPos, this->y + dHeight, sWidth, textSize};   // todo: extract out hardcoded rects like this
-  // spaceText->position(d4.x + d4.w/2 - spaceText->width/2, 200);
-  // this->elements.push_back(spaceText);
 }
 
 void EKeyboard::render(Element* parent)
@@ -274,13 +256,22 @@ void EKeyboard::updateSize()
 
 	int textSize2 = (int)((16 / 400.0) * width);
 
-	// TextElement* delButton = new TextElement("DEL", textSize2, &gray, false);
-	// delButton->position(dPos2, dHeight2);
-	// this->elements.push_back(delButton);
+	// text for space, enter, and symbols
+  SDL_Color grayish = { 0x55, 0x55, 0x55, 0xff };
+  TextElement* spaceText = new TextElement("space", 30, &grayish);
+  SDL_Rect d4 = {this->x+sPos, this->y + dHeight, sWidth, textSize};   // todo: extract out hardcoded rects like this
+  spaceText->position(d4.x + d4.w/2 - spaceText->width/2 - 15, 345);
+  this->elements.push_back(spaceText);
 
-	// TextElement* spaceButton = new TextElement("SPACE", textSize2, &gray, false);
-	// spaceButton->position(sPos2, dHeight2);
-	// this->elements.push_back(spaceButton);
+  TextElement* enterText = new TextElement("enter", 30, &grayish);
+  SDL_Rect d3 = {this->x+dPos + 1000, this->y + dHeight + 100, dWidth, textSize};   // todo: extract out hardcoded rects like this
+  enterText->position(d3.x + d3.w/2 - enterText->width/2, 300);
+  this->elements.push_back(enterText);
+
+  TextElement* symText = new TextElement("sym", 30, &grayish);
+  SDL_Rect d5 = {this->x+dPos, this->y + dHeight + 100, dWidth, textSize};   // todo: extract out hardcoded rects like this
+  symText->position(d5.x + d5.w/2 - symText->width/2, 300);
+  this->elements.push_back(symText);
 }
 
 void EKeyboard::type(int y, int x)

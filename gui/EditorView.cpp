@@ -53,6 +53,21 @@ void EditorView::reset_bounds()
 
   mainTextField->selected_width = selected_width;
   mainTextField->selected_height = selected_height;
+
+  // always snap the cursor to be on screen and visible (by moving the screen)
+  int h = mainTextField->letter_height + 2;
+  float cursor_y =  (h * mainTextField->selected_y - 50) * -1;
+	
+	if (cursor_y > mainTextField->y + 50)
+		mainTextField->y += h;
+  
+  if (cursor_y < mainTextField->y - 550)
+    mainTextField->y -= h;
+	
+// if it's still offscreen, and we're showing the keyboard
+	if (mainTextField->insertMode)
+		mainTextField->y = cursor_y;
+
 }
 
 bool EditorView::copySelection()
@@ -155,6 +170,8 @@ bool EditorView::process(InputEvents* e)
     mainTextField->selected_width = 1;
     mainTextField->insertMode = true;
     toolbar->keyboardShowing = true;
+
+    reset_bounds();
 
     return true;
   }
