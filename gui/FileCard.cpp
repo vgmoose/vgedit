@@ -14,13 +14,13 @@ FileCard::FileCard(Element* parent)
 void FileCard::update(bool folder, const char* name)
 {
   ImageElement* icon = new ImageElement(folder ? ROMFS "res/folder.png" : ROMFS "res/file.png");
-  icon->resize(120, 100);
-  icon->position(this->x + 50, this->y + 10);
+  icon->resize(110, 110);
+  icon->position(this->x + this->width/2 - icon->width/2, this->y + 10);
   this->elements.push_back(icon);
 
   SDL_Color color =  {0xFF, 0xFF, 0xFF, 0xFF };
   TextElement* label = new TextElement(name, 20, &color, NORMAL, 200);
-  label->position(this->x + this->width/2 - label->width/2, this->y + 120);
+  label->position(this->x + this->width/2 - label->width/2, this->y + 130);
   this->elements.push_back(label);
 
   this->folder = folder;

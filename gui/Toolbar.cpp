@@ -11,11 +11,11 @@ Toolbar::Toolbar(const char* path)
 
   // toolbar actions
   // TODO: make real touchable buttons, move handler logic here
-  actions = new TextElement("(-) Exit    (+) Save    (x) Copy    (y) Paste    (b) Delete    (a) Type", 18, &white);
-  actions->position(700, 10);
+  actions = new TextElement("(-) Exit    (+) Save    (x) Copy    (y) Paste    (l/r) Select    (b) Delete    (a) Type", 18, &white);
+  actions->position(600, 10);
 
-  keyActions = new TextElement("(-) Exit    (+) Save    (x) Copy    (y) Paste    (b) Backspace    (a) Select", 18, &white);
-  keyActions->position(700, 10);
+  keyActions = new TextElement("(-) Exit    (+) Save    (x) Caps    (y) Paste    (l/r) Move    (b) Backspace    (a) Type", 18, &white);
+  keyActions->position(600, 10);
 }
 
 void Toolbar::setModified(bool modified)

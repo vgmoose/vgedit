@@ -46,11 +46,11 @@ void EKeyboard::render(Element* parent)
 			SDL_Rect dimens3 = { this->x + dPos, this->y + dHeight, dWidth, textSize };
 			dimens2 = dimens3;
 		}
-		if (curRow == 2 && index > 6)
-		{
-			SDL_Rect dimens4 = { this->x + sPos, this->y + dHeight, sWidth, textSize };
-			dimens2 = dimens4;
-		}
+		// if (curRow == 2 && index > 6)
+		// {
+		// 	SDL_Rect dimens4 = { this->x + sPos, this->y + dHeight, sWidth, textSize };
+		// 	dimens2 = dimens4;
+		// }
 
 		// draw the currently selected tile if these index things are set
 		if (touchMode)

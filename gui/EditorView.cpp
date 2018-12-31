@@ -31,11 +31,12 @@ void EditorView::reset_bounds()
   int selected_x = mainTextField->selected_x;
   int selected_y = mainTextField->selected_y;
 
-  // adjust the bounds of the cursor
   selected_y = selected_y < 0 ? 0 : selected_y;
   selected_y = selected_y > editor->lines.size()-1 ? editor->lines.size()-1 : selected_y;
-  selected_x = selected_x < 0 ? 0 : selected_x;
-  selected_x = selected_x > editor->lines[selected_y].size()-1 ? editor->lines[selected_y].size()-1  : selected_x;
+  
+  // loop around in x direction
+  selected_x = selected_x < 0 ? editor->lines[selected_y].size()-1 : selected_x;
+  selected_x = selected_x > editor->lines[selected_y].size()-1 ? 0 : selected_x;
 
   mainTextField->selected_x = selected_x;
   mainTextField->selected_y = selected_y;
@@ -148,6 +149,7 @@ bool EditorView::process(InputEvents* e)
     // (but it does make sense for vertical selections, to type on multiple lines)
     mainTextField->selected_width = 1;
     mainTextField->insertMode = true;
+    toolbar->keyboardShowing = true;
 
     return true;
   }
@@ -179,6 +181,7 @@ bool EditorView::process(InputEvents* e)
     {
       keyboard->hidden = true;
       mainTextField->insertMode = false;
+      toolbar->keyboardShowing = false;
       return true;
     }
   }
