@@ -88,7 +88,7 @@ void EditorView::syncText()
 bool EditorView::process(InputEvents* e)
 {
   // move the cursoraround the editor 
-  if (keyboard == NULL && e->pressed(LEFT_BUTTON | RIGHT_BUTTON | UP_BUTTON | DOWN_BUTTON))
+  if ((keyboard == NULL || keyboard->hidden) && e->pressed(LEFT_BUTTON | RIGHT_BUTTON | UP_BUTTON | DOWN_BUTTON))
   {
     if (e->pressed(LEFT_BUTTON))
       mainTextField->selected_x -= 1;
@@ -148,8 +148,9 @@ bool EditorView::process(InputEvents* e)
     return true;
   }
 
-  if (keyboard == NULL)
+  if (keyboard == NULL || keyboard->hidden)
   {
+    // copy and paste on X and Y
     if (e->released(X_BUTTON))
     {
       copySelection();
@@ -173,6 +174,7 @@ bool EditorView::process(InputEvents* e)
     if (e->released(Y_BUTTON))
     {
       keyboard->hidden = true;
+      mainTextField->insertMode = false;
       return true;
     }
   }
@@ -184,10 +186,10 @@ bool EditorView::process(InputEvents* e)
       mainTextField->selected_width -= 1;
     if (e->pressed(R_BUTTON))
       mainTextField->selected_width += 1;
-    if (e->pressed(ZL_BUTTON))
-      mainTextField->selected_height -= 1;
-    if (e->pressed(ZR_BUTTON))
-      mainTextField->selected_height += 1;
+    // if (e->pressed(ZL_BUTTON))
+    //   mainTextField->selected_height -= 1;
+    // if (e->pressed(ZR_BUTTON))
+    //   mainTextField->selected_height += 1;
 
     reset_bounds();
     return true;
