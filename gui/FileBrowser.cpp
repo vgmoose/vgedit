@@ -77,13 +77,13 @@ void FileBrowser::listfiles()
   this->elements.push_back(path);
 
   // new folder and file buttons
-  Button* newFolder = new Button("New Folder", X_BUTTON, true);
-  newFolder->position(820, 20);
-  this->elements.push_back(newFolder);
+  // Button* newFolder = new Button("New Folder", X_BUTTON, true);
+  // newFolder->position(820, 20);
+  // this->elements.push_back(newFolder);
 
-  Button* newFile = new Button("New File", Y_BUTTON, true);
-  newFile->position(1020, 20);
-  this->elements.push_back(newFile);
+  // Button* newFile = new Button("New File", Y_BUTTON, true);
+  // newFile->position(1020, 20);
+  // this->elements.push_back(newFile);
 
   DIR* dirp;
   struct dirent* entry;
