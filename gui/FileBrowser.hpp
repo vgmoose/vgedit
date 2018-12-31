@@ -13,4 +13,6 @@ class FileBrowser : public ListElement
   void update_path(const char* path);
 
   std::string* pwd = NULL;
+  bool touchMode = true;
+  int selected = -1;
 };

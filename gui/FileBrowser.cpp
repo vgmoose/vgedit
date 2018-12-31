@@ -17,18 +17,71 @@ FileBrowser::FileBrowser(const char* pwd)
   listfiles();
 }
 
-bool FileBrowser::process(InputEvents* event)
+bool FileBrowser::process(InputEvents* events)
 {
   if (MainDisplay::mainDisplay->editorView != NULL)
     return false;
 
-  return ListElement::process(event);
+  if (events->isTouchDown())
+  {
+    touchMode = true;
+    selected = -1;
+  }
+
+  else if (events->pressed(UP_BUTTON) || events->pressed(DOWN_BUTTON) || events->pressed(LEFT_BUTTON) || events->pressed(RIGHT_BUTTON))
+  {
+    touchMode = false;
+
+    if (selected == -1)
+    {
+      selected = 0;
+    }
+
+    selected -= events->pressed(UP_BUTTON) * 5;
+    selected += events->pressed(DOWN_BUTTON) * 5;
+    selected += events->pressed(RIGHT_BUTTON);
+    selected -= events->pressed(LEFT_BUTTON);
+
+    if (selected < 0) selected = 0;
+    if (selected >= elements.size() - 1) selected = elements.size() - 2; // account for path
+
+    if ((selected / 5) > 3)
+    {
+      this->y = -200 * (selected / 5);
+      return true;
+    }
+    else
+    {
+      this->y = 0;
+      return true;
+    }
+
+  }
+
+  if (events->released(A_BUTTON))
+  {
+    if (selected < 0) return false;
+
+    // activate this file's editor
+    ((FileCard*)elements[1 + selected])->openMyFile();
+    return true;
+  }
+
+  return ListElement::process(events);
 }
 
 void FileBrowser::render(Element* parent)
 {
   if (MainDisplay::mainDisplay->editorView != NULL)
     return;
+
+  if (selected >= 0)
+  {
+    // draw the cursor for this file
+    SDL_Rect dimens4 = { this->x + (selected % 5)*220 + 100, this->y + (selected / 5)*200 + 100, 210, 210};
+	  SDL_SetRenderDrawColor(parent->renderer, 0xaa, 0xaa, 0xaa, 0xff);
+	  SDL_RenderDrawRect(parent->renderer, &dimens4);
+  }
 
   renderer = parent->renderer;
   return super::render(this);
