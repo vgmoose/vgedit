@@ -4,6 +4,12 @@
 #include "libs/hb-appstore/gui/Element.hpp"
 #include <algorithm>
 
+#if defined(PC)
+#define START_PATH "."
+#else
+#define START_PATH "/"
+#endif
+
 int main(int argc, char* argv[])
 {
 	// initialize main title screen
@@ -12,7 +18,7 @@ int main(int argc, char* argv[])
 	// the main input handler
 	InputEvents* events = new InputEvents();
 
-  FileBrowser* fileBrowser = new FileBrowser(".");
+  FileBrowser* fileBrowser = new FileBrowser(START_PATH);
   display->browser = fileBrowser;
   display->elements.push_back(fileBrowser);
 

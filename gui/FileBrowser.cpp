@@ -26,14 +26,34 @@ void FileBrowser::render(Element* parent)
   return super::render(this);
 }
 
+// copy-pasta'd from Utils.cpp in hb-appstore
+// TODO: consolidate
+const std::string dir_name(std::string file_path)
+{
+	// turns "/hi/man/thing.txt to /hi/man"
+	int pos = file_path.find_last_of("/");
+
+	// no "/" in string, return empty string
+	if (pos == std::string::npos)
+		return "";
+
+	return file_path.substr(0, pos);
+}
+
 void FileBrowser::update_path(const char* pwd)
 {
   if (this->pwd)
     delete this->pwd;
 
   char path[2048];
-  my_realpath(pwd, path);
-  this->pwd = new std::string(path);
+  #if defined(PC)
+    // PC can use realpath, other platforms might not have it
+    realpath(pwd, path);
+    this->pwd = new std::string(path);
+  #else
+    this->pwd = new std::string(pwd);
+  #endif
+  
 }
 
 void FileBrowser::listfiles()
@@ -55,18 +75,31 @@ void FileBrowser::listfiles()
 
   int count = 0;
 
+  // create a hardcoded "up" link to the parent directory
+  if (*pwd != std::string("/"))
+  {
+    FileCard* card = new FileCard(this);
+    card->position(this->x + (count % 5) * card->width, this->y + 100 + (count / 5) * card->width );
+    card->update(true, ".. (parent)");
+    std::string cwd = dir_name(*pwd);
+    card->path = new std::string(cwd == "" ? "/" : cwd);
+    card->action = std::bind(&FileCard::openMyFile, card);
+    this->elements.push_back(card);
+    count++;
+  }
+
   if (dirp)
   {
       while ((entry = readdir(dirp)) != NULL)
       {
-        // skip the '.' entry if it exists in the filesystem
-        if (strcmp(entry->d_name, ".") == 0)
+        // skip the '.' and '..' entries if they exist in the filesystem
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
           continue;
         
         FileCard* card = new FileCard(this);
         card->position(this->x + (count % 5) * card->width, this->y + 100 + (count / 5) * card->width );
         card->update(entry->d_type == DT_DIR, entry->d_name);
-        card->path = new std::string(*pwd + std::string("/") + entry->d_name);
+        card->path = new std::string(*pwd + (*pwd != "/" ? std::string("/") : "") + entry->d_name);
         card->action = std::bind(&FileCard::openMyFile, card);
         this->elements.push_back(card);
         count++;
@@ -74,85 +107,4 @@ void FileBrowser::listfiles()
 
       closedir(dirp);
   }
-}
-
-#define MAX_READLINKS 32
-#define PATH_MAX 1024
-
-// from http://www.scs.stanford.edu/histar/src/pkg/uclibc/libc/stdlib/realpath.c
-char* my_realpath(const char *path, char resolved_path[])
-{
-	char copy_path[PATH_MAX];
-	char link_path[PATH_MAX];
-	char got_path[PATH_MAX];
-	char *new_path = got_path;
-	char *max_path;
-	int readlinks = 0;
-	int n;
-
-	if (path == NULL) {
-		return NULL;
-	}
-	if (*path == '\0') {
-		return NULL;
-	}
-	/* Make a copy of the source path since we may need to modify it. */
-	if (strlen(path) >= PATH_MAX - 2) {
-		return NULL;
-	}
-	strcpy(copy_path, path);
-	path = copy_path;
-	max_path = copy_path + PATH_MAX - 2;
-	/* If it's a relative pathname use getcwd for starters. */
-	if (*path != '/') {
-		/* Ohoo... */
-		getcwd(new_path, PATH_MAX - 1);
-		new_path += strlen(new_path);
-		if (new_path[-1] != '/')
-			*new_path++ = '/';
-	} else {
-		*new_path++ = '/';
-		path++;
-	}
-	/* Expand each slash-separated pathname component. */
-	while (*path != '\0') {
-		/* Ignore stray "/". */
-		if (*path == '/') {
-			path++;
-			continue;
-		}
-		if (*path == '.') {
-			/* Ignore ".". */
-			if (path[1] == '\0' || path[1] == '/') {
-				path++;
-				continue;
-			}
-			if (path[1] == '.') {
-				if (path[2] == '\0' || path[2] == '/') {
-					path += 2;
-					/* Ignore ".." at root. */
-					if (new_path == got_path + 1)
-						continue;
-					/* Handle ".." by backing up. */
-					while ((--new_path)[-1] != '/');
-					continue;
-				}
-			}
-		}
-		/* Safely copy the next pathname component. */
-		while (*path != '\0' && *path != '/') {
-			if (path > max_path) {
-				return NULL;
-			}
-			*new_path++ = *path++;
-		}
-		*new_path++ = '/';
-	}
-	/* Delete trailing slash but don't whomp a lone slash. */
-	if (new_path != got_path + 1 && new_path[-1] == '/')
-		new_path--;
-	/* Make sure it's null terminated. */
-	*new_path = '\0';
-	strcpy(resolved_path, got_path);
-	return resolved_path;
 }
