@@ -1,5 +1,4 @@
 GUI :=		libs/hb-appstore/gui/InputEvents.cpp libs/hb-appstore/gui/Element.cpp libs/hb-appstore/gui/TextElement.cpp libs/hb-appstore/gui/ImageElement.cpp libs/hb-appstore/gui/ImageCache.cpp libs/hb-appstore/gui/ListElement.cpp
-
 RAPIDJSON :=	libs/hb-appstore/libs/get/src/libs/rapidjson/include
 
 BREW_FLAGS := -L /usr/local/Cellar/sdl2/2.0.9/lib -L /usr/local/Cellar/sdl2_gfx/1.0.4/lib -L /usr/local/Cellar/sdl2_image/2.0.4/lib -L /usr/local/Cellar/sdl2_mixer/2.0.4/lib -L /usr/local/Cellar/sdl2_ttf/2.0.14/lib 

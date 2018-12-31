@@ -1,5 +1,5 @@
 #include "EditorView.hpp"
-#include "Keyboard.hpp"
+#include "EKeyboard.hpp"
 
 EditorView::EditorView(Editor* editor)
 {
@@ -130,10 +130,15 @@ bool EditorView::process(InputEvents* e)
   }
 
   // bring up the keyboard
-  if (keyboard == NULL && e->released(A_BUTTON))
+  if (e->released(A_BUTTON))
   {
-    keyboard = new Keyboard(this);
-    this->elements.push_back(keyboard);
+    if (keyboard == NULL)
+    {
+      keyboard = new EKeyboard(this);
+      this->elements.push_back(keyboard);
+    }
+
+    keyboard->hidden = false;
 
     // force selection to be width 1 (more than 1 doesn't make sense in insert mode)
     // (but it does make sense for vertical selections, to type on multiple lines)
@@ -167,10 +172,7 @@ bool EditorView::process(InputEvents* e)
 
     if (e->released(Y_BUTTON))
     {
-      keyboard->wipeElements();
-      elements.erase(std::remove(elements.begin(), elements.end(), keyboard), elements.end());
-      keyboard = NULL;
-      mainTextField->insertMode = false;
+      keyboard->hidden = true;
       return true;
     }
   }

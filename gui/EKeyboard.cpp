@@ -1,7 +1,7 @@
-#include "Keyboard.hpp"
+#include "EKeyboard.hpp"
 #include "EditorView.hpp"
 
-Keyboard::Keyboard(EditorView* editorView)
+EKeyboard::EKeyboard(EditorView* editorView)
 {
 	this->x = 30;
 	this->y = 300;
@@ -10,11 +10,11 @@ Keyboard::Keyboard(EditorView* editorView)
 
 	curRow = index = -1;
 
-	// position the keyboard based on this x and y
+	// position the EKeyboard based on this x and y
 	updateSize();
 }
 
-void Keyboard::render(Element* parent)
+void EKeyboard::render(Element* parent)
 {
 	if (hidden)
 		return;
@@ -87,7 +87,7 @@ void Keyboard::render(Element* parent)
 	super::render(this);
 }
 
-bool Keyboard::process(InputEvents* event)
+bool EKeyboard::process(InputEvents* event)
 {
 	// don't do anything if we're hidden, or there's a sidebar and it's active
 	if (hidden)
@@ -108,7 +108,7 @@ bool Keyboard::process(InputEvents* event)
 	{
 		if (curRow < 0 && index < 0)
 		{
-			// switched into keyboard, set to 0 and return
+			// switched into EKeyboard, set to 0 and return
 			curRow = 1;
       index = 0;
 			return true;
@@ -193,7 +193,7 @@ bool Keyboard::process(InputEvents* event)
 	return false;
 }
 
-void Keyboard::updateSize()
+void EKeyboard::updateSize()
 {
 	this->elements.clear();
 
@@ -230,8 +230,8 @@ void Keyboard::updateSize()
 	dWidth = (int)(1.4125 * textSize);
 	sWidth = (int)(1.91875 * textSize);
 
-	// set up the keys vector based on the current keyboard selection
-	generateKeyboard();
+	// set up the keys vector based on the current EKeyboard selection
+	generateEKeyboard();
 
 	SDL_Color gray = { 0x52, 0x52, 0x52, 0xff };
 
@@ -259,7 +259,7 @@ void Keyboard::updateSize()
 	// this->elements.push_back(spaceButton);
 }
 
-void Keyboard::type(int y, int x)
+void EKeyboard::type(int y, int x)
 {
 	const char input = (*(rows[y]))[x * 2];
   auto line = editorView->mainTextField->selected_y;
@@ -270,23 +270,23 @@ void Keyboard::type(int y, int x)
   editorView->syncText();
 }
 
-void Keyboard::backspace()
+void EKeyboard::backspace()
 {
 	// if (!myText->empty())
 	// 	myText->pop_back();
 }
 
-void Keyboard::space()
+void EKeyboard::space()
 {
 	// myText->append(" ");
 }
 
-void Keyboard::updateView()
+void EKeyboard::updateView()
 {
 
 }
 
-void Keyboard::generateKeyboard()
+void EKeyboard::generateEKeyboard()
 {
   int count = 0;
   string keys;
@@ -323,6 +323,6 @@ void Keyboard::generateKeyboard()
   }
 }
 
-Keyboard::~Keyboard()
+EKeyboard::~EKeyboard()
 {
 }

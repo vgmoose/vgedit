@@ -2,7 +2,7 @@
 #include "../edit/Editor.hpp"
 #include "TextInputElement.hpp"
 
-class Keyboard;
+class EKeyboard;
 
 class EditorView : public Element
 {
@@ -10,7 +10,7 @@ class EditorView : public Element
   EditorView(Editor* editor);
 
   Editor* editor = NULL;
-  Keyboard* keyboard = NULL;
+  EKeyboard* keyboard = NULL;
   std::string* copiedText = NULL;
 
   // the big, main text field for the editor

@@ -1,4 +1,12 @@
 #include "MainDisplay.hpp"
+#include "FileBrowser.hpp"
+#include "EditorView.hpp"
+
+#if defined(SWITCH)
+	#include <switch.h>
+#elif defined(__WIIU__)
+  #include <romfs-wiiu.h>
+#endif
 
 SDL_Renderer* MainDisplay::mainRenderer = NULL;
 Element* MainDisplay::subscreen = NULL;
@@ -30,7 +38,7 @@ MainDisplay::MainDisplay()
 
 		// initialize teh romfs for switch/wiiu
 #if defined(SWITCH) || defined(__WIIU__)
-	// romfsInit();
+	romfsInit();
 #endif
 
 	int height = 720;
@@ -53,14 +61,28 @@ MainDisplay::MainDisplay()
 			return;
 		}
 	}
-
-	this->error = 0;
-
-	if (this->error)
-	{
-    
-	}
 }
+
+void MainDisplay::openFile(bool folder, std::string* path)
+{
+  // don't allow a file to be opened if we're already showing an editor
+  if (editorView != NULL)
+    return;
+
+  if (folder)
+  {
+    browser->update_path(path->c_str());
+    browser->y = 0;
+    browser->listfiles();
+  }
+  else
+  {   
+    Editor* editor = new Editor(path->c_str());
+    editorView = new EditorView(editor);
+    this->elements.push_back(editorView);
+  }
+}
+
 
 bool MainDisplay::process(InputEvents* event)
 {
@@ -90,6 +112,13 @@ void MainDisplay::render(Element* parent)
 	this->update();
 }
 
+void MainDisplay::closeEditor()
+{
+  elements.erase(elements.begin() + 1);  // second element should be the editor (TODO: something smarter)
+  delete editorView;
+  editorView = NULL;
+}
+
 void MainDisplay::background(int r, int g, int b)
 {
 	SDL_SetRenderDrawColor(this->renderer, r, g, b, 0xFF);
@@ -110,7 +139,7 @@ void MainDisplay::update()
 	//    this->lastFrameTime = now;
 }
 
-void quit()
+void my_quit()
 {
 	IMG_Quit();
 	TTF_Quit();
@@ -122,7 +151,7 @@ void quit()
 	SDL_Quit();
 
 #if defined(__WIIU__)
-	// romfsExit();
+	romfsExit();
 #endif
 
 	exit(0);

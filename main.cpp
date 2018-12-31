@@ -2,6 +2,7 @@
 #include "gui/EditorView.hpp"
 #include "gui/FileBrowser.hpp"
 #include "libs/hb-appstore/gui/Element.hpp"
+#include <algorithm>
 
 int main(int argc, char* argv[])
 {
@@ -11,13 +12,8 @@ int main(int argc, char* argv[])
 	// the main input handler
 	InputEvents* events = new InputEvents();
 
-  // create the editor instance
-  Editor* editor = new Editor((argc > 1) ? argv[1] : "tmp.txt");
-
-  // EditorView* editorView = new EditorView(editor);
-  // display->elements.push_back(editorView);
-
   FileBrowser* fileBrowser = new FileBrowser(".");
+  display->browser = fileBrowser;
   display->elements.push_back(fileBrowser);
 
 	bool running = true;
@@ -36,8 +32,16 @@ int main(int argc, char* argv[])
 			atLeastOneNewEvent = true;
 
     	// quit on enter/start
-      if (events->held(SELECT_BUTTON))
-        running = false;
+      if (events->released(SELECT_BUTTON))
+      {
+        if (display->editorView == NULL)
+          running = false;
+        else
+        {
+          display->closeEditor();
+          viewChanged = true;
+        }
+      }
 		}
 
 		// one more event update if nothing changed or there were no previous events seen
@@ -66,7 +70,7 @@ int main(int argc, char* argv[])
     MainDisplay::mainDisplay->showingSplash = false;
 	}
 
-	quit();
+	my_quit();
 
 	return 0;
 }

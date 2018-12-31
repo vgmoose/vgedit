@@ -1,0 +1,28 @@
+language: cpp
+sudo: required
+
+os: linux
+dist: xenial
+
+env:
+  global:
+    - DEVKITPRO=/opt/devkitpro
+    - WUT_ROOT=/opt/wut
+
+matrix:
+  include:
+    - env: PLATFORM=pc
+    - env: PLATFORM=switch
+    # - env: PLATFORM=wiiu
+
+addons:
+  apt:
+    packages:
+      - git
+      - wget
+
+install:
+  - ./dependency_helper.sh
+
+script:
+  - make -f Makefile.${PLATFORM}

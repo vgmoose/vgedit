@@ -1,6 +1,7 @@
 #include "../libs/hb-appstore/gui/ImageElement.hpp"
 #include "../libs/hb-appstore/gui/TextElement.hpp"
 #include "FileCard.hpp"
+#include "MainDisplay.hpp"
 
 FileCard::FileCard(Element* parent)
 {
@@ -14,20 +15,20 @@ void FileCard::update(bool folder, const char* name)
 {
   ImageElement* icon = new ImageElement(folder ? ROMFS "res/folder.png" : ROMFS "res/file.png");
   icon->resize(100, 100);
-  icon->position(this->x + 10, this->y + 10);
+  icon->position(this->x + 50, this->y + 10);
   this->elements.push_back(icon);
 
   SDL_Color color =  {0xFF, 0xFF, 0xFF, 0xFF };
-  TextElement* label = new TextElement(name, 20, &color, MONOSPACED, 90);
+  TextElement* label = new TextElement(name, 20, &color, MONOSPACED, 200);
   label->position(this->x + 5, this->y + 120);
   this->elements.push_back(label);
+
+  this->folder = folder;
 }
 
 void FileCard::openMyFile()
 {
-  printf(path->c_str());
-  printf("\n");
-  // MainDisplay::mainDisplay->openFile(pwd + "/" + name);
+  MainDisplay::mainDisplay->openFile(folder, path);
 }
 
 void FileCard::render(Element* parent)
