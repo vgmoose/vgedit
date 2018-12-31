@@ -1,5 +1,6 @@
 #include "../libs/hb-appstore/gui/Element.hpp"
 #include "../edit/Editor.hpp"
+#include "Toolbar.hpp"
 #include "TextInputElement.hpp"
 
 class EKeyboard;
@@ -11,6 +12,7 @@ class EditorView : public Element
 
   Editor* editor = NULL;
   EKeyboard* keyboard = NULL;
+  Toolbar* toolbar = NULL;
   std::string* copiedText = NULL;
 
   // the big, main text field for the editor

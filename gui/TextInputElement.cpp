@@ -26,7 +26,7 @@ void TextInputElement::updateText(const char* text)
 		return;
 
   SDL_Color color = { 0x00, 0x00, 0x00 };
-	SDL_Surface* surf = TTF_RenderText_Blended_Wrapped(font, text, color, 1240);
+	SDL_Surface* surf = TTF_RenderText_Blended_Wrapped(font, text, color, 1260);
 
 	SDL_Texture* texture = SDL_CreateTextureFromSurface(MainDisplay::mainRenderer, surf);
 	SDL_FreeSurface(surf);
@@ -47,8 +47,8 @@ void TextInputElement::render(Element* parent)
   // TODO: don't copy paste code from TextElement? (inherit?)
   //       might need to be done after pulling hb-appstore gui files into own lib
   SDL_Rect textLocation;
-	textLocation.x = this->x + parent->x;
-	textLocation.y = this->y + parent->y;
+	textLocation.x = this->x + parent->x + 20;
+	textLocation.y = this->y + parent->y + 70;
 	textLocation.w = this->width;
 	textLocation.h = this->height;
  

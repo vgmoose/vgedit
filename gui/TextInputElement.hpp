@@ -1,6 +1,6 @@
-#include "../libs/hb-appstore/gui/Element.hpp"
+#include "../libs/hb-appstore/gui/ListElement.hpp"
 
-class TextInputElement : public Element
+class TextInputElement : public ListElement
 {
   public:
   TextInputElement(const char* text);

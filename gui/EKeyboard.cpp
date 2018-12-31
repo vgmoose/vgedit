@@ -19,7 +19,7 @@ void EKeyboard::render(Element* parent)
 	if (hidden)
 		return;
 
-	SDL_Rect dimens = { this->x, this->y, this->width + 305, this->height + 100};
+	SDL_Rect dimens = { this->x, this->y, this->width + 305, this->height + 140};
 
 	this->window = parent->window;
 	this->renderer = parent->renderer;

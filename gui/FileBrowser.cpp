@@ -1,9 +1,11 @@
 #include "FileBrowser.hpp"
 #include "FileCard.hpp"
 #include "../libs/hb-appstore/gui/TextElement.hpp"
+#include "../libs/hb-appstore/gui/Button.hpp"
 #include <dirent.h>
 #include <string.h>
 #include <unistd.h>
+#include "MainDisplay.hpp"
 
 FileBrowser::FileBrowser(const char* pwd)
 {
@@ -17,11 +19,17 @@ FileBrowser::FileBrowser(const char* pwd)
 
 bool FileBrowser::process(InputEvents* event)
 {
+  if (MainDisplay::mainDisplay->editorView != NULL)
+    return false;
+
   return ListElement::process(event);
 }
 
 void FileBrowser::render(Element* parent)
 {
+  if (MainDisplay::mainDisplay->editorView != NULL)
+    return;
+
   renderer = parent->renderer;
   return super::render(this);
 }
@@ -65,8 +73,17 @@ void FileBrowser::listfiles()
   // current path at the top
   SDL_Color white = { 0xFF, 0xFF, 0xFF, 0xFF };
   TextElement* path = new TextElement(pwd->c_str(), 25, &white, MONOSPACED);
-  path->position(5, 5);
+  path->position(10, 30);
   this->elements.push_back(path);
+
+  // new folder and file buttons
+  Button* newFolder = new Button("New Folder", X_BUTTON, true);
+  newFolder->position(720, 20);
+  this->elements.push_back(newFolder);
+
+  Button* newFile = new Button("New File", Y_BUTTON, true);
+  newFile->position(920, 20);
+  this->elements.push_back(newFile);
 
   DIR* dirp;
   struct dirent* entry;
@@ -79,7 +96,7 @@ void FileBrowser::listfiles()
   if (*pwd != std::string("/"))
   {
     FileCard* card = new FileCard(this);
-    card->position(this->x + (count % 5) * card->width, this->y + 100 + (count / 5) * card->width );
+    card->position(this->x + (count % 5) * card->width, this->y + 115 + (count / 5) * card->height );
     card->update(true, ".. (parent)");
     std::string cwd = dir_name(*pwd);
     card->path = new std::string(cwd == "" ? "/" : cwd);
@@ -97,7 +114,7 @@ void FileBrowser::listfiles()
           continue;
         
         FileCard* card = new FileCard(this);
-        card->position(this->x + (count % 5) * card->width, this->y + 100 + (count / 5) * card->width );
+        card->position(this->x + (count % 5) * card->width, this->y + 115 + (count / 5) * card->height );
         card->update(entry->d_type == DT_DIR, entry->d_name);
         card->path = new std::string(*pwd + (*pwd != "/" ? std::string("/") : "") + entry->d_name);
         card->action = std::bind(&FileCard::openMyFile, card);

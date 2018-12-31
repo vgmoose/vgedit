@@ -5,21 +5,25 @@ EditorView::EditorView(Editor* editor)
 {
   // initialize the text view for the first time, using whatever's in the editor
   mainTextField = new TextInputElement(editor->contents());
-  mainTextField->x = 20;
-  mainTextField->y = 20;
+  mainTextField->x = 10;
+  mainTextField->y = 70;
   this->elements.push_back(mainTextField);
+
+  // create a tool bar, but don't add it to the elements list
+  // it will be manually drawn in later (above everything else)
+  toolbar = new Toolbar(editor->filename);
 
   this->editor = editor;
 }
 
 void EditorView::render(Element* parent)
 {
-  SDL_Rect background = { 15, 15, 1240, 690 };
-
   SDL_SetRenderDrawColor(parent->renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-  SDL_RenderFillRect(parent->renderer, &background);
+  SDL_RenderFillRect(parent->renderer, NULL);
 
   super::render(parent);
+
+  toolbar->render(parent);
 }
 
 void EditorView::reset_bounds()
@@ -195,5 +199,5 @@ bool EditorView::process(InputEvents* e)
     return true;
   }
 
-  return super::process(e);
+  return super::process(e) || toolbar->process(e);
 }
