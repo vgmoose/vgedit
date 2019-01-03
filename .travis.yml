@@ -13,7 +13,7 @@ matrix:
   include:
     - env: PLATFORM=pc
     - env: PLATFORM=switch
-    # - env: PLATFORM=wiiu
+    - env: PLATFORM=wiiu
 
 addons:
   apt:
