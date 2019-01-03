@@ -38,7 +38,7 @@ case "${PLATFORM}" in
 
       sudo dkp-pacman -Syu
 
-      sudo dkp-pacman --noconfirm -S wut-linux wiiu-sdl2 devkitPPC wiiu-libromfs ppc-zlib ppc-bzip2 ppc-freetype ppc-libpng wiiu-curl-headers
+      sudo dkp-pacman --noconfirm -S wut-linux wiiu-sdl2 devkitPPC wiiu-libromfs wiiu-sdl2_gfx wiiu-sdl2_image wiiu-sdl2_ttf ppc-zlib ppc-bzip2 ppc-freetype ppc-libpng wiiu-curl-headers
       cd libs/hb-appstore/gui && rm Sidebar.*pp AppDetails.*pp AppList.*pp AboutScreen.*pp AppCard.*pp Feedback.*pp ProgressBar.*pp MainDisplay.*pp Keyboard.*pp || true
     ;;
 esac
