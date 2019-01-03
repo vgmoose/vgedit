@@ -6,8 +6,10 @@
 
 #if defined(PC)
 #define START_PATH "."
-#else
+#elif defined(SWITCH)
 #define START_PATH "/"
+#else
+#define START_PATH "/vol/external01/"
 #endif
 
 int main(int argc, char* argv[])
