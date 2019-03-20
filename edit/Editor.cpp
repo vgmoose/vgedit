@@ -2,133 +2,133 @@
 
 Editor::Editor(const char* filename)
 {
-  this->filename = filename;
+	this->filename = filename;
 
-  if (filename == NULL)
-    filename = "test.txt";
+	if (filename == NULL)
+		filename = "test.txt";
 
-  this->open(filename);
+	this->open(filename);
 }
 
 const char* Editor::contents()
 {
-  // just return full contents of the file
-  stringstream s;
-  for (auto& line : lines)
-    for (auto& letter : line)
-      s << letter;
+	// just return full contents of the file
+	stringstream s;
+	for (auto& line : lines)
+		for (auto& letter : line)
+			s << letter;
 
-  s << '\0';
-  
-  if (text != NULL)
-    delete text;
+	s << '\0';
 
-  text = new std::string(s.str());
-  return text->c_str();
+	if (text != NULL)
+		delete text;
+
+	text = new std::string(s.str());
+	return text->c_str();
 }
 
 int Editor::open(const char* filename)
 {
-  // open input stream for file
+	// open input stream for file
 	ifstream input(filename);
 
 	if (input.tellg() == -1)
-  {
-    // quit if file is missing
+	{
+		// quit if file is missing
 		cout << "target file does not exist" << endl;
-    return -1;
-  }
+		return -1;
+	}
 
-  // TODO: check and prompt for hex files
+	// TODO: check and prompt for hex files
 
 	internal_load_from_stream(&input);
 
-  input.close();
-	
-  // file loaded successfully
+	input.close();
+
+	// file loaded successfully
 	return 0;
 }
 
 void Editor::internal_load_from_stream(istream* input)
 {
-  // clear any existing lines structure
-  lines.clear();
-  
-  // current line being read
-  string line;
+	// clear any existing lines structure
+	lines.clear();
 
-  while (getline(*input, line))
+	// current line being read
+	string line;
+
+	while (getline(*input, line))
 	{
-    // vector representing this line
+		// vector representing this line
 		vector<char> cur;
 
-    // push each letter of current line into the current vector
+		// push each letter of current line into the current vector
 		for (auto& letter : line)
 			cur.push_back(letter);
-    
-    // add a new line at the end (POSIX-defined lines)
-    // https://stackoverflow.com/a/31426524
-    cur.push_back('\n');
-    
-    // add this line to the editor
+
+		// add a new line at the end (POSIX-defined lines)
+		// https://stackoverflow.com/a/31426524
+		cur.push_back('\n');
+
+		// add this line to the editor
 		lines.push_back(cur);
 	}
 
-  // prevent empty files
-  if (lines.size() == 0 || lines[0].size() == 0)
-  {
-    vector<char> endline;
-    endline.push_back('\n');
-    lines.push_back(endline);
-  }
+	// prevent empty files
+	if (lines.size() == 0 || lines[0].size() == 0)
+	{
+		vector<char> endline;
+		endline.push_back('\n');
+		lines.push_back(endline);
+	}
 }
 
 void Editor::update_lists()
 {
-  // TODO: if we're going to update vectors like this every time, we
-  // might as well not bother using vectors at all...
-  stringstream s;
-  s << contents();
-  internal_load_from_stream(&s);
+	// TODO: if we're going to update vectors like this every time, we
+	// might as well not bother using vectors at all...
+	stringstream s;
+	s << contents();
+	internal_load_from_stream(&s);
 }
 
 bool Editor::save()
 {
-  ofstream output;
-  output.open(filename);
+	ofstream output;
+	output.open(filename);
 
-  for (auto& line : lines)
-    for (auto& letter : line)
-      output << letter;
-  
-  output.close();
-  return true;
+	for (auto& line : lines)
+		for (auto& letter : line)
+			output << letter;
+
+	output.close();
+	return true;
 }
 
 bool Editor::type(int line, int pos, const char input)
 {
-  // TODO: handle vertical selections
+	// TODO: handle vertical selections
 
-  // if "overwrite" is on, delete what's under us first, given it's not the end of the line
-  if (overwriteMode && pos < lines[line].size() - 1)
-    lines[line].erase(lines[line].begin() + pos);
+	// if "overwrite" is on, delete what's under us first, given it's not the end of the line
+	if (overwriteMode && pos < lines[line].size() - 1)
+		lines[line].erase(lines[line].begin() + pos);
 
-  lines[line].insert(lines[line].begin() + pos, input);
-  return true;
+	lines[line].insert(lines[line].begin() + pos, input);
+	return true;
 }
 
 bool Editor::del(int line, int pos, int size)
 {
-  // TODO: take in a Selection instead and work accordingly
+	// TODO: take in a Selection instead and work accordingly
 
-  auto target = lines[line].begin() + pos;
+	auto target = lines[line].begin() + pos;
 
-  if (size == 1)
-    lines[line].erase(target);
-  else
-    lines[line].erase(target, target + size);
+	if (size == 1)
+		lines[line].erase(target);
+	else
+		lines[line].erase(target, target + size);
 
-  update_lists();
+	update_lists();
 
-  return true;
+	return true;
 }

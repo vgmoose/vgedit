@@ -1,90 +1,89 @@
 #include "FileBrowser.hpp"
-#include "FileCard.hpp"
-#include "../libs/hb-appstore/gui/TextElement.hpp"
 #include "../libs/hb-appstore/gui/Button.hpp"
+#include "../libs/hb-appstore/gui/TextElement.hpp"
+#include "FileCard.hpp"
+#include "MainDisplay.hpp"
 #include <dirent.h>
 #include <string.h>
 #include <unistd.h>
-#include "MainDisplay.hpp"
 
 FileBrowser::FileBrowser(const char* pwd)
 {
-  update_path(pwd);
+	update_path(pwd);
 
-  x = 40;
-  y = 0;
+	x = 40;
+	y = 0;
 
-  listfiles();
+	listfiles();
 }
 
 bool FileBrowser::process(InputEvents* events)
 {
-  if (MainDisplay::mainDisplay->editorView != NULL)
-    return false;
+	if (MainDisplay::mainDisplay->editorView != NULL)
+		return false;
 
-  if (events->isTouchDown())
-  {
-    touchMode = true;
-    selected = -1;
-  }
+	if (events->isTouchDown())
+	{
+		touchMode = true;
+		selected = -1;
+	}
 
-  else if (events->pressed(UP_BUTTON) || events->pressed(DOWN_BUTTON) || events->pressed(LEFT_BUTTON) || events->pressed(RIGHT_BUTTON))
-  {
-    touchMode = false;
+	else if (events->pressed(UP_BUTTON) || events->pressed(DOWN_BUTTON) || events->pressed(LEFT_BUTTON) || events->pressed(RIGHT_BUTTON))
+	{
+		touchMode = false;
 
-    if (selected == -1)
-    {
-      selected = 0;
-    }
+		if (selected == -1)
+		{
+			selected = 0;
+		}
 
-    selected -= events->pressed(UP_BUTTON) * 5;
-    selected += events->pressed(DOWN_BUTTON) * 5;
-    selected += events->pressed(RIGHT_BUTTON);
-    selected -= events->pressed(LEFT_BUTTON);
+		selected -= events->pressed(UP_BUTTON) * 5;
+		selected += events->pressed(DOWN_BUTTON) * 5;
+		selected += events->pressed(RIGHT_BUTTON);
+		selected -= events->pressed(LEFT_BUTTON);
 
-    if (selected < 0) selected = 0;
-    if (selected >= elements.size() - 1) selected = elements.size() - 2; // account for path
+		if (selected < 0) selected = 0;
+		if (selected >= elements.size() - 1) selected = elements.size() - 2; // account for path
 
-    if ((selected / 5) > 3)
-    {
-      this->y = -200 * (selected / 5);
-      return true;
-    }
-    else
-    {
-      this->y = 0;
-      return true;
-    }
+		if ((selected / 5) > 3)
+		{
+			this->y = -200 * (selected / 5);
+			return true;
+		}
+		else
+		{
+			this->y = 0;
+			return true;
+		}
+	}
 
-  }
+	if (events->released(A_BUTTON))
+	{
+		if (selected < 0) return false;
 
-  if (events->released(A_BUTTON))
-  {
-    if (selected < 0) return false;
+		// activate this file's editor
+		((FileCard*)elements[1 + selected])->openMyFile();
+		return true;
+	}
 
-    // activate this file's editor
-    ((FileCard*)elements[1 + selected])->openMyFile();
-    return true;
-  }
-
-  return ListElement::process(events);
+	return ListElement::process(events);
 }
 
 void FileBrowser::render(Element* parent)
 {
-  if (MainDisplay::mainDisplay->editorView != NULL)
-    return;
+	if (MainDisplay::mainDisplay->editorView != NULL)
+		return;
 
-  if (selected >= 0)
-  {
-    // draw the cursor for this file
-    SDL_Rect dimens4 = { this->x + (selected % 5)*220 + 60, this->y + (selected / 5)*200 + 100, 210, 210};
-	  SDL_SetRenderDrawColor(parent->renderer, 0xaa, 0xaa, 0xaa, 0xff);
-	  SDL_RenderDrawRect(parent->renderer, &dimens4);
-  }
+	if (selected >= 0)
+	{
+		// draw the cursor for this file
+		SDL_Rect dimens4 = { this->x + (selected % 5) * 220 + 60, this->y + (selected / 5) * 200 + 100, 210, 210 };
+		SDL_SetRenderDrawColor(parent->renderer, 0xaa, 0xaa, 0xaa, 0xff);
+		SDL_RenderDrawRect(parent->renderer, &dimens4);
+	}
 
-  renderer = parent->renderer;
-  return super::render(this);
+	renderer = parent->renderer;
+	return super::render(this);
 }
 
 // copy-pasta'd from Utils.cpp in hb-appstore
@@ -103,78 +102,77 @@ const std::string dir_name(std::string file_path)
 
 void FileBrowser::update_path(const char* pwd)
 {
-  if (this->pwd)
-    delete this->pwd;
+	if (this->pwd)
+		delete this->pwd;
 
-  char path[2048];
-  #if defined(PC)
-    // PC can use realpath, other platforms might not have it
-    realpath(pwd, path);
-    this->pwd = new std::string(path);
-  #else
-    this->pwd = new std::string(pwd);
-  #endif
-  
+	char path[2048];
+#if defined(PC)
+	// PC can use realpath, other platforms might not have it
+	realpath(pwd, path);
+	this->pwd = new std::string(path);
+#else
+	this->pwd = new std::string(pwd);
+#endif
 }
 
 void FileBrowser::listfiles()
 {
-  // go through all files in current directory and create FileCard children out of them
+	// go through all files in current directory and create FileCard children out of them
 
-  this->elements.clear();
+	this->elements.clear();
 
-  // current path at the top
-  SDL_Color white = { 0xFF, 0xFF, 0xFF, 0xFF };
-  TextElement* path = new TextElement(pwd->c_str(), 25, &white, MONOSPACED);
-  path->position(10, 30);
-  this->elements.push_back(path);
+	// current path at the top
+	SDL_Color white = { 0xFF, 0xFF, 0xFF, 0xFF };
+	TextElement* path = new TextElement(pwd->c_str(), 25, &white, MONOSPACED);
+	path->position(10, 30);
+	this->elements.push_back(path);
 
-  // new folder and file buttons
-  // Button* newFolder = new Button("New Folder", X_BUTTON, true);
-  // newFolder->position(820, 20);
-  // this->elements.push_back(newFolder);
+	// new folder and file buttons
+	// Button* newFolder = new Button("New Folder", X_BUTTON, true);
+	// newFolder->position(820, 20);
+	// this->elements.push_back(newFolder);
 
-  // Button* newFile = new Button("New File", Y_BUTTON, true);
-  // newFile->position(1020, 20);
-  // this->elements.push_back(newFile);
+	// Button* newFile = new Button("New File", Y_BUTTON, true);
+	// newFile->position(1020, 20);
+	// this->elements.push_back(newFile);
 
-  DIR* dirp;
-  struct dirent* entry;
+	DIR* dirp;
+	struct dirent* entry;
 
-  dirp = opendir(pwd->c_str());
+	dirp = opendir(pwd->c_str());
 
-  int count = 0;
+	int count = 0;
 
-  // create a hardcoded "up" link to the parent directory
-  if (*pwd != std::string("/"))
-  {
-    FileCard* card = new FileCard(this);
-    card->position(this->x + (count % 5) * card->width, this->y + 115 + (count / 5) * card->height );
-    card->update(true, ".. (parent)");
-    std::string cwd = dir_name(*pwd);
-    card->path = new std::string(cwd == "" ? "/" : cwd);
-    card->action = std::bind(&FileCard::openMyFile, card);
-    this->elements.push_back(card);
-    count++;
-  }
+	// create a hardcoded "up" link to the parent directory
+	if (*pwd != std::string("/"))
+	{
+		FileCard* card = new FileCard(this);
+		card->position(this->x + (count % 5) * card->width, this->y + 115 + (count / 5) * card->height);
+		card->update(true, ".. (parent)");
+		std::string cwd = dir_name(*pwd);
+		card->path = new std::string(cwd == "" ? "/" : cwd);
+		card->action = std::bind(&FileCard::openMyFile, card);
+		this->elements.push_back(card);
+		count++;
+	}
 
-  if (dirp)
-  {
-      while ((entry = readdir(dirp)) != NULL)
-      {
-        // skip the '.' and '..' entries if they exist in the filesystem
-        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
-          continue;
-        
-        FileCard* card = new FileCard(this);
-        card->position(this->x + (count % 5) * card->width, this->y + 115 + (count / 5) * card->height );
-        card->update(entry->d_type == DT_DIR, entry->d_name);
-        card->path = new std::string(*pwd + (*pwd != "/" ? std::string("/") : "") + entry->d_name);
-        card->action = std::bind(&FileCard::openMyFile, card);
-        this->elements.push_back(card);
-        count++;
-      }
+	if (dirp)
+	{
+		while ((entry = readdir(dirp)) != NULL)
+		{
+			// skip the '.' and '..' entries if they exist in the filesystem
+			if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+				continue;
 
-      closedir(dirp);
-  }
+			FileCard* card = new FileCard(this);
+			card->position(this->x + (count % 5) * card->width, this->y + 115 + (count / 5) * card->height);
+			card->update(entry->d_type == DT_DIR, entry->d_name);
+			card->path = new std::string(*pwd + (*pwd != "/" ? std::string("/") : "") + entry->d_name);
+			card->action = std::bind(&FileCard::openMyFile, card);
+			this->elements.push_back(card);
+			count++;
+		}
+
+		closedir(dirp);
+	}
 }

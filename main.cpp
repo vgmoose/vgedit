@@ -1,6 +1,6 @@
-#include "gui/MainDisplay.hpp"
 #include "gui/EditorView.hpp"
 #include "gui/FileBrowser.hpp"
+#include "gui/MainDisplay.hpp"
 #include "libs/hb-appstore/gui/Element.hpp"
 #include <algorithm>
 
@@ -20,9 +20,9 @@ int main(int argc, char* argv[])
 	// the main input handler
 	InputEvents* events = new InputEvents();
 
-  FileBrowser* fileBrowser = new FileBrowser(START_PATH);
-  display->browser = fileBrowser;
-  display->elements.push_back(fileBrowser);
+	FileBrowser* fileBrowser = new FileBrowser(START_PATH);
+	display->browser = fileBrowser;
+	display->elements.push_back(fileBrowser);
 
 	bool running = true;
 	while (running)
@@ -39,17 +39,17 @@ int main(int argc, char* argv[])
 			viewChanged |= display->process(events);
 			atLeastOneNewEvent = true;
 
-    	// quit on enter/start
-      if (events->released(SELECT_BUTTON))
-      {
-        if (display->editorView == NULL)
-          running = false;
-        else
-        {
-          display->closeEditor();
-          viewChanged = true;
-        }
-      }
+			// quit on enter/start
+			if (events->released(SELECT_BUTTON))
+			{
+				if (display->editorView == NULL)
+					running = false;
+				else
+				{
+					display->closeEditor();
+					viewChanged = true;
+				}
+			}
 		}
 
 		// one more event update if nothing changed or there were no previous events seen
@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
 				SDL_Delay(16 - delayTime);
 		}
 
-    MainDisplay::mainDisplay->showingSplash = false;
+		MainDisplay::mainDisplay->showingSplash = false;
 	}
 
 	my_quit();

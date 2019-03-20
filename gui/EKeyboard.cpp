@@ -6,7 +6,7 @@ EKeyboard::EKeyboard(EditorView* editorView)
 	this->x = 30;
 	this->y = 300;
 
-  this->editorView = editorView;
+	this->editorView = editorView;
 
 	curRow = index = -1;
 
@@ -19,7 +19,7 @@ void EKeyboard::render(Element* parent)
 	if (hidden)
 		return;
 
-	SDL_Rect dimens = { this->x, this->y, this->width + 305, this->height + 140};
+	SDL_Rect dimens = { this->x, this->y, this->width + 305, this->height + 140 };
 
 	this->window = parent->window;
 	this->renderer = parent->renderer;
@@ -28,7 +28,7 @@ void EKeyboard::render(Element* parent)
 	SDL_RenderFillRect(parent->renderer, &dimens);
 
 	for (int y = 0; y < rows.size(); y++)
-		for (int x = 0; x < rows[y]->size()/2+1; x++)
+		for (int x = 0; x < rows[y]->size() / 2 + 1; x++)
 		{
 			SDL_Rect dimens2 = { this->x + kXPad + x * kXOff + y * yYOff, this->y + kYPad + y * ySpacing, keyWidth, keyWidth };
 			SDL_SetRenderDrawColor(parent->renderer, 0xf4, 0xf4, 0xf4, 0xff);
@@ -55,7 +55,7 @@ void EKeyboard::render(Element* parent)
 		}
 		else
 		{
-      SDL_SetRenderDrawColor(parent->renderer, 0xff, 0xff, 0xff, 0xff); // TODO: matches the DEEP_HIGHLIGHT color
+			SDL_SetRenderDrawColor(parent->renderer, 0xff, 0xff, 0xff, 0xff); // TODO: matches the DEEP_HIGHLIGHT color
 			SDL_RenderFillRect(parent->renderer, &dimens2);
 
 			// border
@@ -75,9 +75,9 @@ void EKeyboard::render(Element* parent)
 	//   SDL_SetRenderDrawColor(parent->renderer, 0xff, 0xaa, 0xaa, 0xff);
 	//   SDL_RenderFillRect(parent->renderer, &dimens3);
 	//
-	  SDL_Rect dimens4 = {this->x+sPos, this->y + dHeight, sWidth, textSize};
-	  SDL_SetRenderDrawColor(parent->renderer, 0xf4, 0xf4, 0xf4, 0xff);
-	  SDL_RenderFillRect(parent->renderer, &dimens4);
+	SDL_Rect dimens4 = { this->x + sPos, this->y + dHeight, sWidth, textSize };
+	SDL_SetRenderDrawColor(parent->renderer, 0xf4, 0xf4, 0xf4, 0xff);
+	SDL_RenderFillRect(parent->renderer, &dimens4);
 
 	super::render(this);
 }
@@ -105,7 +105,7 @@ bool EKeyboard::process(InputEvents* event)
 		{
 			// switched into EKeyboard, set to 0 and return
 			curRow = 1;
-      index = 0;
+			index = 0;
 			return true;
 		}
 
@@ -116,20 +116,20 @@ bool EKeyboard::process(InputEvents* event)
 
 			if (curRow < 0) curRow = 0;
 			if (index < 0) index = 0;
-			if (curRow >= rows.size() + 1) curRow = rows.size();    // +1 for bottom "row" (space, language, enter)
-      if (curRow >= rows.size())
-        index = 1;
-      else if (index > rows[curRow]->size()/2)
-        index = rows[curRow]->size()/2;
+			if (curRow >= rows.size() + 1) curRow = rows.size(); // +1 for bottom "row" (space, language, enter)
+			if (curRow >= rows.size())
+				index = 1;
+			else if (index > rows[curRow]->size() / 2)
+				index = rows[curRow]->size() / 2;
 
 			if (event->held(A_BUTTON))
 			{
-        // space bar
-        if (curRow >= rows.size())
-        {
-          just_type(' ');
-          return true;
-        }
+				// space bar
+				if (curRow >= rows.size())
+				{
+					just_type(' ');
+					return true;
+				}
 
 				type(curRow, index);
 			}
@@ -141,12 +141,12 @@ bool EKeyboard::process(InputEvents* event)
 		return false;
 	}
 
-  int extWidth = width + 305;
+	int extWidth = width + 305;
 
 	if (event->isTouchDown() && event->touchIn(this->x, this->y, extWidth, height + 200))
 	{
 		for (int y = 0; y < rows.size(); y++)
-			for (int x = 0; x < rows[y]->size()/2+1; x++)
+			for (int x = 0; x < rows[y]->size() / 2 + 1; x++)
 				if (event->touchIn(this->x + kXPad + x * kXOff + y * yYOff, this->y + kYPad + y * ySpacing, keyWidth, keyWidth))
 				{
 					ret |= true;
@@ -167,7 +167,7 @@ bool EKeyboard::process(InputEvents* event)
 		{
 
 			for (int y = 0; y < rows.size(); y++)
-				for (int x = 0; x < rows[y]->size()/2+1; x++)
+				for (int x = 0; x < rows[y]->size() / 2 + 1; x++)
 					if (event->touchIn(this->x + kXPad + x * kXOff + y * yYOff, this->y + kYPad + y * ySpacing, keyWidth, keyWidth))
 					{
 						ret |= true;
@@ -201,7 +201,7 @@ bool EKeyboard::process(InputEvents* event)
 void EKeyboard::updateSize()
 {
 	this->elements.clear();
-  rows.clear();
+	rows.clear();
 
 	this->width = 900;
 	this->height = (304 / 900.0) * width;
@@ -257,42 +257,42 @@ void EKeyboard::updateSize()
 	int textSize2 = (int)((16 / 400.0) * width);
 
 	// text for space, enter, and symbols
-  SDL_Color grayish = { 0x55, 0x55, 0x55, 0xff };
-  TextElement* spaceText = new TextElement("space", 30, &grayish);
-  SDL_Rect d4 = {this->x+sPos, this->y + dHeight, sWidth, textSize};   // todo: extract out hardcoded rects like this
-  spaceText->position(d4.x + d4.w/2 - spaceText->width/2 - 15, 345);
-  this->elements.push_back(spaceText);
+	SDL_Color grayish = { 0x55, 0x55, 0x55, 0xff };
+	TextElement* spaceText = new TextElement("space", 30, &grayish);
+	SDL_Rect d4 = { this->x + sPos, this->y + dHeight, sWidth, textSize }; // todo: extract out hardcoded rects like this
+	spaceText->position(d4.x + d4.w / 2 - spaceText->width / 2 - 15, 345);
+	this->elements.push_back(spaceText);
 
-  TextElement* enterText = new TextElement("enter", 30, &grayish);
-  SDL_Rect d3 = {this->x+dPos + 1000, this->y + dHeight + 100, dWidth, textSize};   // todo: extract out hardcoded rects like this
-  enterText->position(d3.x + d3.w/2 - enterText->width/2, 300);
-  this->elements.push_back(enterText);
+	TextElement* enterText = new TextElement("enter", 30, &grayish);
+	SDL_Rect d3 = { this->x + dPos + 1000, this->y + dHeight + 100, dWidth, textSize }; // todo: extract out hardcoded rects like this
+	enterText->position(d3.x + d3.w / 2 - enterText->width / 2, 300);
+	this->elements.push_back(enterText);
 
-  TextElement* symText = new TextElement("sym", 30, &grayish);
-  SDL_Rect d5 = {this->x+dPos, this->y + dHeight + 100, dWidth, textSize};   // todo: extract out hardcoded rects like this
-  symText->position(d5.x + d5.w/2 - symText->width/2, 300);
-  this->elements.push_back(symText);
+	TextElement* symText = new TextElement("sym", 30, &grayish);
+	SDL_Rect d5 = { this->x + dPos, this->y + dHeight + 100, dWidth, textSize }; // todo: extract out hardcoded rects like this
+	symText->position(d5.x + d5.w / 2 - symText->width / 2, 300);
+	this->elements.push_back(symText);
 }
 
 void EKeyboard::type(int y, int x)
 {
 	const char input = (*(rows[y]))[x * 2];
-  auto line = editorView->mainTextField->selected_y;
-  auto pos = editorView->mainTextField->selected_x;
-  editorView->editor->type(line, pos, input);
+	auto line = editorView->mainTextField->selected_y;
+	auto pos = editorView->mainTextField->selected_x;
+	editorView->editor->type(line, pos, input);
 
-  editorView->mainTextField->selected_x++;
-  editorView->syncText();
+	editorView->mainTextField->selected_x++;
+	editorView->syncText();
 }
 
 void EKeyboard::just_type(const char input)
 {
-  auto line = editorView->mainTextField->selected_y;
-  auto pos = editorView->mainTextField->selected_x;
-  editorView->editor->type(line, pos, input);
+	auto line = editorView->mainTextField->selected_y;
+	auto pos = editorView->mainTextField->selected_x;
+	editorView->editor->type(line, pos, input);
 
-  editorView->mainTextField->selected_x++;
-  editorView->syncText();
+	editorView->mainTextField->selected_x++;
+	editorView->syncText();
 }
 
 void EKeyboard::backspace()
@@ -308,44 +308,43 @@ void EKeyboard::space()
 
 void EKeyboard::updateView()
 {
-
 }
 
 void EKeyboard::generateEKeyboard()
 {
-  int count = 0;
-  string keys;
+	int count = 0;
+	string keys;
 
-  if (mode == 0)
-    keys = string((shiftOn || capsOn) ? upper_keys : lower_keys);
-  else
-  {
-    // depending on the mode, grab a bunch of characters from unicode starting from
-    // upside exclamation mark (U+00A1) and onward https://unicode-table.com/en/
-    // TODO: don't hardcode amount here, or hardcode a better one
-    int offset = 47*(mode - 1) + 0x00a1;
-    char chars[47 + (mode == 2)];
-    for (int x=0; x<47+(mode==2); x++)
-    {
-      chars[x] = offset + x;
-    }
+	if (mode == 0)
+		keys = string((shiftOn || capsOn) ? upper_keys : lower_keys);
+	else
+	{
+		// depending on the mode, grab a bunch of characters from unicode starting from
+		// upside exclamation mark (U+00A1) and onward https://unicode-table.com/en/
+		// TODO: don't hardcode amount here, or hardcode a better one
+		int offset = 47 * (mode - 1) + 0x00a1;
+		char chars[47 + (mode == 2)];
+		for (int x = 0; x < 47 + (mode == 2); x++)
+		{
+			chars[x] = offset + x;
+		}
 
-    keys = string(chars);
-  }
+		keys = string(chars);
+	}
 
-  breaks[3] += (mode==2); // one more key for bottom row of mode 2
+	breaks[3] += (mode == 2); // one more key for bottom row of mode 2
 
-  for (int& end : breaks)
-  {
-    string* row = new string(keys.substr(count, end));
-    for (int x=1; x<row->size(); x+=2)
-    {
-      row->insert(row->begin() + x, ' ');
-    }
+	for (int& end : breaks)
+	{
+		string* row = new string(keys.substr(count, end));
+		for (int x = 1; x < row->size(); x += 2)
+		{
+			row->insert(row->begin() + x, ' ');
+		}
 
-    rows.push_back(row);
-    count += end;
-  }
+		rows.push_back(row);
+		count += end;
+	}
 }
 
 EKeyboard::~EKeyboard()

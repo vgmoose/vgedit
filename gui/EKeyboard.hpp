@@ -15,24 +15,24 @@ public:
 
 	// setup field variables
 	void updateSize();
-  void just_type(const char input);
+	void just_type(const char input);
 
-  EditorView * editorView = NULL;
+	EditorView* editorView = NULL;
 
 	// information representing a default qwerty EKeyboard, lower and upper
-  // alongside default EKeyboards will also be: tab, caps lock, return, delete, and shifts
-  const char* lower_keys = "`1234567890-=qwertyuiop[]\\asdfghjkl;'zxcvbnm,./";
-  const char* upper_keys = "~!@#$\%^&*()_+QWERTYUIOP{}|ASDFGHJKL:\"ZXCVBNM<>?";
-  int breaks[4] = { 13, 13, 11, 10 };
+	// alongside default EKeyboards will also be: tab, caps lock, return, delete, and shifts
+	const char* lower_keys = "`1234567890-=qwertyuiop[]\\asdfghjkl;'zxcvbnm,./";
+	const char* upper_keys = "~!@#$\%^&*()_+QWERTYUIOP{}|ASDFGHJKL:\"ZXCVBNM<>?";
+	int breaks[4] = { 13, 13, 11, 10 };
 
-  // the rest of the keys will be dynamically drawn by going through hex iterations
-  // these EKeyboards will fill the extra space with more characters
+	// the rest of the keys will be dynamically drawn by going through hex iterations
+	// these EKeyboards will fill the extra space with more characters
 
 	std::vector<std::string*> rows;
 
-  bool shiftOn = false;
-  bool capsOn = false;
-  int mode = 0;   // the mode of which EKeyboard type we're on (first is special and has shift)
+	bool shiftOn = false;
+	bool capsOn = false;
+	int mode = 0; // the mode of which EKeyboard type we're on (first is special and has shift)
 
 	// the currently selected row and index
 	int curRow = -1;
@@ -66,5 +66,5 @@ public:
 	void backspace();
 	void type(int y, int x);
 	void updateView();
-  void generateEKeyboard();
+	void generateEKeyboard();
 };

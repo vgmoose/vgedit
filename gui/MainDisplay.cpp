@@ -1,11 +1,11 @@
 #include "MainDisplay.hpp"
-#include "FileBrowser.hpp"
 #include "EditorView.hpp"
+#include "FileBrowser.hpp"
 
 #if defined(SWITCH)
-	#include <switch.h>
+#include <switch.h>
 #elif defined(__WIIU__)
-  #include <romfs-wiiu.h>
+#include <romfs-wiiu.h>
 #endif
 
 SDL_Renderer* MainDisplay::mainRenderer = NULL;
@@ -36,7 +36,7 @@ MainDisplay::MainDisplay()
 		return;
 	}
 
-		// initialize teh romfs for switch/wiiu
+	// initialize teh romfs for switch/wiiu
 #if defined(SWITCH) || defined(__WIIU__)
 	romfsInit();
 #endif
@@ -65,32 +65,31 @@ MainDisplay::MainDisplay()
 
 void MainDisplay::openFile(bool folder, std::string* path)
 {
-  // don't allow a file to be opened if we're already showing an editor
-  if (editorView != NULL)
-    return;
+	// don't allow a file to be opened if we're already showing an editor
+	if (editorView != NULL)
+		return;
 
-  if (folder)
-  {
-    browser->update_path(path->c_str());
-    browser->y = 0;
-    browser->listfiles();
-  }
-  else
-  {   
-    Editor* editor = new Editor(path->c_str());
-    editorView = new EditorView(editor);
-    this->elements.push_back(editorView);
-  }
+	if (folder)
+	{
+		browser->update_path(path->c_str());
+		browser->y = 0;
+		browser->listfiles();
+	}
+	else
+	{
+		Editor* editor = new Editor(path->c_str());
+		editorView = new EditorView(editor);
+		this->elements.push_back(editorView);
+	}
 }
-
 
 bool MainDisplay::process(InputEvents* event)
 {
-  if (MainDisplay::subscreen)
-    return MainDisplay::subscreen->process(event);
+	if (MainDisplay::subscreen)
+		return MainDisplay::subscreen->process(event);
 
-  // keep processing child elements
-  return super::process(event) || showingSplash;
+	// keep processing child elements
+	return super::process(event) || showingSplash;
 }
 
 void MainDisplay::render(Element* parent)
@@ -114,9 +113,9 @@ void MainDisplay::render(Element* parent)
 
 void MainDisplay::closeEditor()
 {
-  elements.erase(elements.begin() + 1);  // second element should be the editor (TODO: something smarter)
-  delete editorView;
-  editorView = NULL;
+	elements.erase(elements.begin() + 1); // second element should be the editor (TODO: something smarter)
+	delete editorView;
+	editorView = NULL;
 }
 
 void MainDisplay::background(int r, int g, int b)

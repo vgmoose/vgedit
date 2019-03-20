@@ -16,18 +16,18 @@ public:
 	void render(Element* parent);
 	void background(int r, int g, int b);
 	void update();
-  void closeEditor();
-  void openFile(bool folder, std::string* path);
+	void closeEditor();
+	void openFile(bool folder, std::string* path);
 
 	TextElement* notice = NULL;
-  FileBrowser* browser = NULL;
-  EditorView* editorView = NULL;
+	FileBrowser* browser = NULL;
+	EditorView* editorView = NULL;
 
 	static SDL_Renderer* mainRenderer;
 	static Element* subscreen;
 	static MainDisplay* mainDisplay;
 
-  char path_string[2048];
+	char path_string[2048];
 
 	ImageCache* imageCache = NULL;
 	bool error = false;
