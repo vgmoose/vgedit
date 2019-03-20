@@ -73,6 +73,7 @@ void MainDisplay::openFile(bool folder, std::string* path)
 	{
 		browser->update_path(path->c_str());
 		browser->y = 0;
+		browser->selected = 0;
 		browser->listfiles();
 	}
 	else
