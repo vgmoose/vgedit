@@ -1,6 +1,6 @@
 #include "FileCard.hpp"
-#include "../libs/hb-appstore/gui/ImageElement.hpp"
-#include "../libs/hb-appstore/gui/TextElement.hpp"
+#include "../libs/chesto/src/ImageElement.hpp"
+#include "../libs/chesto/src/TextElement.hpp"
 #include "MainDisplay.hpp"
 
 FileCard::FileCard(Element* parent)
@@ -28,7 +28,7 @@ void FileCard::update(bool folder, const char* name)
 
 void FileCard::openMyFile()
 {
-	MainDisplay::mainDisplay->openFile(folder, path);
+	((MainDisplay*)RootDisplay::mainDisplay)->openFile(folder, path);
 }
 
 void FileCard::render(Element* parent)

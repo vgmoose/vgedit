@@ -21,7 +21,6 @@ case "${PLATFORM}" in
     sudo apt-get -y install libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev libsdl2-gfx-dev zlib1g-dev gcc g++
     ;;
   switch)   # currently libnx
-      rm ./libs/hb-appstore/gui/MainDisplay.cpp
       setup_dkp_repo
       sudo dkp-pacman --noconfirm -S devkitA64 libnx switch-tools switch-curl switch-bzip2 switch-freetype switch-libjpeg-turbo switch-sdl2 switch-sdl2_gfx switch-sdl2_image switch-sdl2_ttf switch-zlib switch-libpng switch-mesa
     ;;
@@ -39,7 +38,6 @@ case "${PLATFORM}" in
       sudo dkp-pacman -Syu
 
       sudo dkp-pacman --noconfirm -S wut-linux wiiu-sdl2 devkitPPC wiiu-libromfs wiiu-sdl2_gfx wiiu-sdl2_image wiiu-sdl2_ttf ppc-zlib ppc-bzip2 ppc-freetype ppc-libpng wiiu-curl-headers
-      cd libs/hb-appstore/gui && rm Sidebar.*pp AppDetails.*pp AppList.*pp AboutScreen.*pp AppCard.*pp Feedback.*pp ProgressBar.*pp MainDisplay.*pp Keyboard.*pp || true
     ;;
 esac
 

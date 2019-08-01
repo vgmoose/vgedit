@@ -1,4 +1,4 @@
-#include "../libs/hb-appstore/gui/TextElement.hpp"
+#include "../libs/chesto/src/TextElement.hpp"
 
 class Toolbar : public Element
 {

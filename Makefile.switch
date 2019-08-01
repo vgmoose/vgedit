@@ -1,4 +1,4 @@
-GUI :=		libs/hb-appstore/gui/
+GUI :=		libs/chesto/src/
 RAPIDJSON :=	libs/hb-appstore/libs/get/src/libs/rapidjson/include
 
 #---------------------------------------------------------------------------------
@@ -132,7 +132,7 @@ all: $(BUILD)
 
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
-	@rm ./libs/hb-appstore/gui/MainDisplay.cpp || true
+	@rm ./libs/chesto/src/MainDisplay.cpp || true
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile.switch
 
 #---------------------------------------------------------------------------------

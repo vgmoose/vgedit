@@ -1,6 +1,6 @@
 #include "FileBrowser.hpp"
-#include "../libs/hb-appstore/gui/Button.hpp"
-#include "../libs/hb-appstore/gui/TextElement.hpp"
+#include "../libs/chesto/src/Button.hpp"
+#include "../libs/chesto/src/TextElement.hpp"
 #include "FileCard.hpp"
 #include "MainDisplay.hpp"
 #include <dirent.h>
@@ -19,7 +19,7 @@ FileBrowser::FileBrowser(const char* pwd)
 
 bool FileBrowser::process(InputEvents* events)
 {
-	if (MainDisplay::mainDisplay->editorView != NULL)
+	if (((MainDisplay*)RootDisplay::mainDisplay)->editorView != NULL)
 		return false;
 
 	if (events->isTouchDown())
@@ -71,7 +71,7 @@ bool FileBrowser::process(InputEvents* events)
 
 void FileBrowser::render(Element* parent)
 {
-	if (MainDisplay::mainDisplay->editorView != NULL)
+	if (((MainDisplay*)RootDisplay::mainDisplay)->editorView != NULL)
 		return;
 
 	if (selected >= 0)

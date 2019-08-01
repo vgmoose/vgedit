@@ -1,7 +1,7 @@
 BASEDIR	:= $(dir $(firstword $(MAKEFILE_LIST)))
 VPATH	:= $(BASEDIR)
 
-GUI :=		libs/hb-appstore/gui/
+GUI :=		libs/chesto/src/
 GET :=		libs/hb-appstore/libs/get/src
 
 #---------------------------------------------------------------------------------

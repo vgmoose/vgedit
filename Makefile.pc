@@ -1,14 +1,12 @@
-GUI :=		libs/hb-appstore/gui/Button.cpp libs/hb-appstore/gui/InputEvents.cpp libs/hb-appstore/gui/Element.cpp libs/hb-appstore/gui/TextElement.cpp libs/hb-appstore/gui/ImageElement.cpp libs/hb-appstore/gui/ImageCache.cpp libs/hb-appstore/gui/ListElement.cpp
+GUI :=		libs/chesto/src/*.cpp
 
-RAPIDJSON :=	libs/hb-appstore/libs/get/src/libs/rapidjson/include
-
-BREW_FLAGS := -L /usr/local/Cellar/sdl2/2.0.9/lib -L /usr/local/Cellar/sdl2_gfx/1.0.4/lib -L /usr/local/Cellar/sdl2_image/2.0.4/lib -L /usr/local/Cellar/sdl2_mixer/2.0.4/lib -L /usr/local/Cellar/sdl2_ttf/2.0.14/lib 
+BREW_FLAGS := -L /usr/local/Cellar/sdl2/2.0.9/lib -L /usr/local/Cellar/sdl2_gfx/1.0.4/lib -L /usr/local/Cellar/sdl2_image/2.0.4/lib -L /usr/local/Cellar/sdl2_ttf/2.0.14/lib 
 
 all:
-	g++ -g -std=gnu++14 *.cpp gui/*.cpp edit/*.cpp ${GUI} -lSDL2 -lSDL2main -lSDL2_image -lSDL2_ttf -lSDL2_gfx -I /usr/local/include -I ${RAPIDJSON} -lcurl -lz -o vgedit.exe -fstack-protector-all -DPC
+	g++ -g -std=gnu++14 *.cpp gui/*.cpp edit/*.cpp ${GUI} -lSDL2 -lSDL2main -lSDL2_image -lSDL2_ttf -lSDL2_gfx -I /usr/local/include -lz -o vgedit.exe -fstack-protector-all -DPC
 
 macos:
-	g++ -g -std=gnu++14 *.cpp gui/*.cpp edit/*.cpp ${GUI} -lSDL2 -lSDL2main -lSDL2_gfx -lSDL2_image -lSDL2_ttf -framework Cocoa -I /usr/local/include -I ${RAPIDJSON} -lcurl -lz -o vgedit.exe -fstack-protector-all -O0 -DPC ${BREW_FLAGS}
+	g++ -g -std=gnu++14 *.cpp gui/*.cpp edit/*.cpp ${GUI} -lSDL2 -lSDL2main -lSDL2_gfx -lSDL2_image -lSDL2_ttf -framework Cocoa -I /usr/local/include -lz -o vgedit.exe -fstack-protector-all -O0 -DPC ${BREW_FLAGS}
 
 clean:
 	rm *.o *.bin

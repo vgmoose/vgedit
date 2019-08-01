@@ -1,3 +1,6 @@
 [submodule "libs/hb-appstore"]
 	path = libs/hb-appstore
 	url = https://github.com/vgmoose/hb-appstore.git
+[submodule "libs/chesto"]
+	path = libs/chesto
+	url = https://gitlab.com/4TU/chesto.git

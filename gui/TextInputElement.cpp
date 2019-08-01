@@ -28,7 +28,7 @@ void TextInputElement::updateText(const char* text)
 	SDL_Color color = { 0x00, 0x00, 0x00 };
 	SDL_Surface* surf = TTF_RenderText_Blended_Wrapped(font, text, color, 1260);
 
-	SDL_Texture* texture = SDL_CreateTextureFromSurface(MainDisplay::mainRenderer, surf);
+	SDL_Texture* texture = SDL_CreateTextureFromSurface(RootDisplay::mainRenderer, surf);
 	SDL_FreeSurface(surf);
 
 	textSurface = texture;
@@ -79,5 +79,5 @@ void TextInputElement::render(Element* parent)
 		SDL_RenderFillRect(parent->renderer, &cursor_pos);
 	}
 
-	SDL_RenderCopy(MainDisplay::mainRenderer, this->textSurface, NULL, &textLocation);
+	SDL_RenderCopy(RootDisplay::mainRenderer, this->textSurface, NULL, &textLocation);
 }

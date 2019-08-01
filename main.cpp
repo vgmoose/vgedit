@@ -1,7 +1,7 @@
 #include "gui/EditorView.hpp"
 #include "gui/FileBrowser.hpp"
 #include "gui/MainDisplay.hpp"
-#include "libs/hb-appstore/gui/Element.hpp"
+#include "libs/chesto/src/Element.hpp"
 #include <algorithm>
 
 #if defined(PC)
@@ -75,10 +75,10 @@ int main(int argc, char* argv[])
 				SDL_Delay(16 - delayTime);
 		}
 
-		MainDisplay::mainDisplay->showingSplash = false;
+		((MainDisplay*)RootDisplay::mainDisplay)->showingSplash = false;
 	}
 
-	my_quit();
+	quit();
 
 	return 0;
 }
