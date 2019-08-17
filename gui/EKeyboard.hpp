@@ -30,6 +30,14 @@ public:
 
 	std::vector<std::string*> rows;
 
+	inline int rowCount() {
+		return (int)rows.size();
+	}
+
+	inline int rowLength(int row) {
+		return (int)rows[row]->size() / 2;
+	}
+
 	bool shiftOn = false;
 	bool capsOn = false;
 	int mode = 0; // the mode of which EKeyboard type we're on (first is special and has shift)
@@ -50,8 +58,11 @@ public:
 	int dPos = 0;
 	int dHeight = 0;
 	int sPos = 0;
+	int enterPos = 0;
+	int enterHeight = 0;
 	int dWidth = 0;
 	int sWidth = 0;
+	int enterWidth = 0;
 
 	// positions of key location offset information
 	int kXPad = 0;

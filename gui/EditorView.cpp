@@ -32,11 +32,11 @@ void EditorView::reset_bounds()
 	int selected_y = mainTextField->selected_y;
 
 	selected_y = selected_y < 0 ? 0 : selected_y;
-	selected_y = selected_y > editor->lines.size() - 1 ? editor->lines.size() - 1 : selected_y;
+	selected_y = selected_y > editor->lineCount() - 1 ? editor->lineCount() - 1 : selected_y;
 
 	// loop around in x direction
-	selected_x = selected_x < 0 ? editor->lines[selected_y].size() - 1 : selected_x;
-	selected_x = selected_x > editor->lines[selected_y].size() - 1 ? 0 : selected_x;
+	selected_x = selected_x < 0 ? editor->lineLength(selected_y) - 1 : selected_x;
+	selected_x = selected_x > editor->lineLength(selected_y) - 1 ? 0 : selected_x;
 
 	mainTextField->selected_x = selected_x;
 	mainTextField->selected_y = selected_y;
@@ -46,10 +46,10 @@ void EditorView::reset_bounds()
 
 	// adjust the bounds of the selection
 	selected_height = selected_height < 1 ? 1 : selected_height;
-	selected_height = selected_height > editor->lines.size() - selected_y ? editor->lines.size() - selected_y : selected_height;
+	selected_height = selected_height > editor->lineCount() - selected_y ? editor->lineCount() - selected_y : selected_height;
 
 	selected_width = selected_width < 1 ? 1 : selected_width;
-	selected_width = selected_width > editor->lines[selected_y].size() - selected_x ? editor->lines[selected_y].size() - selected_x : selected_width;
+	selected_width = selected_width > editor->lineLength(selected_y) - selected_x ? editor->lineLength(selected_y) - selected_x : selected_width;
 
 	mainTextField->selected_width = selected_width;
 	mainTextField->selected_height = selected_height;
@@ -143,8 +143,17 @@ bool EditorView::process(InputEvents* e)
 			}
 			else
 			{
-				// TODO: delete the last newline on the previous line (joining this line and the earlier one)
-				return false;
+				// delete the last newline on the previous line (joining this line and the earlier one)
+				if (mainTextField->selected_y > 0)
+				{
+					mainTextField->selected_y--;
+					mainTextField->selected_x = editor->lineLength(mainTextField->selected_y) - 1;
+				}
+				else
+				{
+					// nothing to delete
+					return false;
+				}
 			}
 		}
 

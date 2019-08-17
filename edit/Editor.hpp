@@ -17,6 +17,18 @@ public:
 	bool save();
 	bool type(int line, int pos, const char input);
 	bool del(int line, int pos, int size);
+	bool newline(int line, int pos);
+
+	inline int lineCount()
+	{
+		return (int)lines.size();
+	}
+
+	inline int lineLength(int line)
+	{
+		// includes endline
+		return (int)lines[line].size();
+	}
 
 	// all lines in current file
 	vector<vector<char>> lines;

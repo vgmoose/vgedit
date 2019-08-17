@@ -27,24 +27,37 @@ void EKeyboard::render(Element* parent)
 	SDL_SetRenderDrawColor(parent->renderer, 0xf9, 0xf9, 0xf9, 0xFF);
 	SDL_RenderFillRect(parent->renderer, &dimens);
 
-	for (int y = 0; y < rows.size(); y++)
-		for (int x = 0; x < rows[y]->size() / 2 + 1; x++)
+	for (int y = 0; y < rowCount(); y++)
+		for (int x = 0; x < rowLength(y) + 1; x++)
 		{
 			SDL_Rect dimens2 = { this->x + kXPad + x * kXOff + y * yYOff, this->y + kYPad + y * ySpacing, keyWidth, keyWidth };
 			SDL_SetRenderDrawColor(parent->renderer, 0xf4, 0xf4, 0xf4, 0xff);
 			SDL_RenderFillRect(parent->renderer, &dimens2);
 		}
 
+	SDL_Rect dimensSpace = { this->x + sPos, this->y + dHeight, sWidth, textSize };
+	SDL_Rect dimensEnter = { this->x + enterPos, this->y + enterHeight, enterWidth, (int)(1.5 * textSize) };
+
 	// if there's a highlighted piece set, color it in
 	if (curRow >= 0 || index >= 0)
 	{
 		SDL_Rect dimens2 = { this->x + kXPad + index * kXOff + curRow * yYOff, this->y + kYPad + curRow * ySpacing, keyWidth, keyWidth };
 
-		// if we're on SPACE, expand the dimens width of the highllighted button
-		if (curRow >= rows.size())
+		if (curRow >= rowCount())
 		{
-			SDL_Rect dimens4 = { this->x + sPos, this->y + dHeight, sWidth, textSize };
-			dimens2 = dimens4;
+			switch (index)
+			{
+				case 1:
+					// if we're on SPACE, expand the dimens width of the highlighted button
+					dimens2 = dimensSpace;
+					break;
+				case 2:
+					// if we're on ENTER, expand the dimens width of the highlighted button
+					dimens2 = dimensEnter;
+					break;
+				default:
+					break;
+			}
 		}
 
 		// draw the currently selected tile if these index things are set
@@ -75,9 +88,9 @@ void EKeyboard::render(Element* parent)
 	//   SDL_SetRenderDrawColor(parent->renderer, 0xff, 0xaa, 0xaa, 0xff);
 	//   SDL_RenderFillRect(parent->renderer, &dimens3);
 	//
-	SDL_Rect dimens4 = { this->x + sPos, this->y + dHeight, sWidth, textSize };
 	SDL_SetRenderDrawColor(parent->renderer, 0xf4, 0xf4, 0xf4, 0xff);
-	SDL_RenderFillRect(parent->renderer, &dimens4);
+	SDL_RenderFillRect(parent->renderer, &dimensSpace);
+	SDL_RenderFillRect(parent->renderer, &dimensEnter);
 
 	super::render(this);
 }
@@ -111,23 +124,65 @@ bool EKeyboard::process(InputEvents* event)
 
 		if (event->isKeyDown())
 		{
+			int lastRow = curRow;
 			curRow += (event->held(DOWN_BUTTON) - event->held(UP_BUTTON));
 			index += (event->held(RIGHT_BUTTON) - event->held(LEFT_BUTTON));
 
 			if (curRow < 0) curRow = 0;
 			if (index < 0) index = 0;
-			if (curRow >= rows.size() + 1) curRow = rows.size(); // +1 for bottom "row" (space, language, enter)
-			if (curRow >= rows.size())
-				index = 1;
-			else if (index > rows[curRow]->size() / 2)
-				index = rows[curRow]->size() / 2;
+			if (curRow >= rowCount() + 1) curRow = rowCount(); // +1 for bottom "row" (space, language, enter)
+			if (curRow == rowCount())
+			{
+				// go to space key if last index is in the middle of row
+				if (lastRow < curRow && index > 0 && index < rowLength(lastRow))
+				{
+ 					index = 1;
+				}
+
+				// TODO: implement sym key
+				// space key
+				if (index < 1) index = 1;
+				// enter key
+				if (index > 2) index = 2;
+			}
+			else
+			{
+				if (index > rowLength(curRow))
+					index = rowLength(curRow);
+
+				if (lastRow == rowCount()) {
+					switch (index)
+					{
+						case 1: // space
+							// go to middle of current row
+							index = rowLength(curRow) / 2;
+							break;
+						case 2: // enter
+							// go to end of current row
+							index = rowLength(curRow);
+							break;
+						default:
+							break;
+					}
+				}
+			}
 
 			if (event->held(A_BUTTON))
 			{
-				// space bar
-				if (curRow >= rows.size())
+				// space bar and enter key
+				if (curRow >= rowCount())
 				{
-					just_type(' ');
+					switch (index)
+					{
+						case 1:
+							just_type(' ');
+							break;
+						case 2:
+							just_type('\n');
+							break;
+						default:
+							break;
+					}
 					return true;
 				}
 
@@ -145,8 +200,8 @@ bool EKeyboard::process(InputEvents* event)
 
 	if (event->isTouchDown() && event->touchIn(this->x, this->y, extWidth, height + 200))
 	{
-		for (int y = 0; y < rows.size(); y++)
-			for (int x = 0; x < rows[y]->size() / 2 + 1; x++)
+		for (int y = 0; y < rowCount(); y++)
+			for (int x = 0; x < rowLength(y) + 1; x++)
 				if (event->touchIn(this->x + kXPad + x * kXOff + y * yYOff, this->y + kYPad + y * ySpacing, keyWidth, keyWidth))
 				{
 					ret |= true;
@@ -166,8 +221,8 @@ bool EKeyboard::process(InputEvents* event)
 		if (event->touchIn(this->x, this->y, extWidth, height + 200))
 		{
 
-			for (int y = 0; y < rows.size(); y++)
-				for (int x = 0; x < rows[y]->size() / 2 + 1; x++)
+			for (int y = 0; y < rowCount(); y++)
+				for (int x = 0; x < rowLength(y) + 1; x++)
 					if (event->touchIn(this->x + kXPad + x * kXOff + y * yYOff, this->y + kYPad + y * ySpacing, keyWidth, keyWidth))
 					{
 						ret |= true;
@@ -184,6 +239,12 @@ bool EKeyboard::process(InputEvents* event)
 			{
 				ret |= true;
 				just_type(' ');
+			}
+
+			if (event->touchIn(this->x + enterPos, this->y + enterHeight, enterWidth, textSize))
+			{
+				ret |= true;
+				just_type('\n');
 			}
 
 			if (ret)
@@ -228,13 +289,16 @@ void EKeyboard::updateSize()
 
 	this->textSize = 0.9375 * keyWidth;
 
-	// delete and space key dimensions
+	// delete, space and enter key dimensions
 	dPos = (int)((13 / 400.0) * width);
 	dHeight = (int)((85 / 135.0) * height) + 145;
 	sPos = (int)((150 / 400.0) * width);
+	enterPos = dPos + 1000;
+	enterHeight = dHeight - 34;
 
 	dWidth = (int)(1.4125 * textSize);
 	sWidth = (int)(7.5 * textSize);
+	enterWidth = (int)(2.25 * textSize);
 
 	// set up the keys vector based on the current EKeyboard selection
 	generateEKeyboard();
@@ -242,7 +306,7 @@ void EKeyboard::updateSize()
 	SDL_Color gray = { 0x52, 0x52, 0x52, 0xff };
 
 	// go through and draw each of the three rows at the right position
-	for (int x = 0; x < rows.size(); x++)
+	for (int x = 0; x < rowCount(); x++)
 	{
 		TextElement* rowText = new TextElement(rows[x]->c_str(), textSize, &gray, true);
 		rowText->position(kXPad + x * kXOff, kYPad + x * kYOff);
@@ -250,11 +314,11 @@ void EKeyboard::updateSize()
 	}
 
 	// these are local variables, similar to how the other ones are global events
-	int dPos2 = (int)((20 / 400.0) * width);
-	int dHeight2 = (int)((90 / 135.0) * height);
-	int sPos2 = (int)((330 / 400.0) * width);
+	// int dPos2 = (int)((20 / 400.0) * width);
+	// int dHeight2 = (int)((90 / 135.0) * height);
+	// int sPos2 = (int)((330 / 400.0) * width);
 
-	int textSize2 = (int)((16 / 400.0) * width);
+	// int textSize2 = (int)((16 / 400.0) * width);
 
 	// text for space, enter, and symbols
 	SDL_Color grayish = { 0x55, 0x55, 0x55, 0xff };
@@ -264,8 +328,8 @@ void EKeyboard::updateSize()
 	this->elements.push_back(spaceText);
 
 	TextElement* enterText = new TextElement("enter", 30, &grayish);
-	SDL_Rect d3 = { this->x + dPos + 1000, this->y + dHeight + 100, dWidth, textSize }; // todo: extract out hardcoded rects like this
-	enterText->position(d3.x + d3.w / 2 - enterText->width / 2, 300);
+	SDL_Rect d3 = { this->x + enterPos, this->y + enterHeight, enterWidth, textSize }; // todo: extract out hardcoded rects like this
+	enterText->position(d3.x + d3.w / 2 - enterText->width / 2 - 30, 327);
 	this->elements.push_back(enterText);
 
 	TextElement* symText = new TextElement("sym", 30, &grayish);
@@ -289,9 +353,18 @@ void EKeyboard::just_type(const char input)
 {
 	auto line = editorView->mainTextField->selected_y;
 	auto pos = editorView->mainTextField->selected_x;
-	editorView->editor->type(line, pos, input);
 
-	editorView->mainTextField->selected_x++;
+	if (input == '\n')
+	{
+		editorView->editor->newline(line, pos);
+		editorView->mainTextField->selected_y++;
+	}
+	else
+	{
+		editorView->editor->type(line, pos, input);
+		editorView->mainTextField->selected_x++;
+	}
+
 	editorView->syncText();
 }
 
@@ -337,7 +410,7 @@ void EKeyboard::generateEKeyboard()
 	for (int& end : breaks)
 	{
 		string* row = new string(keys.substr(count, end));
-		for (int x = 1; x < row->size(); x += 2)
+		for (int x = 1; x < (int)row->size(); x += 2)
 		{
 			row->insert(row->begin() + x, ' ');
 		}
