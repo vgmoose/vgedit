@@ -3,6 +3,8 @@
 class Toolbar : public Element
 {
 public:
+	const static int MAX_PATH_LENGTH = 48;
+
 	Toolbar(const char* path);
 	void setModified(bool modified);
 	void render(Element* parent);
@@ -11,7 +13,7 @@ public:
 	TextElement* actions = NULL;
 	TextElement* keyActions = NULL;
 
-	const char* path = NULL;
+	char path[MAX_PATH_LENGTH + 1];
 	bool modified = true;
 	bool keyboardShowing = false;
 };

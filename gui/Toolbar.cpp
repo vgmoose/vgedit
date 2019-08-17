@@ -2,10 +2,16 @@
 
 Toolbar::Toolbar(const char* path)
 {
-	pathE = new TextElement(path, 20, 0, MONOSPACED);
+	if (strlen(path) > MAX_PATH_LENGTH) {
+		strcpy(this->path, "...");
+		strcpy(this->path + 3, path + strlen(path) - (MAX_PATH_LENGTH - 3));
+	} else {
+		strcpy(this->path, path);
+	}
+
+	pathE = new TextElement(this->path, 20, 0, MONOSPACED);
 	pathE->position(10, 10);
 	elements.push_back(pathE);
-	this->path = path;
 
 	SDL_Color white = { 0xFF, 0xFF, 0xFF, 0xFF };
 
