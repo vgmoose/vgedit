@@ -63,8 +63,8 @@ void TextInputElement::render(Element* parent)
 	int w = letter_width, h = letter_height;
 
 	// draw the currently selected block
-	SDL_Rect cursor_pos = { textLocation.x + selected_x * w - 2, textLocation.y + selected_y * (h + 2) - 2,
-		selected_width * w + 4, selected_height * h + 4 };
+	SDL_Rect cursor_pos = { textLocation.x + selected_x * w - 2, textLocation.y + selected_y * h - 2,
+		selected_width * w + 4, selected_height * h + 2 };
 
 	if (insertMode) // TODO: use block cursor for overwrite mode too
 	{
