@@ -50,6 +50,10 @@ This software is licensed the GPLv3
 
 Folder and file icons by [Alfredo Hernandez](https://www.flaticon.com/authors/alfredo-hernandez) under the Flaticon Basic License
 
+#### Contributors
+- [vgmoose](https://github.com/vgmoose)
+- [satelliteseeker](https://github.com/satelliteseeker)
+
 ### Contributing
 It's not required, but running a clang-format before making a PR helps to clean up styling issues:
 ```
