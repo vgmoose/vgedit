@@ -1,5 +1,7 @@
-# vgedit [![travis](https://travis-ci.org/vgmoose/vgedit.svg?branch=master)](https://travis-ci.org/vgmoose/vgedit)
-An SDL2 text editor designed for easy use on a console using a controller or touch screen.
+# vgedit
+[![GPLv3 License](https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat-square)](https://opensource.org/licenses/GPL-3.0) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome!-tomato.svg?style=flat-square)](http://makeapullrequest.com) [![travis](https://img.shields.io/travis/vgmoose/vgedit.svg?label=travis&style=flat-square)](https://travis-ci.org/vgmoose/vgedit)
+
+A basic SDL2 text editor designed for easy use on a video game console using a controller or touch screen. The primary goal of this project is to allow you to not have to turn to another device to edit text files.
 
 
 ## Compilation instructions
@@ -60,3 +62,4 @@ It's not required, but running a clang-format before making a PR helps to clean 
 find . \( -name "*.cpp" -or -name "*.hpp" \) -not -path "./libs/*" -exec clang-format -i {} \;
 ```
 
+Any and all PRs are welcome and appreciated! In particular, there is still some work to be done to properly align the cursor on text files with long lines, or when switching between touch screen and controller. You can also find me to talk directly about these issues on discord as vgmoose#3545 .
