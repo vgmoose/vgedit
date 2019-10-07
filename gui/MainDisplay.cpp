@@ -5,6 +5,8 @@
 MainDisplay::MainDisplay()
 {
 	RootDisplay::super();
+
+  // backgroundColor = { 0x42, 0x45, 0x48, 0xFF };
 }
 
 void MainDisplay::openFile(bool folder, std::string* path)

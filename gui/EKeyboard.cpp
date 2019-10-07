@@ -309,6 +309,7 @@ void EKeyboard::updateSize()
 	for (int x = 0; x < rowCount(); x++)
 	{
 		TextElement* rowText = new TextElement(rows[x]->c_str(), textSize, &gray, true);
+    printf("XX %d, %d\n", kXPad + x * kXOff, kYPad + x * kYOff);
 		rowText->position(kXPad + x * kXOff, kYPad + x * kYOff);
 		this->elements.push_back(rowText);
 	}

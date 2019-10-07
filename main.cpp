@@ -78,7 +78,8 @@ int main(int argc, char* argv[])
 		((MainDisplay*)RootDisplay::mainDisplay)->showingSplash = false;
 	}
 
-	quit();
+  // 👋
+  delete display;
 
 	return 0;
 }

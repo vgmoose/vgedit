@@ -21,7 +21,7 @@ EXEFS_SRC	:=	exefs_src
 
 APP_TITLE	:= vgedit
 APP_AUTHOR 	:= vgmoose
-APP_VERSION 	:= 1.0
+APP_VERSION 	:= 1.1.1
 ICON		:= romfs/res/icon.jpg
 
 #---------------------------------------------------------------------------------
