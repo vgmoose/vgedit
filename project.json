@@ -6,7 +6,7 @@
         "description": "Text editor for video game consoles",
         "language": "c++",
         "use": [ "chesto" ],
-        "sources": [ "gui", "edit" ]
+        "sources": [ "gui", "edit", "libs/SDL_FontCache" ]
     },
     "lang.cpp": {
         "lib": [ "SDL2", "SDL2_image", "SDL2_ttf", "SDL2_gfx" ],

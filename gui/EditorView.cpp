@@ -55,7 +55,7 @@ void EditorView::reset_bounds()
 	mainTextField->selected_height = selected_height;
 
 	// always snap the cursor to be on screen and visible (by moving the screen)
-	int h = mainTextField->letter_height + 2;
+	int h = mainTextField->fontHeight + 2;
 	float cursor_y = (h * mainTextField->selected_y - 50) * -1;
 
 	if (cursor_y > mainTextField->y + 50)

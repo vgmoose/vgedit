@@ -1,5 +1,6 @@
 CHESTO  := ./libs/chesto/src
 RESINFS := ./libs/chesto/libs/resinfs
+FONTCACHE := ./libs/SDL_FontCache
 
 # default this environment variable
 DEVKITPRO ?= /opt/devkitpro
@@ -14,14 +15,14 @@ include $(DEVKITPRO)/libnx/switch_rules
 
 TARGET		:=	vgedit
 BUILD		:=	build
-SOURCES		:=	. gui edit $(RESINFS)/source $(CHESTO)
+SOURCES		:=	. gui edit $(RESINFS)/source $(CHESTO) $(FONTCACHE)
 INCLUDES	:=	. $(CHESTO)
 RAMFS_DIR		:=	resin
 EXEFS_SRC	:=	exefs_src
 
 APP_TITLE	:= vgedit
 APP_AUTHOR 	:= vgmoose
-APP_VERSION 	:= 2.0
+APP_VERSION 	:= 1.9
 ICON		:= resin/res/icon.jpg
 
 #---------------------------------------------------------------------------------

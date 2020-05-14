@@ -3,40 +3,22 @@
 
 TextInputElement::TextInputElement(const char* text)
 {
-	int size = 20;
-	font = TTF_OpenFont(RAMFS "./res/mono.ttf", size);
+  int size = 20;
 
-	// get a size of just one "square" letter so we can use it for cursor spacing later
-	updateText("A");
-	letter_width = this->width;
-	letter_height = this->height;
+  renderer = (RootDisplay::mainDisplay)->renderer;
 
-	// initialize and draw the text surface
+  font = FC_CreateFont();  
+  FC_LoadFont(font, renderer, RAMFS "./res/mono.ttf", size, FC_MakeColor(0,0,0,255), TTF_STYLE_NORMAL);  
+
+  fontHeight = FC_GetLineHeight(font) + lineSpacing;
+  fontWidth = FC_GetWidth(font, "A"); // width of one char
+
 	updateText(text);
 }
 
 void TextInputElement::updateText(const char* text)
 {
-	// free old surface if existing first
-	if (this->textSurface)
-		SDL_DestroyTexture(this->textSurface);
-
-	// font didn't load, don't render anything
-	if (!font)
-		return;
-
-	SDL_Color color = { 0x00, 0x00, 0x00 };
-	SDL_Surface* surf = TTF_RenderText_Blended_Wrapped(font, text, color, 1260);
-
-	SDL_Texture* texture = SDL_CreateTextureFromSurface(RootDisplay::mainRenderer, surf);
-	SDL_FreeSurface(surf);
-
-	textSurface = texture;
-
-	int w, h;
-	SDL_QueryTexture(this->textSurface, NULL, NULL, &w, &h);
-	this->width = w;
-	this->height = h;
+	this->text = new std::string(text);
 }
 
 void TextInputElement::render(Element* parent)
@@ -44,40 +26,53 @@ void TextInputElement::render(Element* parent)
 	if (this->hidden)
 		return;
 
-	// TODO: don't copy paste code from TextElement? (inherit?)
-	//       might need to be done after pulling hb-appstore gui files into own lib
-	SDL_Rect textLocation;
-	textLocation.x = this->x + parent->x + 20;
-	textLocation.y = this->y + parent->y + 70;
-	textLocation.w = this->width;
-	textLocation.h = this->height;
+  int xPos = this->x + parent->x + 20;
+  int yPos = this->y + parent->y + 70;
 
-	int border = 2;
+  int w = fontWidth, h = fontHeight;
 
-	SDL_Rect dimens = { textLocation.x - border, textLocation.y - border,
-		textLocation.w + border * 2, textLocation.h + border * 2 };
-
-	SDL_SetRenderDrawColor(parent->renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-	SDL_RenderFillRect(parent->renderer, &dimens);
-
-	int w = letter_width, h = letter_height;
-
-	// draw the currently selected block
-	SDL_Rect cursor_pos = { textLocation.x + selected_x * w - 2, textLocation.y + selected_y * h - 2,
-		selected_width * w + 4, selected_height * h + 2 };
+	// // draw the currently selected block
+	SDL_Rect cursor_pos = { xPos + selected_x * w, yPos + selected_y * h,
+		selected_width * w, selected_height * h };
 
 	if (insertMode) // TODO: use block cursor for overwrite mode too
 	{
 		// traditional line cursor, between characters
-		SDL_SetRenderDrawColor(parent->renderer, 0x00, 0x00, 0x00, 0xFF);
-		SDL_RenderDrawLine(parent->renderer, cursor_pos.x + 2, cursor_pos.y, cursor_pos.x + 2, cursor_pos.y + cursor_pos.h);
+		SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
+		SDL_RenderDrawLine(renderer, cursor_pos.x + 2, cursor_pos.y, cursor_pos.x + 2, cursor_pos.y + cursor_pos.h);
 	}
 	else
 	{
 		// highlight cursor for overview screen
-		SDL_SetRenderDrawColor(parent->renderer, 0xDD, 0xDD, 0xDD, 0xFF);
-		SDL_RenderFillRect(parent->renderer, &cursor_pos);
+		SDL_SetRenderDrawColor(renderer, 0xDD, 0xDD, 0xDD, 0xFF);
+		SDL_RenderFillRect(renderer, &cursor_pos);
 	}
 
-	SDL_RenderCopy(RootDisplay::mainRenderer, this->textSurface, NULL, &textLocation);
+  // go through and divvy up the text in each line
+  // by visiting COLS characters at a time
+  int curPos = 0;
+  int linePos = 0;
+  int len = text->size();
+
+  // for the entire string
+  while (curPos < len)
+  {
+    int lpos = curPos;
+    int bonusWidth = 0; // add to this in cases like tab, where "one" character takes 4 spaces 
+    while ((curPos + bonusWidth) - lpos < COLS)
+    {
+      char curChar = text->at(curPos);
+      if (curChar == '\t')
+        bonusWidth += 3;
+
+      if (curChar == '\n')
+        break;
+
+      curPos ++;
+    }
+    FC_Draw(font, renderer, xPos, yPos + linePos * fontHeight, text->substr(lpos, curPos - lpos + 1).c_str());
+    curPos ++;
+    linePos ++;
+  }
+
 }

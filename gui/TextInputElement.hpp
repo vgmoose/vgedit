@@ -1,4 +1,6 @@
+#include <string>
 #include "../libs/chesto/src/ListElement.hpp"
+#include "../libs/SDL_FontCache/SDL_FontCache.h"
 
 class TextInputElement : public ListElement
 {
@@ -12,11 +14,14 @@ public:
 	int selected_width = 1;
 	int selected_height = 1;
 
+  int COLS = 100;
+  int lineSpacing = 2;
+
+  int fontHeight;
+  int fontWidth;
+
 	bool insertMode = false;
 
-	int letter_width = 10;
-	int letter_height = 20;
-
-	SDL_Texture* textSurface = NULL;
-	TTF_Font* font = NULL;
+  std::string* text;
+	FC_Font* font = NULL;
 };
