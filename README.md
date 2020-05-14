@@ -1,5 +1,10 @@
 # vgedit
-[![GPLv3 License](https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat-square)](https://opensource.org/licenses/GPL-3.0) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome!-tomato.svg?style=flat-square)](http://makeapullrequest.com) [![travis](https://img.shields.io/travis/vgmoose/vgedit.svg?label=travis&style=flat-square)](https://travis-ci.org/vgmoose/vgedit)
+[![GPLv3 License](https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat-square)](https://opensource.org/licenses/GPL-3.0)
+[![gitlab ci](https://gitlab.com/4TU/hb-appstore/badges/master/pipeline.svg?style=flat-square)](https://gitlab.com/4TU/hb-appstore/pipelines)
+[![travis](https://img.shields.io/travis/vgmoose/vgedit.svg?label=travis&style=flat-square)](https://travis-ci.org/vgmoose/vgedit)
+[![twitter](https://img.shields.io/twitter/follow/vgmoose.svg?label=twitter&style=flat-square)](https://twitter.com/vgmoose)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome!-tomato.svg?style=flat-square)](http://makeapullrequest.com)
+
 
 A basic SDL2 text editor designed for easy use on a video game console using a controller or touch screen. The primary goal of this project is to allow you to not have to turn to another device to edit text files.
 

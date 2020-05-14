@@ -132,7 +132,6 @@ all: $(BUILD)
 
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
-	@rm ./libs/chesto/src/MainDisplay.cpp || true
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile.switch
 
 #---------------------------------------------------------------------------------

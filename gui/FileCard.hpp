@@ -1,3 +1,4 @@
+#include <string>
 #include "../libs/chesto/src/Element.hpp"
 
 class FileCard : public Element

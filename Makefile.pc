@@ -3,10 +3,10 @@ GUI :=		libs/chesto/src/*.cpp
 BREW_FLAGS := -L /usr/local/Cellar/sdl2/2.0.9/lib -L /usr/local/Cellar/sdl2_gfx/1.0.4/lib -L /usr/local/Cellar/sdl2_image/2.0.4/lib -L /usr/local/Cellar/sdl2_ttf/2.0.14/lib 
 
 all:
-	g++ -g -std=gnu++14 gui/*.cpp edit/*.cpp ${GUI} -lSDL2 -lSDL2main -lcurl -lSDL2_image -lSDL2_ttf -lSDL2_gfx -I /usr/local/include -lz -o vgedit.exe -fstack-protector-all -DPC
+	g++ -g -std=gnu++14 gui/*.cpp edit/*.cpp ${GUI} -lSDL2 -lSDL2main -lcurl -lSDL2_image -lSDL2_ttf -lSDL2_gfx -I /usr/local/include -lz -o vgedit.bin -fstack-protector-all -DPC
 
 macos:
-	g++ -g -std=gnu++14 gui/*.cpp edit/*.cpp ${GUI} -lSDL2 -lSDL2main -lcurl -lSDL2_gfx -lSDL2_image -lSDL2_ttf -framework Cocoa -I /usr/local/include -lz -o vgedit.exe -fstack-protector-all -O0 -DPC ${BREW_FLAGS}
+	g++ -g -std=gnu++14 gui/*.cpp edit/*.cpp ${GUI} -lSDL2 -lSDL2main -lcurl -lSDL2_gfx -lSDL2_image -lSDL2_ttf -framework Cocoa -I /usr/local/include -lz -o vgedit.bin -fstack-protector-all -O0 -DPC ${BREW_FLAGS}
 
 clean:
 	rm *.o *.bin
