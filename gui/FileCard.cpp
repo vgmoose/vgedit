@@ -13,7 +13,7 @@ FileCard::FileCard(Element* parent)
 
 void FileCard::update(bool folder, const char* name)
 {
-	ImageElement* icon = new ImageElement(folder ? ROMFS "res/folder.png" : ROMFS "res/file.png");
+	ImageElement* icon = new ImageElement(folder ? RAMFS "res/folder.png" : RAMFS "res/file.png");
 	icon->resize(110, 110);
 	icon->position(this->x + this->width / 2 - icon->width / 2, this->y + 10);
 	this->elements.push_back(icon);

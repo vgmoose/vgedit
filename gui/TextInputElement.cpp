@@ -4,7 +4,7 @@
 TextInputElement::TextInputElement(const char* text)
 {
 	int size = 20;
-	font = TTF_OpenFont(ROMFS "./res/mono.ttf", size);
+	font = TTF_OpenFont(RAMFS "./res/mono.ttf", size);
 
 	// get a size of just one "square" letter so we can use it for cursor spacing later
 	updateText("A");

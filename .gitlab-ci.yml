@@ -1,0 +1,30 @@
+image: ubuntu:18.04
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+.common: &common
+  script:
+    - ./dependency_helper.sh
+    - make -f Makefile.$PLATFORM
+  artifacts:
+    paths:
+      - vgedit.$EXT
+
+PC:
+  <<: *common
+  variables:
+    PLATFORM: pc
+    EXT: bin
+
+WiiU:
+  <<: *common
+  variables:
+    PLATFORM: wiiu
+    EXT: rpx
+
+Switch:
+  <<: *common
+  variables:
+    PLATFORM: switch
+    EXT: nro

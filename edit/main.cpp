@@ -1,7 +1,7 @@
-#include "gui/EditorView.hpp"
-#include "gui/FileBrowser.hpp"
-#include "gui/MainDisplay.hpp"
-#include "libs/chesto/src/Element.hpp"
+#include "../gui/EditorView.hpp"
+#include "../gui/FileBrowser.hpp"
+#include "../gui/MainDisplay.hpp"
+#include "../libs/chesto/src/Element.hpp"
 #include <algorithm>
 
 #if defined(PC)

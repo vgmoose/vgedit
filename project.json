@@ -1,0 +1,18 @@
+{
+    "id": "vgedit",
+    "type": "application",
+    "value": {
+        "author": "vgmoose",
+        "description": "Text editor for video game consoles",
+        "language": "c++",
+        "use": [ "chesto" ],
+        "sources": [ "gui", "edit" ]
+    },
+    "lang.cpp": {
+        "lib": [ "SDL2", "SDL2_image", "SDL2_ttf", "SDL2_gfx" ],
+        "static-lib": [ "chesto" ],
+        "cpp-standard": "gnu++14",
+        "cxxflags": [ "-Wno-narrowing", "-DPC", "-fstack-protector-all" ]
+    }
+}
+

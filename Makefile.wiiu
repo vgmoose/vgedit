@@ -1,12 +1,13 @@
-CHESTO		:= ./libs/chesto/src
+CHESTO  := ./libs/chesto/src
+RESINFS := ./libs/chesto/libs/resinfs
 
-#-------------------------------------------------------------------------------
-.SUFFIXES:
-#-------------------------------------------------------------------------------
-
-ifeq ($(strip $(DEVKITPRO)),)
-$(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>/devkitpro")
-endif
+# default this environment variable
+DEVKITPRO ?= /opt/devkitpro
+DEVKITPPC ?= $(DEVKITPRO)/devkitPPC
+WUT_ROOT ?= $(DEVKITPRO)/wut
+export DEVKITPRO
+export DEVKITPPC
+export WUT_ROOT
 
 TOPDIR ?= $(CURDIR)
 include $(DEVKITPRO)/wut/share/wut_rules
@@ -20,9 +21,9 @@ include $(DEVKITPRO)/wut/share/wut_rules
 #-------------------------------------------------------------------------------
 TARGET		:=	vgedit
 BUILD		:=	build
-SOURCES		:=	. gui edit $(CHESTO)
+SOURCES		:=	. gui edit $(RESINFS)/source $(CHESTO)
 INCLUDES	:=	.
-ROMFS		:=	romfs
+RAMFS_DIR		:=	resin
 
 #-------------------------------------------------------------------------------
 # options for code generation
@@ -31,7 +32,7 @@ CFLAGS		:=	-g -Wall -O2 -ffunction-sections \
 			-ffast-math \
 			$(MACHDEP)
 
-CFLAGS		+=	$(INCLUDE) -D__WIIU__ -D__WUT__ -DUSE_FILE32API -DNOCRYPT -DINPUT_JOYSTICK -DMUSIC -D_XOPEN_SOURCE
+CFLAGS		+=	$(INCLUDE) -D__WIIU__ -D__WUT__ -DUSE_FILE32API -DNOCRYPT -DINPUT_JOYSTICK -DMUSIC -D_XOPEN_SOURCE -DUSE_RAMFS
 
 CXXFLAGS	:=	$(CFLAGS) -std=gnu++14
 
@@ -107,7 +108,7 @@ else
 #-------------------------------------------------------------------------------
 # romfs
 #-------------------------------------------------------------------------------
-include $(PORTLIBS_PATH)/wiiu/share/romfs-wiiu.mk
+include $(PWD)/libs/chesto/libs/resinfs/share/romfs-wiiu.mk
 CFLAGS		+=	$(ROMFS_CFLAGS)
 CXXFLAGS	+=	$(ROMFS_CFLAGS)
 LIBS		+=	$(ROMFS_LIBS)

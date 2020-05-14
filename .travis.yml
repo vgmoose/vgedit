@@ -1,32 +1,15 @@
 language: cpp
-sudo: required
 
-os: linux
-dist: xenial
-
-env:
-  global:
-    - DEVKITPRO=/opt/devkitpro
-    - DEVKITPPC=/opt/devkitpro/devkitPPC
-    - WUT_ROOT=/opt/devkitpro/wut
+services:
+  - docker
 
 matrix:
   include:
     - env: PLATFORM=pc
-    - env: PLATFORM=switch
     - env: PLATFORM=wiiu
-  allow_failures:
     - env: PLATFORM=switch
-    - env: PLATFORM=wiiu
-
-addons:
-  apt:
-    packages:
-      - git
-      - wget
-
-install:
-  - ./dependency_helper.sh
 
 script:
-  - make -f Makefile.${PLATFORM}
+  - docker run -e PLATFORM="$PLATFORM"
+               -v $(pwd):/code ubuntu:18.04
+               /bin/bash -c "cd /code && ./dependency_helper.sh && ./build.sh"

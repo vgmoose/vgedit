@@ -31,13 +31,9 @@ void Toolbar::setModified(bool modified)
 	std::string text;
 	text += path;
 	text += (modified ? "*" : "");
-	pathE->textSurface = pathE->renderText(text, 20, MONOSPACED, 0);
 
-	// TODO: have TextElement easier to update...
-	int w, h;
-	SDL_QueryTexture(pathE->textSurface, NULL, NULL, &w, &h);
-	pathE->width = w;
-	pathE->height = h;
+  pathE->setText(text);
+  pathE->update();
 }
 
 void Toolbar::render(Element* parent)
