@@ -1,15 +1,16 @@
 # vgedit
 [![GPLv3 License](https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat-square)](https://opensource.org/licenses/GPL-3.0)
-[![gitlab ci](https://gitlab.com/4TU/hb-appstore/badges/master/pipeline.svg?style=flat-square)](https://gitlab.com/4TU/hb-appstore/pipelines)
+[![gitlab ci](https://gitlab.com/vgmoose/vgedit/badges/master/pipeline.svg?style=flat-square)](https://gitlab.com/vgmoose/vgedit/pipelines)
 [![travis](https://img.shields.io/travis/vgmoose/vgedit.svg?label=travis&style=flat-square)](https://travis-ci.org/vgmoose/vgedit)
 [![twitter](https://img.shields.io/twitter/follow/vgmoose.svg?label=twitter&style=flat-square)](https://twitter.com/vgmoose)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome!-tomato.svg?style=flat-square)](http://makeapullrequest.com)
 
-
 A basic SDL2 text editor designed for easy use on a video game console using a controller or touch screen. The primary goal of this project is to allow you to not have to turn to another device to edit text files.
 
-
 ## Compilation instructions
+This program is written using [Chesto](https://gitlab.com/4TU/chesto) and has a dependency on SDL2. It targets Switch, Wii U, and PC.
+
+You can get pre-compiled binaries for each platform under [Pipelines](https://gitlab.com/vgmoose/vgedit/pipelines) for a given commit. The download artifacts dropdown is to the right of the build passing status.
 
 ### Building for Switch (with libnx)
 1. Install [dkp-pacman](https://devkitpro.org/viewtopic.php?f=13&t=8702)
@@ -52,8 +53,12 @@ cd vgedit
 make -f Makefile.pc
 ```
 
+You can also build for PC using the [bake](https://github.com/SanderMertens/bake) build system.
+
 ## License
-This software is licensed the GPLv3
+This software is licensed under the GPLv3.
+
+> Free software is software that gives you the user the freedom to share, study and modify it. We call this free software because the user is free. - [Free Software Foundation](https://www.fsf.org/about/what-is-free-software)
 
 Folder and file icons by [Alfredo Hernandez](https://www.flaticon.com/authors/alfredo-hernandez) under the Flaticon Basic License
 
