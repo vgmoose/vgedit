@@ -4,7 +4,7 @@
 EditorView::EditorView(Editor* editor)
 {
 	// initialize the text view for the first time, using whatever's in the editor
-	mainTextField = new TextInputElement(editor->contents());
+	mainTextField = new TextInputElement(editor);
 	mainTextField->x = 10;
 	mainTextField->y = 70;
 	this->elements.push_back(mainTextField);
@@ -14,6 +14,7 @@ EditorView::EditorView(Editor* editor)
 	toolbar = new Toolbar(editor->filename);
 
 	this->editor = editor;
+	this->text = editor->text;
 }
 
 void EditorView::render(Element* parent)
@@ -28,45 +29,35 @@ void EditorView::render(Element* parent)
 
 void EditorView::reset_bounds()
 {
-	int selected_x = mainTextField->selected_x;
-	int selected_y = mainTextField->selected_y;
-
-	selected_y = selected_y < 0 ? 0 : selected_y;
-	selected_y = selected_y > editor->lineCount() - 1 ? editor->lineCount() - 1 : selected_y;
+	int selected_x = mainTextField->selectedPos;
 
 	// loop around in x direction
-	selected_x = selected_x < 0 ? editor->lineLength(selected_y) - 1 : selected_x;
-	selected_x = selected_x > editor->lineLength(selected_y) - 1 ? 0 : selected_x;
+	selected_x = selected_x < 0 ? 0 : selected_x;
+	selected_x = selected_x > text->length() - 1 ? text->length() - 1 : selected_x;
 
-	mainTextField->selected_x = selected_x;
-	mainTextField->selected_y = selected_y;
+	mainTextField->selectedPos = selected_x;
 
-	int selected_width = mainTextField->selected_width;
-	int selected_height = mainTextField->selected_height;
+	int selected_width = mainTextField->selectedWidth;
 
 	// adjust the bounds of the selection
-	selected_height = selected_height < 1 ? 1 : selected_height;
-	selected_height = selected_height > editor->lineCount() - selected_y ? editor->lineCount() - selected_y : selected_height;
-
 	selected_width = selected_width < 1 ? 1 : selected_width;
-	selected_width = selected_width > editor->lineLength(selected_y) - selected_x ? editor->lineLength(selected_y) - selected_x : selected_width;
+	selected_width = selected_width > editor->curLineLength - selected_x ? editor->curLineLength - selected_x : selected_width;
 
-	mainTextField->selected_width = selected_width;
-	mainTextField->selected_height = selected_height;
+	mainTextField->selectedWidth = selected_width || 1;
 
 	// always snap the cursor to be on screen and visible (by moving the screen)
-	int h = mainTextField->fontHeight + 2;
-	float cursor_y = (h * mainTextField->selected_y - 50) * -1;
+	// int h = mainTextField->fontHeight + 2;
+	// float cursor_y = (h * mainTextField->selected_y - 50) * -1;
 
-	if (cursor_y > mainTextField->y + 50)
-		mainTextField->y += h;
+	// if (cursor_y > mainTextField->y + 50)
+	// 	mainTextField->y += h;
 
-	if (cursor_y < mainTextField->y - 550)
-		mainTextField->y -= h;
+	// if (cursor_y < mainTextField->y - 550)
+	// 	mainTextField->y -= h;
 
-	// if it's still offscreen, and we're showing the keyboard
-	if (mainTextField->insertMode)
-		mainTextField->y = cursor_y;
+	// // if it's still offscreen, and we're showing the keyboard
+	// if (mainTextField->insertMode)
+	// 	mainTextField->y = cursor_y;
 }
 
 bool EditorView::copySelection()
@@ -76,13 +67,10 @@ bool EditorView::copySelection()
 	if (copiedText)
 		delete copiedText;
 
-	stringstream s;
-	int sx = mainTextField->selected_x;
-	int sy = mainTextField->selected_y;
-	for (int x = sx; x < sx + mainTextField->selected_width; x++)
-		s << editor->lines[sy][x];
+	int pos = mainTextField->selectedPos;
+  int width = mainTextField->selectedWidth;
 
-	copiedText = new std::string(s.str());
+	copiedText = new std::string(text->substr(pos, width));
 	return true;
 }
 
@@ -92,7 +80,7 @@ bool EditorView::pasteSelection()
 		return false;
 
 	for (char& letter : *copiedText)
-		editor->type(mainTextField->selected_y, mainTextField->selected_x++, letter);
+		editor->type(mainTextField->selectedPos++, letter);
 
 	syncText();
 	return true;
@@ -101,7 +89,6 @@ bool EditorView::pasteSelection()
 void EditorView::syncText()
 {
 	reset_bounds();
-	mainTextField->updateText(editor->contents());
 	toolbar->setModified(true);
 }
 
@@ -110,14 +97,22 @@ bool EditorView::process(InputEvents* e)
 	// move the cursoraround the editor
 	if ((keyboard == NULL || keyboard->hidden) && e->pressed(LEFT_BUTTON | RIGHT_BUTTON | UP_BUTTON | DOWN_BUTTON))
 	{
+		// relative cursor position from the start
+		int relPos = (mainTextField->selectedPos - editor->curLinePos);
+
 		if (e->pressed(LEFT_BUTTON))
-			mainTextField->selected_x -= 1;
+			mainTextField->selectedPos -= 1;
 		if (e->pressed(RIGHT_BUTTON))
-			mainTextField->selected_x += 1;
+			mainTextField->selectedPos += 1;
 		if (e->pressed(UP_BUTTON))
-			mainTextField->selected_y -= 1;
+			mainTextField->selectedPos = editor->prevLinePos + relPos;
 		if (e->pressed(DOWN_BUTTON))
-			mainTextField->selected_y += 1;
+		{
+			int next_lpos = editor->curLinePos + editor->curLineLength;
+			int next_rpos = next_lpos + editor->nextLineLength;
+			int down_pos = next_lpos + relPos;
+			mainTextField->selectedPos = min(next_rpos, down_pos) + 1;
+		}
 
 		reset_bounds();
 		return true;
@@ -137,27 +132,13 @@ bool EditorView::process(InputEvents* e)
 		// in insert mode, delete is a "backspace-style" action, and moves the cursor left if it can
 		if (mainTextField->insertMode)
 		{
-			if (mainTextField->selected_x > 0)
-			{
-				mainTextField->selected_x--;
-			}
-			else
-			{
-				// delete the last newline on the previous line (joining this line and the earlier one)
-				if (mainTextField->selected_y > 0)
-				{
-					mainTextField->selected_y--;
-					mainTextField->selected_x = editor->lineLength(mainTextField->selected_y) - 1;
-				}
-				else
-				{
-					// nothing to delete
-					return false;
-				}
-			}
+			if (mainTextField->selectedPos <= 0)
+				return false;
+			
+			mainTextField->selectedPos--;
 		}
 
-		editor->del(mainTextField->selected_y, mainTextField->selected_x, mainTextField->selected_width);
+		editor->del(mainTextField->selectedPos, mainTextField->selectedWidth);
 		syncText();
 		return true;
 	}
@@ -175,7 +156,7 @@ bool EditorView::process(InputEvents* e)
 
 		// force selection to be width 1 (more than 1 doesn't make sense in insert mode)
 		// (but it does make sense for vertical selections, to type on multiple lines)
-		mainTextField->selected_width = 1;
+		mainTextField->selectedWidth = 1;
 		mainTextField->insertMode = true;
 		toolbar->keyboardShowing = true;
 
@@ -224,9 +205,9 @@ bool EditorView::process(InputEvents* e)
 	{
 		// move the bounds of the selection
 		if (e->pressed(L_BUTTON))
-			mainTextField->selected_width -= 1;
+			mainTextField->selectedWidth -= 1;
 		if (e->pressed(R_BUTTON))
-			mainTextField->selected_width += 1;
+			mainTextField->selectedWidth += 1;
 		// if (e->pressed(ZL_BUTTON))
 		//   mainTextField->selected_height -= 1;
 		// if (e->pressed(ZR_BUTTON))

@@ -1,18 +1,25 @@
 #include <string>
 #include "../libs/chesto/src/ListElement.hpp"
 #include "../libs/SDL_FontCache/SDL_FontCache.h"
+#include "../edit/Editor.hpp"
 
 class TextInputElement : public ListElement
 {
 public:
-	TextInputElement(const char* text);
+	TextInputElement(Editor* editor);
 	void updateText(const char* text);
+
+	bool process(InputEvents* event);
 	void render(Element* parent);
 
-	int selected_x = 0;
-	int selected_y = 0;
-	int selected_width = 1;
-	int selected_height = 1;
+	int selectedPos = 0;
+	int selectedWidth = 1;
+
+	int selectedXPos = 0;
+	int selectedYPos = 0;
+
+	int lastSelectedXPos = -1;
+	int lastSelectedYPos = -1;
 
   int COLS = 100;
   int lineSpacing = 2;
@@ -22,6 +29,6 @@ public:
 
 	bool insertMode = false;
 
-  std::string* text;
+	Editor* editor;
 	FC_Font* font = NULL;
 };

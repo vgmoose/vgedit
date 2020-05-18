@@ -342,30 +342,23 @@ void EKeyboard::updateSize()
 void EKeyboard::type(int y, int x)
 {
 	const char input = (*(rows[y]))[x * 2];
-	auto line = editorView->mainTextField->selected_y;
-	auto pos = editorView->mainTextField->selected_x;
-	editorView->editor->type(line, pos, input);
+	auto pos = editorView->mainTextField->selectedPos;
+	editorView->editor->type(pos, input);
 
-	editorView->mainTextField->selected_x++;
+	editorView->mainTextField->selectedPos++;
 	editorView->syncText();
 }
 
 void EKeyboard::just_type(const char input)
 {
-	auto line = editorView->mainTextField->selected_y;
-	auto pos = editorView->mainTextField->selected_x;
+	auto pos = editorView->mainTextField->selectedPos;
 
 	if (input == '\n')
-	{
-		editorView->editor->newline(line, pos);
-		editorView->mainTextField->selected_y++;
-	}
+		editorView->editor->newline(pos);
 	else
-	{
-		editorView->editor->type(line, pos, input);
-		editorView->mainTextField->selected_x++;
-	}
+		editorView->editor->type(pos, input);
 
+	editorView->mainTextField->selectedPos++;
 	editorView->syncText();
 }
 

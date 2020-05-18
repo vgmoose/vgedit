@@ -15,6 +15,8 @@ public:
 	Toolbar* toolbar = NULL;
 	std::string* copiedText = NULL;
 
+  std::string* text = NULL;
+
 	// the big, main text field for the editor
 	TextInputElement* mainTextField;
 	bool process(InputEvents* e);
