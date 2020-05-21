@@ -1,9 +1,13 @@
+#ifndef EDITORVIEW_H
+#define EDITORVIEW_H
+
 #include "../edit/Editor.hpp"
 #include "../libs/chesto/src/Element.hpp"
 #include "TextInputElement.hpp"
 #include "Toolbar.hpp"
 
 class EKeyboard;
+class Toolbar;
 
 class EditorView : public Element
 {
@@ -28,3 +32,4 @@ public:
 
 	void reset_bounds();
 };
+#endif

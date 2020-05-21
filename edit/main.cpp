@@ -40,16 +40,16 @@ int main(int argc, char* argv[])
 			atLeastOneNewEvent = true;
 
 			// quit on enter/start
-			if (events->released(SELECT_BUTTON))
-			{
-				if (display->editorView == NULL)
-					running = false;
-				else
-				{
-					display->closeEditor();
-					viewChanged = true;
-				}
-			}
+			// if (events->released(SELECT_BUTTON))
+			// {
+			// 	if (display->editorView == NULL)
+			// 		running = false;
+			// 	else
+			// 	{
+			// 		display->closeEditor();
+			// 		viewChanged = true;
+			// 	}
+			// }
 		}
 
 		// one more event update if nothing changed or there were no previous events seen

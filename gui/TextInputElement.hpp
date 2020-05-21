@@ -3,6 +3,9 @@
 #include "../libs/SDL_FontCache/SDL_FontCache.h"
 #include "../edit/Editor.hpp"
 
+#ifndef TEXTINPUTELEMENT_H
+#define TEXTINPUTELEMENT_H
+
 class TextInputElement : public ListElement
 {
 public:
@@ -32,3 +35,5 @@ public:
 	Editor* editor;
 	FC_Font* font = NULL;
 };
+
+#endif

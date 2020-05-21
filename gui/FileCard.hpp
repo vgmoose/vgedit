@@ -4,12 +4,11 @@
 class FileCard : public Element
 {
 public:
-	FileCard(Element* parent);
-	void update(bool folder, const char* name);
-	void render(Element* parent);
-	bool process(InputEvents* event);
+	FileCard(bool isFolder, const char* name);
+	~FileCard();
+	void update(bool isFolder, const char* name);
 	void openMyFile();
 
-	bool folder = false;
+	bool isFolder = false;
 	std::string* path = NULL;
 };

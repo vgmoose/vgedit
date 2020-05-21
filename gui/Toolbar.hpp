@@ -1,11 +1,17 @@
+#ifndef TOOLBAR_H
+#define TOOLBAR_H
+
 #include "../libs/chesto/src/TextElement.hpp"
+#include "EditorView.hpp"
+
+class EditorView;
 
 class Toolbar : public Element
 {
 public:
 	const static int MAX_PATH_LENGTH = 48;
 
-	Toolbar(const char* path);
+	Toolbar(const char* path, EditorView* editorView);
 	void setModified(bool modified);
 	void render(Element* parent);
 
@@ -17,3 +23,5 @@ public:
 	bool modified = true;
 	bool keyboardShowing = false;
 };
+
+#endif

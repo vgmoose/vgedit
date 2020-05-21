@@ -83,7 +83,7 @@ void FileBrowser::render(Element* parent)
 	}
 
 	renderer = parent->renderer;
-	return super::render(this);
+	return ListElement::render(this);
 }
 
 // copy-pasta'd from Utils.cpp in hb-appstore
@@ -146,9 +146,8 @@ void FileBrowser::listfiles()
 	// create a hardcoded "up" link to the parent directory
 	if (*pwd != std::string("/"))
 	{
-		FileCard* card = new FileCard(this);
+		FileCard* card = new FileCard(true, ".. (parent)");
 		card->position(this->x + (count % 5) * card->width, this->y + 115 + (count / 5) * card->height);
-		card->update(true, ".. (parent)");
 		std::string cwd = dir_name(*pwd);
 		card->path = new std::string(cwd == "" ? "/" : cwd);
 		card->action = std::bind(&FileCard::openMyFile, card);
@@ -164,12 +163,11 @@ void FileBrowser::listfiles()
 			if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
 				continue;
 
-			FileCard* card = new FileCard(this);
+			FileCard* card = new FileCard(entry->d_type == DT_DIR, entry->d_name);
 			card->position(this->x + (count % 5) * card->width, this->y + 115 + (count / 5) * card->height);
-			card->update(entry->d_type == DT_DIR, entry->d_name);
 			card->path = new std::string(*pwd + (*pwd != "/" ? std::string("/") : "") + entry->d_name);
 			card->action = std::bind(&FileCard::openMyFile, card);
-			this->elements.push_back(card);
+			child(card);
 			count++;
 		}
 

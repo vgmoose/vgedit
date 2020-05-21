@@ -9,13 +9,13 @@ MainDisplay::MainDisplay()
   // backgroundColor = { 0x42, 0x45, 0x48, 0xFF };
 }
 
-void MainDisplay::openFile(bool folder, std::string* path)
+void MainDisplay::openFile(bool isFolder, std::string* path)
 {
 	// don't allow a file to be opened if we're already showing an editor
 	if (editorView != NULL)
 		return;
 
-	if (folder)
+	if (isFolder)
 	{
 		browser->update_path(path->c_str());
 		browser->y = 0;

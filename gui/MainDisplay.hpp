@@ -16,7 +16,7 @@ public:
 	void background(int r, int g, int b);
 	void update();
 	void closeEditor();
-	void openFile(bool folder, std::string* path);
+	void openFile(bool isFolder, std::string* path);
 
 	TextElement* notice = NULL;
 	FileBrowser* browser = NULL;

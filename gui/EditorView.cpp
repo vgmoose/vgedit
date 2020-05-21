@@ -11,7 +11,7 @@ EditorView::EditorView(Editor* editor)
 
 	// create a tool bar, but don't add it to the elements list
 	// it will be manually drawn in later (above everything else)
-	toolbar = new Toolbar(editor->filename);
+	toolbar = new Toolbar(editor->filename, this);
 
 	this->editor = editor;
 	this->text = editor->text;
@@ -105,7 +105,11 @@ bool EditorView::process(InputEvents* e)
 		if (e->pressed(RIGHT_BUTTON))
 			mainTextField->selectedPos += 1;
 		if (e->pressed(UP_BUTTON))
-			mainTextField->selectedPos = editor->prevLinePos + relPos;
+		{
+			int prev_rpos = editor->curLinePos - 1;
+			int up_pos = editor->prevLinePos + relPos;
+			mainTextField->selectedPos = min(up_pos, prev_rpos);
+		}
 		if (e->pressed(DOWN_BUTTON))
 		{
 			int next_lpos = editor->curLinePos + editor->curLineLength;

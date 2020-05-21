@@ -1,6 +1,8 @@
 #include "Toolbar.hpp"
+#include "../libs/chesto/src/Container.hpp"
+#include "../libs/chesto/src/Button.hpp"
 
-Toolbar::Toolbar(const char* path)
+Toolbar::Toolbar(const char* path, EditorView* editorView)
 {
 	if (strlen(path) > MAX_PATH_LENGTH) {
 		strcpy(this->path, "...");
@@ -15,13 +17,42 @@ Toolbar::Toolbar(const char* path)
 
 	SDL_Color white = { 0xFF, 0xFF, 0xFF, 0xFF };
 
-	// toolbar actions
-	// TODO: make real touchable buttons, move handler logic here
-	actions = new TextElement("(-) Exit    (+) Save    (x) Copy    (y) Paste    (l/r) Select    (b) Delete    (a) Type", 18, &white);
-	actions->position(620, 10);
+	Container* con = new Container(ROW_LAYOUT, 10);
+	elements.push_back(con);
 
-	keyActions = new TextElement("(-) Exit    (+) Save    (x) Caps    (y) Stow Keyboard    (b) Backspace    (a) Type", 18, &white);
-	keyActions->position(610, 10);
+	con->add((new Button("Exit", SELECT_BUTTON))->setAction([](){
+		printf("TODO: Implement exit here\n");
+	}));
+
+	con->add((new Button("Save", START_BUTTON))->setAction([](){
+		printf("TODO: Implement exit here\n");
+	})),
+
+	con->add((new Button("Copy", X_BUTTON))->setAction([](){
+		printf("TODO: paste\n");
+	}));
+
+	con->add((new Button("Paste", Y_BUTTON))->setAction([](){
+		printf("TODO: paste\n");
+	}));
+
+	con->add((new Button("", L_BUTTON))->setAction([](){
+		printf("TODO: left dir\n");
+	}));
+
+	con->add((new Button("Select", R_BUTTON))->setAction([](){
+		printf("TODO: right dir\n");
+	}));
+
+	con->add((new Button("Delete", B_BUTTON))->setAction([](){
+		printf("TODO: Type\n");
+	}));
+
+	con->add((new Button("Type", A_BUTTON))->setAction([](){
+		printf("TODO: Type\n");
+	}));
+
+	con->position(SCREEN_WIDTH - 10 - con->width, 40);
 }
 
 void Toolbar::setModified(bool modified)
@@ -41,13 +72,13 @@ void Toolbar::render(Element* parent)
 	SDL_Rect background = { 0, 0, 1280, 50 };
 
 	// draw top bar on top of other things
-	SDL_SetRenderDrawColor(parent->renderer, 0x0, 0x0, 0x0, 0xFF);
-	SDL_RenderFillRect(parent->renderer, &background);
+	// SDL_SetRenderDrawColor(parent->renderer, 0x0, 0x0, 0x0, 0xFF);
+	// SDL_RenderFillRect(parent->renderer, &background);
 
 	super::render(this);
 
-	if (keyboardShowing)
-		keyActions->render(this);
-	else
-		actions->render(this);
+	// if (keyboardShowing)
+	// 	keyActions->render(this);
+	// else
+	// 	actions->render(this);
 }
