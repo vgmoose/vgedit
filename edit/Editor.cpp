@@ -1,4 +1,6 @@
 #include "Editor.hpp"
+#include <cmath>
+#include <algorithm>
 
 Editor::Editor(const char* filename)
 {
@@ -39,6 +41,10 @@ void Editor::internal_load_from_stream(ifstream* input)
 	buffer << input->rdbuf();
 	text = new std::string(buffer.str());
 
+	// get initial line count to know how many places to show
+	int lineCount = std::count(text->begin(), text->end(), '\n') + 50;
+	lineNoPlaces = std::max((int)(std::log10(lineCount)) + 1, 2);
+
 	// prevent empty files
 	if (text->empty())
 	{
@@ -68,7 +74,7 @@ bool Editor::type(int pos, const char input)
 
 	// if "overwrite" is on, delete what's under us first, given it's not the end of the line
 	if (overwriteMode && pos < curLineLength - 1)
-		text->erase(pos, 1);
+		text->erase(pos, 1);	
 
 	text->insert(pos, 1, input);
 	return true;

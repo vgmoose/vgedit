@@ -9,6 +9,7 @@ EKeyboard::EKeyboard(EditorView* editorView)
 	this->editorView = editorView;
 
 	curRow = index = -1;
+	this->isAbsolute = true;
 
 	// position the EKeyboard based on this x and y
 	updateSize();
@@ -19,29 +20,29 @@ void EKeyboard::render(Element* parent)
 	if (hidden)
 		return;
 
-	SDL_Rect dimens = { this->x, this->y, this->width + 305, this->height + 140 };
+	CST_Rect dimens = { this->x, this->y, this->width + 305, this->height + 140 };
 
 	this->window = parent->window;
-	this->renderer = parent->renderer;
+	auto renderer = getRenderer();
 
-	SDL_SetRenderDrawColor(parent->renderer, 0xf9, 0xf9, 0xf9, 0xFF);
-	SDL_RenderFillRect(parent->renderer, &dimens);
+	CST_SetDrawColor(renderer, { 0xf9, 0xf9, 0xf9, 0xFF });
+	CST_FillRect(renderer, &dimens);
 
 	for (int y = 0; y < rowCount(); y++)
 		for (int x = 0; x < rowLength(y) + 1; x++)
 		{
-			SDL_Rect dimens2 = { this->x + kXPad + x * kXOff + y * yYOff, this->y + kYPad + y * ySpacing, keyWidth, keyWidth };
-			SDL_SetRenderDrawColor(parent->renderer, 0xf4, 0xf4, 0xf4, 0xff);
-			SDL_RenderFillRect(parent->renderer, &dimens2);
+			CST_Rect dimens2 = { this->x + kXPad + x * kXOff + y * yYOff, this->y + kYPad + y * ySpacing, keyWidth, keyWidth };
+			CST_SetDrawColor(renderer, { 0xf4, 0xf4, 0xf4, 0xff });
+			CST_FillRect(renderer, &dimens2);
 		}
 
-	SDL_Rect dimensSpace = { this->x + sPos, this->y + dHeight, sWidth, textSize };
-	SDL_Rect dimensEnter = { this->x + enterPos, this->y + enterHeight, enterWidth, (int)(1.5 * textSize) };
+	CST_Rect dimensSpace = { this->x + sPos, this->y + dHeight, sWidth, textSize };
+	CST_Rect dimensEnter = { this->x + enterPos, this->y + enterHeight, enterWidth, (int)(1.5 * textSize) };
 
 	// if there's a highlighted piece set, color it in
 	if (curRow >= 0 || index >= 0)
 	{
-		SDL_Rect dimens2 = { this->x + kXPad + index * kXOff + curRow * yYOff, this->y + kYPad + curRow * ySpacing, keyWidth, keyWidth };
+		CST_Rect dimens2 = { this->x + kXPad + index * kXOff + curRow * yYOff, this->y + kYPad + curRow * ySpacing, keyWidth, keyWidth };
 
 		if (curRow >= rowCount())
 		{
@@ -63,34 +64,34 @@ void EKeyboard::render(Element* parent)
 		// draw the currently selected tile if these index things are set
 		if (touchMode)
 		{
-			SDL_SetRenderDrawColor(parent->renderer, 0xad, 0xd8, 0xe6, 0x90); // TODO: matches the DEEP_HIGHLIGHT color
-			SDL_RenderFillRect(parent->renderer, &dimens2);
+			CST_SetDrawColor(renderer, { 0xad, 0xd8, 0xe6, 0x90 }); // TODO: matches the DEEP_HIGHLIGHT color
+			CST_FillRect(renderer, &dimens2);
 		}
 		else
 		{
-			SDL_SetRenderDrawColor(parent->renderer, 0xff, 0xff, 0xff, 0xff); // TODO: matches the DEEP_HIGHLIGHT color
-			SDL_RenderFillRect(parent->renderer, &dimens2);
+			CST_SetDrawColor(renderer, { 0xff, 0xff, 0xff, 0xff }); // TODO: matches the DEEP_HIGHLIGHT color
+			CST_FillRect(renderer, &dimens2);
 
 			// border
 			for (int z = 4; z >= 0; z--)
 			{
-				SDL_SetRenderDrawColor(parent->renderer, 0x66 - z * 10, 0x7c + z * 20, 0x89 + z * 10, 0xFF);
+				CST_SetDrawColor(renderer, { 0x66 - z * 10, 0x7c + z * 20, 0x89 + z * 10, 0xFF });
 				dimens2.x--;
 				dimens2.y--;
 				dimens2.w += 2;
 				dimens2.h += 2;
-				SDL_RenderDrawRect(parent->renderer, &dimens2);
+				CST_DrawRect(renderer, &dimens2);
 			}
 		}
 	}
 
-	//   SDL_Rect dimens3 = {this->x+dPos, this->y + dHeight, dWidth, textSize};
-	//   SDL_SetRenderDrawColor(parent->renderer, 0xff, 0xaa, 0xaa, 0xff);
-	//   SDL_RenderFillRect(parent->renderer, &dimens3);
+	//   CST_Rect dimens3 = {this->x+dPos, this->y + dHeight, dWidth, textSize};
+	//   CST_SetDrawColor(renderer, 0xff, 0xaa, 0xaa, 0xff);
+	//   CST_FillRect(renderer, &dimens3);
 	//
-	SDL_SetRenderDrawColor(parent->renderer, 0xf4, 0xf4, 0xf4, 0xff);
-	SDL_RenderFillRect(parent->renderer, &dimensSpace);
-	SDL_RenderFillRect(parent->renderer, &dimensEnter);
+	CST_SetDrawColor(renderer, { 0xf4, 0xf4, 0xf4, 0xff });
+	CST_FillRect(renderer, &dimensSpace);
+	CST_FillRect(renderer, &dimensEnter);
 
 	super::render(this);
 }
@@ -284,7 +285,7 @@ void EKeyboard::updateSize()
 	// can change quickly
 	int kXPad = (int)((30 / 400.0) * width);
 	int kXOff = (int)((22 / 400.0) * width);
-	int kYPad = (int)((14 / 400.0) * width);
+	// int kYPad = (int)((14 / 400.0) * width);
 	int kYOff = (int)((33 / 400.0) * width);
 
 	this->textSize = 0.9375 * keyWidth;
@@ -303,13 +304,12 @@ void EKeyboard::updateSize()
 	// set up the keys vector based on the current EKeyboard selection
 	generateEKeyboard();
 
-	SDL_Color gray = { 0x52, 0x52, 0x52, 0xff };
+	CST_Color gray = { 0x52, 0x52, 0x52, 0xff };
 
 	// go through and draw each of the three rows at the right position
 	for (int x = 0; x < rowCount(); x++)
 	{
 		TextElement* rowText = new TextElement(rows[x]->c_str(), textSize, &gray, true);
-    printf("XX %d, %d\n", kXPad + x * kXOff, kYPad + x * kYOff);
 		rowText->position(kXPad + x * kXOff, kYPad + x * kYOff);
 		this->elements.push_back(rowText);
 	}
@@ -322,19 +322,19 @@ void EKeyboard::updateSize()
 	// int textSize2 = (int)((16 / 400.0) * width);
 
 	// text for space, enter, and symbols
-	SDL_Color grayish = { 0x55, 0x55, 0x55, 0xff };
+	CST_Color grayish = { 0x55, 0x55, 0x55, 0xff };
 	TextElement* spaceText = new TextElement("space", 30, &grayish);
-	SDL_Rect d4 = { this->x + sPos, this->y + dHeight, sWidth, textSize }; // todo: extract out hardcoded rects like this
+	CST_Rect d4 = { this->x + sPos, this->y + dHeight, sWidth, textSize }; // todo: extract out hardcoded rects like this
 	spaceText->position(d4.x + d4.w / 2 - spaceText->width / 2 - 15, 345);
 	this->elements.push_back(spaceText);
 
 	TextElement* enterText = new TextElement("enter", 30, &grayish);
-	SDL_Rect d3 = { this->x + enterPos, this->y + enterHeight, enterWidth, textSize }; // todo: extract out hardcoded rects like this
+	CST_Rect d3 = { this->x + enterPos, this->y + enterHeight, enterWidth, textSize }; // todo: extract out hardcoded rects like this
 	enterText->position(d3.x + d3.w / 2 - enterText->width / 2 - 30, 327);
 	this->elements.push_back(enterText);
 
 	TextElement* symText = new TextElement("sym", 30, &grayish);
-	SDL_Rect d5 = { this->x + dPos, this->y + dHeight + 100, dWidth, textSize }; // todo: extract out hardcoded rects like this
+	CST_Rect d5 = { this->x + dPos, this->y + dHeight + 100, dWidth, textSize }; // todo: extract out hardcoded rects like this
 	symText->position(d5.x + d5.w / 2 - symText->width / 2, 300);
 	this->elements.push_back(symText);
 }

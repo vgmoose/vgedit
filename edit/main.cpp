@@ -30,7 +30,7 @@ int main(int argc, char* argv[])
 		bool atLeastOneNewEvent = false;
 		bool viewChanged = false;
 
-		int frameStart = SDL_GetTicks();
+		int frameStart = CST_GetTicks();
 
 		// get any new input events
 		while (events->update())
@@ -38,18 +38,6 @@ int main(int argc, char* argv[])
 			// process the inputs of the supplied event
 			viewChanged |= display->process(events);
 			atLeastOneNewEvent = true;
-
-			// quit on enter/start
-			// if (events->released(SELECT_BUTTON))
-			// {
-			// 	if (display->editorView == NULL)
-			// 		running = false;
-			// 	else
-			// 	{
-			// 		display->closeEditor();
-			// 		viewChanged = true;
-			// 	}
-			// }
 		}
 
 		// one more event update if nothing changed or there were no previous events seen
@@ -68,11 +56,11 @@ int main(int argc, char* argv[])
 			// delay for the remainder of the frame to keep up to 60fps
 			// (we only do this if we didn't draw to not waste energy
 			// if we did draw, then proceed immediately without waiting for smoother progress bars / scrolling)
-			int delayTime = (SDL_GetTicks() - frameStart);
+			int delayTime = (CST_GetTicks() - frameStart);
 			if (delayTime < 0)
 				delayTime = 0;
 			if (delayTime < 16)
-				SDL_Delay(16 - delayTime);
+				CST_Delay(16 - delayTime);
 		}
 
 		((MainDisplay*)RootDisplay::mainDisplay)->showingSplash = false;

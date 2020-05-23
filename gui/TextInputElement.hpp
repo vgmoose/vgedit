@@ -24,7 +24,7 @@ public:
 	int lastSelectedXPos = -1;
 	int lastSelectedYPos = -1;
 
-  int COLS = 100;
+  int COLS = 95;
   int lineSpacing = 2;
 
   int fontHeight;
@@ -34,6 +34,7 @@ public:
 
 	Editor* editor;
 	FC_Font* font = NULL;
+	FC_Font* lineFont = NULL;
 };
 
 #endif

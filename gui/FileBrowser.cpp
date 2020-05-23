@@ -77,13 +77,12 @@ void FileBrowser::render(Element* parent)
 	if (selected >= 0)
 	{
 		// draw the cursor for this file
-		SDL_Rect dimens4 = { this->x + (selected % 5) * 220 + 60, this->y + (selected / 5) * 200 + 100, 210, 210 };
-		SDL_SetRenderDrawColor(parent->renderer, 0xaa, 0xaa, 0xaa, 0xff);
-		SDL_RenderDrawRect(parent->renderer, &dimens4);
+		CST_Rect dimens4 = { this->x + (selected % 5) * 220 + 60, this->y + (selected / 5) * 200 + 100, 210, 210 };
+		CST_SetDrawColor(parent->renderer, { 0xaa, 0xaa, 0xaa, 0xff });
+		CST_DrawRect(parent->renderer, &dimens4);
 	}
 
-	renderer = parent->renderer;
-	return ListElement::render(this);
+	return ListElement::render(parent);
 }
 
 // copy-pasta'd from Utils.cpp in hb-appstore
@@ -122,7 +121,7 @@ void FileBrowser::listfiles()
 	this->elements.clear();
 
 	// current path at the top
-	SDL_Color white = { 0xFF, 0xFF, 0xFF, 0xFF };
+	CST_Color white = { 0xFF, 0xFF, 0xFF, 0xFF };
 	TextElement* path = new TextElement(pwd->c_str(), 25, &white, MONOSPACED);
 	path->position(10, 30);
 	this->elements.push_back(path);

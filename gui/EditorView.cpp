@@ -9,18 +9,22 @@ EditorView::EditorView(Editor* editor)
 	mainTextField->y = 70;
 	this->elements.push_back(mainTextField);
 
+	this->editor = editor;
+	this->text = editor->text;
+
 	// create a tool bar, but don't add it to the elements list
 	// it will be manually drawn in later (above everything else)
 	toolbar = new Toolbar(editor->filename, this);
-
-	this->editor = editor;
-	this->text = editor->text;
 }
 
 void EditorView::render(Element* parent)
 {
 	SDL_SetRenderDrawColor(parent->renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 	SDL_RenderFillRect(parent->renderer, NULL);
+
+	// SDL_SetRenderDrawColor(parent->renderer, 0xee, 0xee, 0xee, 0xff);
+	// SDL_Rect rect = {0, 0, 10 + editor->lineNoPlaces * mainTextField->fontWidth, SCREEN_HEIGHT};
+	// SDL_RenderFillRect(parent->renderer, &rect);
 
 	super::render(parent);
 
@@ -41,9 +45,9 @@ void EditorView::reset_bounds()
 
 	// adjust the bounds of the selection
 	selected_width = selected_width < 1 ? 1 : selected_width;
-	selected_width = selected_width > editor->curLineLength - selected_x ? editor->curLineLength - selected_x : selected_width;
+	selected_width = selected_width > editor->curLineLength - selected_x + 2 ? editor->curLineLength - selected_x + 2 : selected_width;
 
-	mainTextField->selectedWidth = selected_width || 1;
+	mainTextField->selectedWidth = selected_width;
 
 	// always snap the cursor to be on screen and visible (by moving the screen)
 	// int h = mainTextField->fontHeight + 2;
@@ -122,104 +126,5 @@ bool EditorView::process(InputEvents* e)
 		return true;
 	}
 
-	// perform a save
-	if (e->released(START_BUTTON))
-	{
-		toolbar->setModified(false);
-		editor->save();
-		return true;
-	}
-
-	// delete what's under the current selection (not backspace)
-	if (e->pressed(B_BUTTON))
-	{
-		// in insert mode, delete is a "backspace-style" action, and moves the cursor left if it can
-		if (mainTextField->insertMode)
-		{
-			if (mainTextField->selectedPos <= 0)
-				return false;
-			
-			mainTextField->selectedPos--;
-		}
-
-		editor->del(mainTextField->selectedPos, mainTextField->selectedWidth);
-		syncText();
-		return true;
-	}
-
-	// bring up the keyboard
-	if (e->released(A_BUTTON))
-	{
-		if (keyboard == NULL)
-		{
-			keyboard = new EKeyboard(this);
-			this->elements.push_back(keyboard);
-		}
-
-		keyboard->hidden = false;
-
-		// force selection to be width 1 (more than 1 doesn't make sense in insert mode)
-		// (but it does make sense for vertical selections, to type on multiple lines)
-		mainTextField->selectedWidth = 1;
-		mainTextField->insertMode = true;
-		toolbar->keyboardShowing = true;
-
-		reset_bounds();
-
-		return true;
-	}
-
-	if (keyboard == NULL || keyboard->hidden)
-	{
-		// copy and paste on X and Y
-		if (e->released(X_BUTTON))
-		{
-			copySelection();
-			return true;
-		}
-	}
-	else
-	{
-		if (e->released(X_BUTTON))
-		{
-			// editor->overwriteMode = !editor->overwriteMode;
-			// TODO: add overwrite mode back when hex editor is here
-
-			keyboard->shiftOn = !keyboard->shiftOn;
-			keyboard->updateSize();
-			return true;
-		}
-
-		if (e->released(Y_BUTTON))
-		{
-			keyboard->hidden = true;
-			mainTextField->insertMode = false;
-			toolbar->keyboardShowing = false;
-			return true;
-		}
-	}
-
-	if (e->released(Y_BUTTON))
-	{
-		pasteSelection();
-		return true;
-	}
-
-	if (e->pressed(L_BUTTON | R_BUTTON | ZL_BUTTON | ZR_BUTTON))
-	{
-		// move the bounds of the selection
-		if (e->pressed(L_BUTTON))
-			mainTextField->selectedWidth -= 1;
-		if (e->pressed(R_BUTTON))
-			mainTextField->selectedWidth += 1;
-		// if (e->pressed(ZL_BUTTON))
-		//   mainTextField->selected_height -= 1;
-		// if (e->pressed(ZR_BUTTON))
-		//   mainTextField->selected_height += 1;
-
-		reset_bounds();
-		return true;
-	}
-
-	return super::process(e) || toolbar->process(e);
+	return toolbar->process(e) || super::process(e);
 }

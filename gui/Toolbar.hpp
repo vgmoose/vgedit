@@ -9,15 +9,16 @@ class EditorView;
 class Toolbar : public Element
 {
 public:
-	const static int MAX_PATH_LENGTH = 48;
+	const static int MAX_PATH_LENGTH = 44;
 
 	Toolbar(const char* path, EditorView* editorView);
 	void setModified(bool modified);
+	
 	void render(Element* parent);
 
 	TextElement* pathE = NULL;
-	TextElement* actions = NULL;
-	TextElement* keyActions = NULL;
+	TextElement* stats = NULL;
+	std::string statusText = "";
 
 	char path[MAX_PATH_LENGTH + 1];
 	bool modified = true;

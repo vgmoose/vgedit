@@ -1,4 +1,6 @@
 #include "Toolbar.hpp"
+#include "MainDisplay.hpp"
+#include "EKeyboard.hpp"
 #include "../libs/chesto/src/Container.hpp"
 #include "../libs/chesto/src/Button.hpp"
 
@@ -12,47 +14,107 @@ Toolbar::Toolbar(const char* path, EditorView* editorView)
 	}
 
 	pathE = new TextElement(this->path, 20, 0, MONOSPACED);
-	pathE->position(10, 10);
+	pathE->position(10, 13);
 	elements.push_back(pathE);
 
-	SDL_Color white = { 0xFF, 0xFF, 0xFF, 0xFF };
+	CST_Color white = { 0xFF, 0xFF, 0xFF, 0xFF };
 
-	Container* con = new Container(ROW_LAYOUT, 10);
+	auto editor = editorView->editor;
+	auto textField = editorView->mainTextField;
+
+	bool dark = false;
+	int bsize = 16;
+	
+	// member vars
+	auto isInsert = textField->insertMode;
+	auto keyboard = editorView->keyboard;
+
+	Container* con = new Container(ROW_LAYOUT, 5);
+	Container* bot = new Container(ROW_LAYOUT, 5);
 	elements.push_back(con);
+	elements.push_back(bot);
 
-	con->add((new Button("Exit", SELECT_BUTTON))->setAction([](){
-		printf("TODO: Implement exit here\n");
+	con->add((new Button("Exit", SELECT_BUTTON, dark, bsize))->setAction([](){
+		((MainDisplay*)RootDisplay::mainDisplay)->closeEditor();
 	}));
 
-	con->add((new Button("Save", START_BUTTON))->setAction([](){
-		printf("TODO: Implement exit here\n");
+	con->add((new Button("Save", START_BUTTON, dark, bsize))->setAction([this, editor](){
+		// perform a save
+		this->setModified(false);
+		editor->save();
 	})),
 
-	con->add((new Button("Copy", X_BUTTON))->setAction([](){
-		printf("TODO: paste\n");
+	con->add((new Button(isInsert ? "Caps" : "Copy", X_BUTTON, dark, bsize))->setAction([isInsert, editorView, keyboard](){
+		if (isInsert) {
+			keyboard->shiftOn = !keyboard->shiftOn;
+			keyboard->updateSize();
+			return;
+		}
+		editorView->copySelection();
 	}));
 
-	con->add((new Button("Paste", Y_BUTTON))->setAction([](){
-		printf("TODO: paste\n");
+	con->add((new Button(isInsert ? "Stow Keyboard" : "Paste", Y_BUTTON, dark, bsize))->setAction([this, isInsert, textField, keyboard, editorView](){
+		if (isInsert) {
+			keyboard->hidden = true;
+			textField->insertMode = false;
+			this->keyboardShowing = false;
+			return;
+		}
+		editorView->pasteSelection();
 	}));
 
-	con->add((new Button("", L_BUTTON))->setAction([](){
-		printf("TODO: left dir\n");
+	// L and R don't do anything in insert mode (no selections)
+	if (!isInsert)
+	{
+		bot->add((new Button("Deselect", L_BUTTON, dark, bsize))->setAction([textField, editorView](){
+			textField->selectedWidth -= 1;
+			editorView->reset_bounds();
+		}));
+
+		bot->add((new Button("Select", R_BUTTON, dark, bsize))->setAction([textField, editorView](){
+			textField->selectedWidth += 1;
+			editorView->reset_bounds();
+		}));
+
+		bot->add((new Button("Bring up Keyboard", A_BUTTON, dark, bsize))->setAction([this, textField, keyboard, editorView](){
+			if (keyboard == NULL)
+			{
+				editorView->keyboard = new EKeyboard(editorView);
+				editorView->elements.push_back(editorView->keyboard);
+			}
+
+			editorView->keyboard->hidden = false;
+
+			// force selection to be width 1 (more than 1 doesn't make sense in insert mode)
+			// (but it does make sense for vertical selections, to type on multiple lines)
+			textField->selectedWidth = 1;
+			textField->insertMode = true;
+			this->keyboardShowing = true;
+
+			editorView->reset_bounds();
+		}));
+
+		stats = new TextElement("ZZ characters", 20, 0, MONOSPACED);
+		stats->position(10, SCREEN_HEIGHT - 35);
+		elements.push_back(stats);
+	}
+
+	con->add((new Button(isInsert ? "Backspace" : "Delete", B_BUTTON, dark, bsize))->setAction([textField, editor, editorView](){
+		// in insert mode, delete is a "backspace-style" action, and moves the cursor left if it can
+		if (textField->insertMode)
+		{
+			if (textField->selectedPos <= 0)
+				return;
+			
+			textField->selectedPos--;
+		}
+
+		editor->del(textField->selectedPos, textField->selectedWidth);
+		editorView->syncText();
 	}));
 
-	con->add((new Button("Select", R_BUTTON))->setAction([](){
-		printf("TODO: right dir\n");
-	}));
-
-	con->add((new Button("Delete", B_BUTTON))->setAction([](){
-		printf("TODO: Type\n");
-	}));
-
-	con->add((new Button("Type", A_BUTTON))->setAction([](){
-		printf("TODO: Type\n");
-	}));
-
-	con->position(SCREEN_WIDTH - 10 - con->width, 40);
+	con->position(SCREEN_WIDTH - 10 - con->width, 5);
+	bot->position(SCREEN_WIDTH - 10 - bot->width, SCREEN_HEIGHT - bot->height - 5);
 }
 
 void Toolbar::setModified(bool modified)
@@ -69,16 +131,18 @@ void Toolbar::setModified(bool modified)
 
 void Toolbar::render(Element* parent)
 {
-	SDL_Rect background = { 0, 0, 1280, 50 };
+	CST_Rect topBg = { 0, 0, SCREEN_WIDTH, 50 };
 
 	// draw top bar on top of other things
-	// SDL_SetRenderDrawColor(parent->renderer, 0x0, 0x0, 0x0, 0xFF);
-	// SDL_RenderFillRect(parent->renderer, &background);
+	CST_SetDrawColor(parent->renderer, { 0x40, 0x40, 0x40, 0xFF });
+	CST_FillRect(parent->renderer, &topBg);
 
-	super::render(this);
+	if (!keyboardShowing) {
+		CST_Rect botBg = { 0, SCREEN_HEIGHT - 50, SCREEN_WIDTH, 50 };
 
-	// if (keyboardShowing)
-	// 	keyActions->render(this);
-	// else
-	// 	actions->render(this);
+		// draw top bar on top of other things
+		CST_FillRect(parent->renderer, &botBg);
+	}
+
+	super::render(parent);
 }

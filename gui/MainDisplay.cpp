@@ -5,8 +5,7 @@
 MainDisplay::MainDisplay()
 {
 	RootDisplay::super();
-
-  // backgroundColor = { 0x42, 0x45, 0x48, 0xFF };
+	backgroundColor = fromRGB(0x42, 0x45, 0x48);
 }
 
 void MainDisplay::openFile(bool isFolder, std::string* path)
@@ -38,7 +37,9 @@ bool MainDisplay::process(InputEvents* event)
 
 void MainDisplay::closeEditor()
 {
+	// this is _probably_ safe
 	elements.erase(elements.begin() + 1); // second element should be the editor (TODO: something smarter)
+	editorView->wipeAll(); // destroy subelements
 	delete editorView;
 	editorView = NULL;
 }

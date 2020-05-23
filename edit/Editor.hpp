@@ -26,6 +26,8 @@ public:
 	int curLineLength = 0;
 	int prevLinePos = 0;
 	int nextLineLength = 0;
+
+	int lineNoPlaces = 0;
   
 	const char* filename = NULL;
 	bool overwriteMode = false;
