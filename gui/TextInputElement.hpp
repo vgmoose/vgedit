@@ -24,6 +24,8 @@ public:
 	int lastSelectedXPos = -1;
 	int lastSelectedYPos = -1;
 
+	int bonusWidthInSelection = 0;
+
   int COLS = 95;
   int lineSpacing = 2;
 

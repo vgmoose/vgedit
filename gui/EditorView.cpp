@@ -44,14 +44,15 @@ void EditorView::reset_bounds()
 	int selected_width = mainTextField->selectedWidth;
 
 	// adjust the bounds of the selection
+	auto posInLine = mainTextField->selectedPos - editor->curLinePos;
+	selected_width = selected_width > editor->curLineLength - posInLine ? editor->curLineLength - posInLine + 1 : selected_width;
 	selected_width = selected_width < 1 ? 1 : selected_width;
-	selected_width = selected_width > editor->curLineLength - selected_x + 2 ? editor->curLineLength - selected_x + 2 : selected_width;
 
 	mainTextField->selectedWidth = selected_width;
 
 	// always snap the cursor to be on screen and visible (by moving the screen)
 	// int h = mainTextField->fontHeight + 2;
-	// float cursor_y = (h * mainTextField->selected_y - 50) * -1;
+	// float cursor_y = (h * mainTextField->selectedYPos - 50) * -1;
 
 	// if (cursor_y > mainTextField->y + 50)
 	// 	mainTextField->y += h;
@@ -122,7 +123,6 @@ bool EditorView::process(InputEvents* e)
 			mainTextField->selectedPos = min(next_rpos, down_pos) + 1;
 		}
 
-		reset_bounds();
 		return true;
 	}
 

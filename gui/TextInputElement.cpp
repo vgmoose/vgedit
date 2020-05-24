@@ -53,7 +53,7 @@ void TextInputElement::render(Element* parent)
   int w = fontWidth, h = fontHeight;
 
 	// // draw the currently selected block
-	CST_Rect cursor_pos = { selectedXPos, selectedYPos - 2, selectedWidth * w, 1 * h };
+	CST_Rect cursor_pos = { selectedXPos, selectedYPos - 2, (selectedWidth + bonusWidthInSelection) * w, 1 * h };
 
 	if (insertMode) // TODO: use block cursor for overwrite mode too
 	{
@@ -104,6 +104,7 @@ void TextInputElement::render(Element* parent)
 
     int lpos = curPos;
     int bonusWidth = 0; // add to this in cases like tab, where "one" character takes 4 spaces 
+    bonusWidthInSelection = 0;
 
     if (!hasWrapped) {
       // update the position of the line number only if we didn't wrap
@@ -125,8 +126,11 @@ void TextInputElement::render(Element* parent)
       }
 
       char curChar = text->at(curPos);
-      if (curChar == '\t')
+      if (curChar == '\t') {
         bonusWidth += 3;
+        if (curPos >= selectedPos && curPos < selectedPos + selectedWidth)
+          bonusWidthInSelection += 3;
+      }
 
       if (curChar == '\n') {
         actualLineNo ++;
@@ -174,8 +178,11 @@ void TextInputElement::render(Element* parent)
     linePos ++;
   }
 
+  auto editorView = ((MainDisplay*)RootDisplay::mainDisplay)->editorView;
+  editorView->reset_bounds();
+
   // counts for the status bar
-  auto toolbar = ((MainDisplay*)RootDisplay::mainDisplay)->editorView->toolbar;
+  auto toolbar = editorView->toolbar;
   if (toolbar->stats != NULL) {
     std::ostringstream status;
     status << len << " characters" << " (";
