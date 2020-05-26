@@ -13,9 +13,7 @@ TextInputElement::TextInputElement(Editor* editor)
   FC_LoadFont(font, renderer, fontPath, size, FC_MakeColor(0,0,0,255), TTF_STYLE_NORMAL); 
 
   lineFont = FC_CreateFont();  
-  FC_LoadFont(lineFont, renderer, fontPath, size - 5, FC_MakeColor(0x40,0x40,0x40,255), TTF_STYLE_NORMAL); 
-  
-  
+  FC_LoadFont(lineFont, renderer, fontPath, size - 5, FC_MakeColor(0x40,0x40,0x40,255), TTF_STYLE_NORMAL);
 
   fontHeight = FC_GetLineHeight(font) + lineSpacing;
   fontWidth = FC_GetWidth(font, "A"); // width of one char
@@ -25,7 +23,15 @@ TextInputElement::TextInputElement(Editor* editor)
 
 bool TextInputElement::process(InputEvents* event)
 {
-  bool ret = ListElement::process(event);
+  bool ret = false;
+
+  if (event->isTouchUp() && elasticCounter == 0 && (!insertMode || event->yPos < 300)) {
+    lastTouchX = event->xPos;
+    lastTouchY = event->yPos;
+    ret |= true;
+  }
+
+  ret |= ListElement::process(event);
 
   ret |= (selectedXPos != lastSelectedXPos || selectedYPos != lastSelectedYPos);
 
@@ -40,6 +46,9 @@ void TextInputElement::render(Element* parent)
 	if (this->hidden)
 		return;
 
+  auto editorView = ((MainDisplay*)RootDisplay::mainDisplay)->editorView;
+  editorView->reset_bounds();
+
   std::string* text = editor->text;
 
   int len = text->length();
@@ -52,23 +61,7 @@ void TextInputElement::render(Element* parent)
 
   int w = fontWidth, h = fontHeight;
 
-	// // draw the currently selected block
-	CST_Rect cursor_pos = { selectedXPos, selectedYPos - 2, (selectedWidth + bonusWidthInSelection) * w, 1 * h };
-
-	if (insertMode) // TODO: use block cursor for overwrite mode too
-	{
-		// traditional line cursor, between characters
-		CST_SetDrawColor(renderer, { 0x00, 0x00, 0x00, 0xFF });
-		CST_DrawLine(renderer, cursor_pos.x + 2, cursor_pos.y, cursor_pos.x + 2, cursor_pos.y + cursor_pos.h);
-	}
-	else
-	{
-		// highlight cursor for overview screen
-		CST_SetDrawColor(renderer, { 0xDD, 0xDD, 0xDD, 0xFF });
-		CST_FillRect(renderer, &cursor_pos);
-    CST_SetDrawColor(renderer, { 0x90, 0x90, 0x90, 0xFF });
-    CST_DrawRect(renderer, &cursor_pos);
-	}
+  bonusWidthInSelection = 0;
 
   // go through and divvy up the text in each line
   // by visiting COLS characters at a time
@@ -104,7 +97,6 @@ void TextInputElement::render(Element* parent)
 
     int lpos = curPos;
     int bonusWidth = 0; // add to this in cases like tab, where "one" character takes 4 spaces 
-    bonusWidthInSelection = 0;
 
     if (!hasWrapped) {
       // update the position of the line number only if we didn't wrap
@@ -113,6 +105,16 @@ void TextInputElement::render(Element* parent)
 
     while (curPos < len && (curPos + bonusWidth) - lpos < COLS)
     {
+      // if we have a last touch, and we're nearby it, set our current selection position
+      // and reset that last touch position
+      if (lastTouchX > 0 && lastTouchY > 0) {
+        if (abs(lastTouchY - lineYPos) < 10
+            && (abs(lastTouchX - (xPos + ((curPos + bonusWidth) - lpos) * fontWidth)) < 10)) {
+          selectedPos = curPos;
+          lastTouchX = lastTouchY = -1;
+        }
+      }
+
       if (curPos == selectedPos)
       {
         // we found where our selected cursor position is, mark its coordinates
@@ -158,6 +160,24 @@ void TextInputElement::render(Element* parent)
       editor->curLineLength = curPos - lpos;
       currentLineNo = linePos;
       isOnNextLine = true;
+
+      // we can update the cursor right now
+      CST_Rect cursor_pos = { selectedXPos, selectedYPos - 3, (selectedWidth + bonusWidthInSelection) * w, 1 * h };
+
+      if (insertMode) // TODO: use block cursor for overwrite mode too
+      {
+        // traditional line cursor, between characters
+        CST_SetDrawColor(renderer, { 0x00, 0x00, 0x00, 0xFF });
+        CST_DrawLine(renderer, cursor_pos.x + 2, cursor_pos.y, cursor_pos.x + 2, cursor_pos.y + cursor_pos.h);
+      }
+      else
+      {
+        // highlight cursor for overview screen
+        CST_SetDrawColor(renderer, { 0xDD, 0xDD, 0xDD, 0xFF });
+        CST_FillRect(renderer, &cursor_pos);
+        CST_SetDrawColor(renderer, { 0x90, 0x90, 0x90, 0xFF });
+        CST_DrawRect(renderer, &cursor_pos);
+      }
     }
 
     prev_lpos = lpos;
@@ -165,20 +185,24 @@ void TextInputElement::render(Element* parent)
     if (lineYPos > -10) // only draw if it would be onscreen
     {
       if (actualLineNo != prevActualLineNo) {
+        // line numbers for this row, only over start of the "actual" (pre-wrapped) line
         std::stringstream stream;
         stream << std::setw(lineNoPlaces) << std::setfill('0') << actualLineNo;
         auto res = stream.str();
         FC_Draw(lineFont, renderer, lineXPos, actualLineYPos + 1, res.c_str());
         prevActualLineNo = actualLineNo;
       }
-      FC_Draw(font, renderer, xPos, lineYPos, text->substr(lpos, curPos - lpos + 1).c_str());
+
+      // draw this part of current line
+      auto lineText = text->substr(lpos, curPos - lpos + 1);
+      FC_Draw(font, renderer, xPos, lineYPos, lineText.c_str());
       hasWrapped = curPos - lpos + bonusWidth == COLS; // we wrapped if our line width (and tabs) is equal to max
     }
+  
     curPos ++;
     linePos ++;
   }
 
-  auto editorView = ((MainDisplay*)RootDisplay::mainDisplay)->editorView;
   editorView->reset_bounds();
 
   // counts for the status bar

@@ -38,6 +38,7 @@ void EKeyboard::render(Element* parent)
 
 	CST_Rect dimensSpace = { this->x + sPos, this->y + dHeight, sWidth, textSize };
 	CST_Rect dimensEnter = { this->x + enterPos, this->y + enterHeight, enterWidth, (int)(1.5 * textSize) };
+	CST_Rect dimensTab = { this->x + dPos, this->y + dHeight + 100, dWidth, (int)(1.5 * textSize) };
 
 	// if there's a highlighted piece set, color it in
 	if (curRow >= 0 || index >= 0)
@@ -48,6 +49,9 @@ void EKeyboard::render(Element* parent)
 		{
 			switch (index)
 			{
+				case 0:
+					dimens = dimensTab;
+					break;
 				case 1:
 					// if we're on SPACE, expand the dimens width of the highlighted button
 					dimens2 = dimensSpace;
@@ -131,7 +135,7 @@ bool EKeyboard::process(InputEvents* event)
 
 			if (curRow < 0) curRow = 0;
 			if (index < 0) index = 0;
-			if (curRow >= rowCount() + 1) curRow = rowCount(); // +1 for bottom "row" (space, language, enter)
+			if (curRow >= rowCount() + 1) curRow = rowCount(); // +1 for bottom "row" (tab, space, enter)
 			if (curRow == rowCount())
 			{
 				// go to space key if last index is in the middle of row
@@ -140,9 +144,9 @@ bool EKeyboard::process(InputEvents* event)
  					index = 1;
 				}
 
-				// TODO: implement sym key
-				// space key
-				if (index < 1) index = 1;
+				// tab key
+				if (index < 0) index = 0;
+
 				// enter key
 				if (index > 2) index = 2;
 			}
@@ -154,6 +158,9 @@ bool EKeyboard::process(InputEvents* event)
 				if (lastRow == rowCount()) {
 					switch (index)
 					{
+						case 0: //tab
+							index = 0;
+							break;
 						case 1: // space
 							// go to middle of current row
 							index = rowLength(curRow) / 2;
@@ -175,6 +182,9 @@ bool EKeyboard::process(InputEvents* event)
 				{
 					switch (index)
 					{
+						case 0:
+							just_type('\t');
+							break;
 						case 1:
 							just_type(' ');
 							break;
@@ -230,11 +240,11 @@ bool EKeyboard::process(InputEvents* event)
 						type(y, x);
 					}
 
-			// if (event->touchIn(this->x + dPos, this->y + dHeight, dWidth, textSize))
-			// {
-			// 	ret |= true;
-			// 	backspace();
-			// }
+			if (event->touchIn(this->x + dPos, this->y + dHeight + 100, dWidth, textSize))
+			{
+				ret |= true;
+				just_type('\t');
+			}
 
 			if (event->touchIn(this->x + sPos, this->y + dHeight, sWidth, textSize))
 			{
@@ -333,7 +343,7 @@ void EKeyboard::updateSize()
 	enterText->position(d3.x + d3.w / 2 - enterText->width / 2 - 30, 327);
 	this->elements.push_back(enterText);
 
-	TextElement* symText = new TextElement("sym", 30, &grayish);
+	TextElement* symText = new TextElement("tab", 30, &grayish);
 	CST_Rect d5 = { this->x + dPos, this->y + dHeight + 100, dWidth, textSize }; // todo: extract out hardcoded rects like this
 	symText->position(d5.x + d5.w / 2 - symText->width / 2, 300);
 	this->elements.push_back(symText);

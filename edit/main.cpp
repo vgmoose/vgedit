@@ -63,7 +63,10 @@ int main(int argc, char* argv[])
 				CST_Delay(16 - delayTime);
 		}
 
-		((MainDisplay*)RootDisplay::mainDisplay)->showingSplash = false;
+		// free up any elements that are in the trash
+		display->recycle();
+
+		display->showingSplash = false;
 	}
 
   // 👋

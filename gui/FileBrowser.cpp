@@ -74,12 +74,20 @@ void FileBrowser::render(Element* parent)
 	if (((MainDisplay*)RootDisplay::mainDisplay)->editorView != NULL)
 		return;
 
-	if (selected >= 0)
+	if (selected >= 0) 
 	{
 		// draw the cursor for this file
-		CST_Rect dimens4 = { this->x + (selected % 5) * 220 + 60, this->y + (selected / 5) * 200 + 100, 210, 210 };
-		CST_SetDrawColor(parent->renderer, { 0xaa, 0xaa, 0xaa, 0xff });
-		CST_DrawRect(parent->renderer, &dimens4);
+		auto selectedElement = elements[1 + selected];
+		CST_Rect dimens4 = selectedElement->getBounds();
+		for (int z = 4; z >= 0; z--)
+		{
+			CST_SetDrawColor(parent->renderer, { 0x66 - z * 10, 0x7c + z * 20, 0x89 + z * 10, 0xFF });
+			dimens4.x--;
+			dimens4.y--;
+			dimens4.w += 2;
+			dimens4.h += 2;
+			CST_DrawRect(parent->renderer, &dimens4);
+		}
 	}
 
 	return ListElement::render(parent);

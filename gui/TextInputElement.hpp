@@ -24,6 +24,10 @@ public:
 	int lastSelectedXPos = -1;
 	int lastSelectedYPos = -1;
 
+	// variables to track the last touch for cursor positioning
+	int lastTouchX = -1;
+	int lastTouchY = -1;
+
 	int bonusWidthInSelection = 0;
 
   int COLS = 95;

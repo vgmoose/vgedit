@@ -12,6 +12,7 @@ public:
 	const static int MAX_PATH_LENGTH = 44;
 
 	Toolbar(const char* path, EditorView* editorView);
+	void initButtons(EditorView* editorView);
 	void setModified(bool modified);
 	
 	void render(Element* parent);

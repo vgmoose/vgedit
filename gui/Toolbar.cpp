@@ -13,9 +13,20 @@ Toolbar::Toolbar(const char* path, EditorView* editorView)
 		strcpy(this->path, path);
 	}
 
+	this->initButtons(editorView);
+}
+
+void Toolbar::initButtons(EditorView* editorView)
+{
+	this->removeAll(true);	// TOOD: memory leak from old toolbar
+
 	pathE = new TextElement(this->path, 20, 0, MONOSPACED);
 	pathE->position(10, 13);
 	elements.push_back(pathE);
+
+	stats = new TextElement("ZZ characters", 20, 0, MONOSPACED);
+	stats->position(10, SCREEN_HEIGHT - 35);
+	elements.push_back(stats);
 
 	CST_Color white = { 0xFF, 0xFF, 0xFF, 0xFF };
 
@@ -58,6 +69,9 @@ Toolbar::Toolbar(const char* path, EditorView* editorView)
 			keyboard->hidden = true;
 			textField->insertMode = false;
 			this->keyboardShowing = false;
+
+			// reload toolbar
+			this->initButtons(editorView);
 			return;
 		}
 		editorView->pasteSelection();
@@ -92,11 +106,11 @@ Toolbar::Toolbar(const char* path, EditorView* editorView)
 			this->keyboardShowing = true;
 
 			editorView->reset_bounds();
+
+			// re-init toolbar with insert mode options
+			this->initButtons(editorView);
 		}));
 
-		stats = new TextElement("ZZ characters", 20, 0, MONOSPACED);
-		stats->position(10, SCREEN_HEIGHT - 35);
-		elements.push_back(stats);
 	}
 
 	con->add((new Button(isInsert ? "Backspace" : "Delete", B_BUTTON, dark, bsize))->setAction([textField, editor, editorView](){
