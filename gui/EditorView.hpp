@@ -19,7 +19,10 @@ public:
 	Toolbar* toolbar = NULL;
 	std::string* copiedText = NULL;
 
-  std::string* text = NULL;
+  	std::string* text = NULL;
+
+	// set to false when scrolling away with touch controls
+  	bool keepCursorOnscreen = true;
 
 	// the big, main text field for the editor
 	TextInputElement* mainTextField;

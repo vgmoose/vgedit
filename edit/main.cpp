@@ -24,8 +24,7 @@ int main(int argc, char* argv[])
 	display->browser = fileBrowser;
 	display->elements.push_back(fileBrowser);
 
-	bool running = true;
-	while (running)
+	while (!display->exitRequested)
 	{
 		bool atLeastOneNewEvent = false;
 		bool viewChanged = false;

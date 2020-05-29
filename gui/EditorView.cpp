@@ -50,19 +50,20 @@ void EditorView::reset_bounds()
 
 	mainTextField->selectedWidth = selected_width;
 
+	// printf("main text area %d\n", mainTextField->selectedYPos);
 	// always snap the cursor to be on screen and visible (by moving the screen)
-	// int h = mainTextField->fontHeight + 2;
-	// float cursor_y = (h * mainTextField->selectedYPos - 50) * -1;
+	int h = mainTextField->fontHeight;
+	float cursor_y = mainTextField->selectedYPos;
 
-	// if (cursor_y > mainTextField->y + 50)
-	// 	mainTextField->y += h;
 
-	// if (cursor_y < mainTextField->y - 550)
-	// 	mainTextField->y -= h;
+	// if this boolean is set, adjust the textfield in the direction of the cursor
+	if (keepCursorOnscreen) {
+		if (cursor_y > (mainTextField->insertMode ? 200 : (SCREEN_HEIGHT - 100)))
+			mainTextField->y -= h/2;
 
-	// // if it's still offscreen, and we're showing the keyboard
-	// if (mainTextField->insertMode)
-	// 	mainTextField->y = cursor_y;
+		if (cursor_y < 50 && mainTextField->y < -1 * h/4)
+			mainTextField->y += h/2;
+	}
 }
 
 bool EditorView::copySelection()
@@ -123,8 +124,13 @@ bool EditorView::process(InputEvents* e)
 			mainTextField->selectedPos = min(next_rpos, down_pos) + 1;
 		}
 
+		// when we use a directional button for movement, start locking the cursor on screen
+		keepCursorOnscreen = true;
+
 		return true;
 	}
+
+	keepCursorOnscreen = !(e->isTouch() || e->isScroll());
 
 	return toolbar->process(e) || super::process(e);
 }

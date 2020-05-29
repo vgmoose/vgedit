@@ -33,7 +33,7 @@ void Toolbar::initButtons(EditorView* editorView)
 	auto editor = editorView->editor;
 	auto textField = editorView->mainTextField;
 
-	bool dark = false;
+	bool dark = true;
 	int bsize = 16;
 	
 	// member vars
@@ -80,7 +80,15 @@ void Toolbar::initButtons(EditorView* editorView)
 	// L and R don't do anything in insert mode (no selections)
 	if (!isInsert)
 	{
-		bot->add((new Button("Deselect", L_BUTTON, dark, bsize))->setAction([textField, editorView](){
+		bot->add((new Button("Undo", ZL_BUTTON, dark, bsize))->setAction([textField, editorView](){
+			// TODO: add undo
+		}));
+
+		bot->add((new Button("Redo", ZR_BUTTON, dark, bsize))->setAction([textField, editorView](){
+			// TODO: add redo
+		}));
+
+		bot->add((new Button("Find", L_BUTTON, dark, bsize))->setAction([textField, editorView](){
 			textField->selectedWidth -= 1;
 			editorView->reset_bounds();
 		}));
@@ -90,7 +98,7 @@ void Toolbar::initButtons(EditorView* editorView)
 			editorView->reset_bounds();
 		}));
 
-		bot->add((new Button("Bring up Keyboard", A_BUTTON, dark, bsize))->setAction([this, textField, keyboard, editorView](){
+		bot->add((new Button("Show Keyboard", A_BUTTON, dark, bsize))->setAction([this, textField, keyboard, editorView](){
 			if (keyboard == NULL)
 			{
 				editorView->keyboard = new EKeyboard(editorView);
@@ -98,6 +106,7 @@ void Toolbar::initButtons(EditorView* editorView)
 			}
 
 			editorView->keyboard->hidden = false;
+			editorView->keepCursorOnscreen = true;
 
 			// force selection to be width 1 (more than 1 doesn't make sense in insert mode)
 			// (but it does make sense for vertical selections, to type on multiple lines)

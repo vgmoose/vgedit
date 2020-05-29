@@ -23,7 +23,7 @@ void FileCard::update(bool isFolder, const char* name)
 
 	// text label (centered)
 	CST_Color color = { 0xFF, 0xFF, 0xFF, 0xFF };
-	con->add((new TextElement(name, 20, &color, NORMAL, 200)))->centerHorizontallyIn(con);
+	con->add((new TextElement(name, 20, &color, NORMAL, this->width)))->centerHorizontallyIn(con);
 	thumbIcon->centerHorizontallyIn(con);
 
 	// add and center container

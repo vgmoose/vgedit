@@ -1,6 +1,7 @@
 #include "FileBrowser.hpp"
 #include "../libs/chesto/src/Button.hpp"
 #include "../libs/chesto/src/TextElement.hpp"
+#include "../libs/chesto/src/Container.hpp"
 #include "FileCard.hpp"
 #include "MainDisplay.hpp"
 #include <dirent.h>
@@ -134,14 +135,15 @@ void FileBrowser::listfiles()
 	path->position(10, 30);
 	this->elements.push_back(path);
 
-	// new folder and file buttons
-	// Button* newFolder = new Button("New Folder", X_BUTTON, true);
-	// newFolder->position(820, 20);
-	// this->elements.push_back(newFolder);
-
-	// Button* newFile = new Button("New File", Y_BUTTON, true);
-	// newFile->position(1020, 20);
-	// this->elements.push_back(newFile);
+	// new folder, file, and exit buttons
+	Container* con = new Container(ROW_LAYOUT, 10);
+	con->add((new Button("Exit", SELECT_BUTTON, true))->setAction([](){
+		RootDisplay::mainDisplay->exitRequested = true;
+	}));
+	con->add(new Button("New Folder", X_BUTTON, true));
+	con->add(new Button("New File", Y_BUTTON, true));
+	con->position(750, 30);
+	this->elements.push_back(con);
 
 	DIR* dirp;
 	struct dirent* entry;
@@ -164,6 +166,7 @@ void FileBrowser::listfiles()
 
 	if (dirp)
 	{
+		std::vector<FileCard*> fileCards;
 		while ((entry = readdir(dirp)) != NULL)
 		{
 			// skip the '.' and '..' entries if they exist in the filesystem
@@ -171,10 +174,20 @@ void FileBrowser::listfiles()
 				continue;
 
 			FileCard* card = new FileCard(entry->d_type == DT_DIR, entry->d_name);
-			card->position(this->x + (count % 5) * card->width, this->y + 115 + (count / 5) * card->height);
 			card->path = new std::string(*pwd + (*pwd != "/" ? std::string("/") : "") + entry->d_name);
 			card->action = std::bind(&FileCard::openMyFile, card);
+			fileCards.push_back(card);
+		}
+
+		// sort alphabetically
+		std::sort(fileCards.begin(), fileCards.end(), [](FileCard* a, FileCard* b){
+			return strncasecmp(a->path->c_str(), b->path->c_str(), std::min(a->path->length(), b->path->length())) < 0;
+		});
+
+		// make children of the browser
+		for (auto card : fileCards) {
 			child(card);
+			card->position(this->x + (count % 5) * card->width, this->y + 115 + (count / 5) * card->height);
 			count++;
 		}
 

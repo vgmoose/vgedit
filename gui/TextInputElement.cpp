@@ -88,8 +88,8 @@ void TextInputElement::render(Element* parent)
   // TODO: keep track of the "last on screen" position in the text and more intelligently
   //       set curPos to start formatting from that position (and save time traversing downwards)
 
-  // for the entire string, or when going offscreen
-  while (curPos < len && lineYPos < SCREEN_HEIGHT + 10)
+  // for the entire string, and: (when going offscreen, or haven't seen cursor yet)
+  while (curPos < len && (lineYPos < SCREEN_HEIGHT + 10 || curPos <= selectedPos))
   {
     lineYPos = yPos + linePos * fontHeight;
 
@@ -108,7 +108,7 @@ void TextInputElement::render(Element* parent)
       // if we have a last touch, and we're nearby it, set our current selection position
       // and reset that last touch position
       if (lastTouchX > 0 && lastTouchY > 0) {
-        if (abs(lastTouchY - lineYPos) < 10
+        if (abs(lastTouchY - lineYPos) < 15
             && (abs(lastTouchX - (xPos + ((curPos + bonusWidth) - lpos) * fontWidth)) < 10)) {
           selectedPos = curPos;
           lastTouchX = lastTouchY = -1;
@@ -167,16 +167,27 @@ void TextInputElement::render(Element* parent)
       if (insertMode) // TODO: use block cursor for overwrite mode too
       {
         // traditional line cursor, between characters
-        CST_SetDrawColor(renderer, { 0x00, 0x00, 0x00, 0xFF });
-        CST_DrawLine(renderer, cursor_pos.x + 2, cursor_pos.y, cursor_pos.x + 2, cursor_pos.y + cursor_pos.h);
+        // CST_SetDrawColor(renderer, { 0x00, 0x00, 0x00, 0xFF });
+        CST_SetDrawColor(renderer, { 0x3e, 0xcc, 0xb1, 0xFF });
+        for (int i=-1; i<2; i++) {
+          CST_DrawLine(renderer, cursor_pos.x + i, cursor_pos.y - 1, cursor_pos.x + i, cursor_pos.y + cursor_pos.h + 1);
+        }
       }
       else
       {
         // highlight cursor for overview screen
-        CST_SetDrawColor(renderer, { 0xDD, 0xDD, 0xDD, 0xFF });
+        // CST_SetDrawColor(renderer, { 0xDD, 0xDD, 0xDD, 0xFF });
+        CST_SetDrawColor(renderer, { 0xd6, 0xf5, 0xef, 0xFF });
         CST_FillRect(renderer, &cursor_pos);
-        CST_SetDrawColor(renderer, { 0x90, 0x90, 0x90, 0xFF });
-        CST_DrawRect(renderer, &cursor_pos);
+        // CST_SetDrawColor(renderer, { 0x90, 0x90, 0x90, 0xFF });
+        CST_SetDrawColor(renderer, { 0x3e, 0xcc, 0xb1, 0xFF });
+        for (int i=0; i<2; i++) {
+          cursor_pos.x -= 1;
+          cursor_pos.y -= 1;
+          cursor_pos.w += 2;
+          cursor_pos.h += 2;
+          CST_DrawRect(renderer, &cursor_pos);
+        }
       }
     }
 
