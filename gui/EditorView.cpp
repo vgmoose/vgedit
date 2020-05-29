@@ -55,9 +55,11 @@ void EditorView::reset_bounds()
 	int h = mainTextField->fontHeight;
 	float cursor_y = mainTextField->selectedYPos;
 
-
 	// if this boolean is set, adjust the textfield in the direction of the cursor
 	if (keepCursorOnscreen) {
+		if (mainTextField->selectedPos == 0)
+			mainTextField->y = 0;
+
 		if (cursor_y > (mainTextField->insertMode ? 200 : (SCREEN_HEIGHT - 100)))
 			mainTextField->y -= h/2;
 

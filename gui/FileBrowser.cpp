@@ -20,6 +20,7 @@ FileBrowser::FileBrowser(const char* pwd)
 
 bool FileBrowser::process(InputEvents* events)
 {
+	bool updateUI = false;
 	if (((MainDisplay*)RootDisplay::mainDisplay)->editorView != NULL)
 		return false;
 
@@ -33,41 +34,51 @@ bool FileBrowser::process(InputEvents* events)
 	{
 		touchMode = false;
 
-		if (selected == -1)
-		{
-			selected = 0;
-		}
-
 		selected -= events->pressed(UP_BUTTON) * 5;
 		selected += events->pressed(DOWN_BUTTON) * 5;
 		selected += events->pressed(RIGHT_BUTTON);
 		selected -= events->pressed(LEFT_BUTTON);
 
-		if (selected < 0) selected = 0;
-		if (selected >= elements.size() - 1) selected = elements.size() - 2; // account for path
+		updateUI |= true;
+	}
 
-		if ((selected / 5) > 3)
-		{
-			this->y = -200 * (selected / 5);
-			return true;
+	if (selected < 0) selected = 0;
+	if (selected >= elements.size() - 2) selected = elements.size() - 3;
+
+	updateUI |= ListElement::process(events);
+
+	// excluding path and buttons at the end, this should be a FileCard
+	auto currentCard = (FileCard*)elements[selected];
+
+	int cardY = currentCard->yAbs;
+
+	if (!touchMode) {
+		// keep the cursor on screen if using buttons
+		if (selected <= 3) {
+			this->y = 0;
+			updateUI |= true;
 		}
 		else
 		{
-			this->y = 0;
-			return true;
+			if (cardY < 10) {
+				this->y += currentCard->height / 2;
+				updateUI |= true;
+			}
+			if (cardY > SCREEN_HEIGHT - (currentCard->height + 10)) {
+				this->y -= currentCard->height / 2;
+				updateUI |= true;
+			}
 		}
 	}
 
 	if (events->released(A_BUTTON))
 	{
-		if (selected < 0) return false;
-
 		// activate this file's editor
-		((FileCard*)elements[1 + selected])->openMyFile();
-		return true;
+		currentCard->openMyFile();
+		updateUI = true;
 	}
 
-	return ListElement::process(events);
+	return updateUI;
 }
 
 void FileBrowser::render(Element* parent)
@@ -75,10 +86,12 @@ void FileBrowser::render(Element* parent)
 	if (((MainDisplay*)RootDisplay::mainDisplay)->editorView != NULL)
 		return;
 
-	if (selected >= 0) 
+	ListElement::render(parent);
+
+	if (selected >= 0 && !touchMode) 
 	{
 		// draw the cursor for this file
-		auto selectedElement = elements[1 + selected];
+		auto selectedElement = elements[selected];
 		CST_Rect dimens4 = selectedElement->getBounds();
 		for (int z = 4; z >= 0; z--)
 		{
@@ -90,8 +103,6 @@ void FileBrowser::render(Element* parent)
 			CST_DrawRect(parent->renderer, &dimens4);
 		}
 	}
-
-	return ListElement::render(parent);
 }
 
 // copy-pasta'd from Utils.cpp in hb-appstore
@@ -128,22 +139,6 @@ void FileBrowser::listfiles()
 	// go through all files in current directory and create FileCard children out of them
 
 	this->elements.clear();
-
-	// current path at the top
-	CST_Color white = { 0xFF, 0xFF, 0xFF, 0xFF };
-	TextElement* path = new TextElement(pwd->c_str(), 25, &white, MONOSPACED);
-	path->position(10, 30);
-	this->elements.push_back(path);
-
-	// new folder, file, and exit buttons
-	Container* con = new Container(ROW_LAYOUT, 10);
-	con->add((new Button("Exit", SELECT_BUTTON, true))->setAction([](){
-		RootDisplay::mainDisplay->exitRequested = true;
-	}));
-	con->add(new Button("New Folder", X_BUTTON, true));
-	con->add(new Button("New File", Y_BUTTON, true));
-	con->position(750, 30);
-	this->elements.push_back(con);
 
 	DIR* dirp;
 	struct dirent* entry;
@@ -193,4 +188,21 @@ void FileBrowser::listfiles()
 
 		closedir(dirp);
 	}
+
+	// current path at the top
+	CST_Color white = { 0xFF, 0xFF, 0xFF, 0xFF };
+	TextElement* path = new TextElement(pwd->c_str(), 25, &white, MONOSPACED);
+	path->position(10, 30);
+	this->elements.push_back(path);
+
+	// new folder, file, and exit buttons
+	Container* con = new Container(ROW_LAYOUT, 10);
+	con->add((new Button("Exit", SELECT_BUTTON, true))->setAction([](){
+		RootDisplay::mainDisplay->exitRequested = true;
+	}));
+
+	con->add(new Button("New Folder", X_BUTTON, true));
+	con->add(new Button("New File", Y_BUTTON, true));
+	con->position(750, 30);
+	this->elements.push_back(con);
 }

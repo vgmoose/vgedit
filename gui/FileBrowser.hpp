@@ -14,5 +14,6 @@ public:
 
 	std::string* pwd = NULL;
 	bool touchMode = true;
+
 	int selected = -1;
 };

@@ -103,7 +103,7 @@ void TextInputElement::render(Element* parent)
       actualLineYPos = lineYPos;
     }
 
-    while (curPos < len && (curPos + bonusWidth) - lpos < COLS)
+    while (curPos < len && (curPos + bonusWidth) - lpos <= COLS)
     {
       // if we have a last touch, and we're nearby it, set our current selection position
       // and reset that last touch position
