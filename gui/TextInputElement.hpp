@@ -15,6 +15,8 @@ public:
 	bool process(InputEvents* event);
 	void render(Element* parent);
 
+	void drawLineNo(int actualLineNo, int lineXPos, int actualLineYPos);
+
 	int selectedPos = 0;
 	int selectedWidth = 1;
 

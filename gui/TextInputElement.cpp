@@ -41,6 +41,14 @@ bool TextInputElement::process(InputEvents* event)
   return ret;
 }
 
+void TextInputElement::drawLineNo(int actualLineNo, int lineXPos, int actualLineYPos)
+{
+  std::stringstream stream;
+  stream << std::setw(editor->lineNoPlaces) << std::setfill('0') << actualLineNo;
+  auto res = stream.str();
+  FC_Draw(lineFont, renderer, lineXPos, actualLineYPos + 1, res.c_str());
+}
+
 void TextInputElement::render(Element* parent)
 {
 	if (this->hidden)
@@ -78,6 +86,7 @@ void TextInputElement::render(Element* parent)
   int prev_lpos = 0;
   bool isOnNextLine = false;
   bool hasWrapped = false; // becomes true after we wrap around
+  bool nextTimeCountLine = false; // becomes true when \n is at the end of the width of the line
 
   // below loop will go through the text string from the front until it would go offscreen
   // and determine lines/spacing based on the content of the text (newlines and wrapping)
@@ -98,10 +107,11 @@ void TextInputElement::render(Element* parent)
     int lpos = curPos;
     int bonusWidth = 0; // add to this in cases like tab, where "one" character takes 4 spaces 
 
-    if (!hasWrapped) {
+    if (!hasWrapped || nextTimeCountLine) {
       // update the position of the line number only if we didn't wrap
       actualLineYPos = lineYPos;
     }
+    nextTimeCountLine = false;
 
     while (curPos < len && (curPos + bonusWidth) - lpos <= COLS)
     {
@@ -114,6 +124,8 @@ void TextInputElement::render(Element* parent)
           lastTouchX = lastTouchY = -1;
         }
       }
+
+      bool isLastCharOnLine = (curPos + bonusWidth) - lpos == COLS;
 
       if (curPos == selectedPos)
       {
@@ -136,9 +148,15 @@ void TextInputElement::render(Element* parent)
 
       if (curChar == '\n') {
         actualLineNo ++;
+        if (isLastCharOnLine)
+          nextTimeCountLine = true; // special case for \n on same line, force draw next time
         hasWrapped = false; // we're going to a new, real line next
         break;
       }
+
+      // special case of end of the line not incrementing curPos
+      if (isLastCharOnLine)
+        break;
 
       curPos ++;
     }
@@ -193,17 +211,14 @@ void TextInputElement::render(Element* parent)
 
     prev_lpos = lpos;
 
+    if (actualLineYPos > -10 && actualLineNo != 0 && actualLineNo != prevActualLineNo) {
+      // line numbers for this row, only over start of the "actual" (pre-wrapped) line
+      drawLineNo(actualLineNo, lineXPos, actualLineYPos);
+      prevActualLineNo = actualLineNo;
+    }
+
     if (lineYPos > -10) // only draw if it would be onscreen
     {
-      if (actualLineNo != prevActualLineNo) {
-        // line numbers for this row, only over start of the "actual" (pre-wrapped) line
-        std::stringstream stream;
-        stream << std::setw(lineNoPlaces) << std::setfill('0') << actualLineNo;
-        auto res = stream.str();
-        FC_Draw(lineFont, renderer, lineXPos, actualLineYPos + 1, res.c_str());
-        prevActualLineNo = actualLineNo;
-      }
-
       // draw this part of current line
       auto lineText = text->substr(lpos, curPos - lpos + 1);
       FC_Draw(font, renderer, xPos, lineYPos, lineText.c_str());
@@ -213,6 +228,11 @@ void TextInputElement::render(Element* parent)
     curPos ++;
     linePos ++;
   }
+
+  // if we had more of the file to go through (we stopped rendering early)
+  // draw the final line numbers
+  if (curPos != len)
+    drawLineNo(actualLineNo + 1, lineXPos, actualLineYPos);
 
   editorView->reset_bounds();
 
