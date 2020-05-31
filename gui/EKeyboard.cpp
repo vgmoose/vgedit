@@ -38,7 +38,7 @@ void EKeyboard::render(Element* parent)
 
 	CST_Rect dimensSpace = { this->x + sPos, this->y + dHeight, sWidth, textSize };
 	CST_Rect dimensEnter = { this->x + enterPos, this->y + enterHeight, enterWidth, (int)(1.5 * textSize) };
-	CST_Rect dimensTab = { this->x + dPos, this->y + dHeight + 100, dWidth, (int)(1.5 * textSize) };
+	CST_Rect dimensTab = { this->x + dPos, this->y + enterHeight, enterWidth, (int)(1.5 * textSize) };
 
 	// if there's a highlighted piece set, color it in
 	if (curRow >= 0 || index >= 0)
@@ -50,7 +50,7 @@ void EKeyboard::render(Element* parent)
 			switch (index)
 			{
 				case 0:
-					dimens = dimensTab;
+					dimens2 = dimensTab;
 					break;
 				case 1:
 					// if we're on SPACE, expand the dimens width of the highlighted button
@@ -89,13 +89,13 @@ void EKeyboard::render(Element* parent)
 		}
 	}
 
-	//   CST_Rect dimens3 = {this->x+dPos, this->y + dHeight, dWidth, textSize};
-	//   CST_SetDrawColor(renderer, 0xff, 0xaa, 0xaa, 0xff);
-	//   CST_FillRect(renderer, &dimens3);
-	//
 	CST_SetDrawColor(renderer, { 0xf4, 0xf4, 0xf4, 0xff });
 	CST_FillRect(renderer, &dimensSpace);
-	CST_FillRect(renderer, &dimensEnter);
+
+	if (typeAction == NULL) {
+		CST_FillRect(renderer, &dimensEnter);
+		CST_FillRect(renderer, &dimensTab);
+	}
 
 	super::render(this);
 }
@@ -240,7 +240,7 @@ bool EKeyboard::process(InputEvents* event)
 						type(y, x);
 					}
 
-			if (event->touchIn(this->x + dPos, this->y + dHeight + 100, dWidth, textSize))
+			if (event->touchIn(this->x + dPos, this->y + enterHeight, enterWidth, textSize))
 			{
 				ret |= true;
 				just_type('\t');
@@ -324,13 +324,6 @@ void EKeyboard::updateSize()
 		this->elements.push_back(rowText);
 	}
 
-	// these are local variables, similar to how the other ones are global events
-	// int dPos2 = (int)((20 / 400.0) * width);
-	// int dHeight2 = (int)((90 / 135.0) * height);
-	// int sPos2 = (int)((330 / 400.0) * width);
-
-	// int textSize2 = (int)((16 / 400.0) * width);
-
 	// text for space, enter, and symbols
 	CST_Color grayish = { 0x55, 0x55, 0x55, 0xff };
 	TextElement* spaceText = new TextElement("space", 30, &grayish);
@@ -338,15 +331,18 @@ void EKeyboard::updateSize()
 	spaceText->position(d4.x + d4.w / 2 - spaceText->width / 2 - 15, 345);
 	this->elements.push_back(spaceText);
 
-	TextElement* enterText = new TextElement("enter", 30, &grayish);
-	CST_Rect d3 = { this->x + enterPos, this->y + enterHeight, enterWidth, textSize }; // todo: extract out hardcoded rects like this
-	enterText->position(d3.x + d3.w / 2 - enterText->width / 2 - 30, 327);
-	this->elements.push_back(enterText);
+	if (typeAction == NULL)
+	{
+		TextElement* enterText = new TextElement("enter", 30, &grayish);
+		CST_Rect d3 = { this->x + enterPos, this->y + enterHeight, enterWidth, textSize }; // todo: extract out hardcoded rects like this
+		enterText->position(d3.x + d3.w / 2 - enterText->width / 2 - 30, 327);
+		this->elements.push_back(enterText);
 
-	TextElement* symText = new TextElement("tab", 30, &grayish);
-	CST_Rect d5 = { this->x + dPos, this->y + dHeight + 100, dWidth, textSize }; // todo: extract out hardcoded rects like this
-	symText->position(d5.x + d5.w / 2 - symText->width / 2, 300);
-	this->elements.push_back(symText);
+		TextElement* symText = new TextElement("tab", 30, &grayish);
+		CST_Rect d5 = { this->x + dPos, this->y + enterHeight, enterWidth, textSize }; // todo: extract out hardcoded rects like this
+		symText->position(d5.x + d5.w / 2 - symText->width / 2 - 30, 327);
+		this->elements.push_back(symText);
+	}
 }
 
 void EKeyboard::type(int y, int x)
@@ -367,6 +363,13 @@ void EKeyboard::type(int y, int x)
 
 void EKeyboard::just_type(const char input)
 {
+	if (typeAction != NULL) {
+		if (input != ' ')
+			return;	// don't let them type tab/enter in typeAction (aka filename)
+		typeAction(input);
+		return;
+	}
+
 	auto pos = editorView->mainTextField->selectedPos;
 
 	if (input == '\n')

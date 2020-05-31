@@ -1,5 +1,5 @@
 #include <string>
-#include "../libs/chesto/src/Element.hpp"
+#include "../libs/chesto/src/TextElement.hpp"
 
 class TextQueryPopup : public Element
 {
@@ -8,6 +8,7 @@ public:
 	~TextQueryPopup();
 
 	std::string query = "";
+	TextElement* queryText = NULL;
 
 	void render(Element* parent);
 };

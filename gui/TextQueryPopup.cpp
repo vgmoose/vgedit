@@ -1,11 +1,16 @@
 #include "../libs/chesto/src/Button.hpp"
+#include "../libs/chesto/src/Container.hpp"
 #include "TextQueryPopup.hpp"
 #include "EKeyboard.hpp"
 
 TextQueryPopup::TextQueryPopup(const char* prompt, const char* ctaText, std::function<void(const char*)> onConfirm)
 {
-	this->width = 220;
-	this->height = 200;
+	this->width = SCREEN_WIDTH;
+	this->height = SCREEN_HEIGHT;
+
+	this->x = 0;
+	this->y = 0;
+	this->isAbsolute = true;
 
 	// draw a big dim layer around the entire window before drawing this progress bar
 	CST_Rect dim = { 0, 0, 1280, 720 };
@@ -16,49 +21,62 @@ TextQueryPopup::TextQueryPopup(const char* prompt, const char* ctaText, std::fun
 
 	auto mainDisplay = RootDisplay::mainDisplay;
 
-	auto promptText = new TextElement(prompt, 20);
-	auto queryText = new TextElement("<folder name>", 20);
+	auto promptText = new TextElement(prompt, 22);
+	queryText = new TextElement("", 28);
 
 	auto keyboard = new EKeyboard(NULL);
-	keyboard->typeAction = [this, queryText](char input) {
+	keyboard->typeAction = [this](char input) {
 		query += input;
 		queryText->setText(query);
 		queryText->update();
 	};
+	keyboard->updateSize();
 	child(keyboard);
-
-	child(((new Button("Backspace", B_BUTTON))->setAction([this, queryText](){
-		if (!query.empty())
-			query.pop_back();
-		queryText->setText(query);
-		queryText->update();
-	}))->setPosition(20, 10));
 
 	std::function<void()> cleanUp = [this, mainDisplay](){
 		this->removeAll();
 		mainDisplay->switchSubscreen(NULL);
 	};
 
-	child(((new Button(ctaText, X_BUTTON))->setAction([this, onConfirm, cleanUp](){
+	auto con = new Container(ROW_LAYOUT);
+	bool dark = true;
+
+	child(((new Button("Backspace", B_BUTTON, dark))->setAction([this](){
+		if (!query.empty())
+			query.pop_back();
+		queryText->setText(query);
+		queryText->update();
+	}))->setPosition(SCREEN_WIDTH - 200, 230));
+
+	con->add(((new Button("Cancel", Y_BUTTON, dark))->setAction(cleanUp)));
+
+	con->add(((new Button(ctaText, X_BUTTON, dark))->setAction([this, onConfirm, cleanUp](){
 		onConfirm(query.c_str());
 		cleanUp();
-	}))->setPosition(160, 110));
+	})));
 
-	child(((new Button("Cancel", Y_BUTTON))->setAction(cleanUp))->setPosition(50, 110));
+	child(promptText->setPosition(0, 15)->centerHorizontallyIn(this));
+	child(con->setPosition(0, 230)->centerHorizontallyIn(this));
+	child(queryText->setPosition(0, 100)->centerHorizontallyIn(this));
 
-	child(queryText->setPosition(300, 50));
+	hasBackground = true;
+	backgroundColor = fromRGB(0x42, 0x45, 0x48);
 }
 
 void TextQueryPopup::render(Element* parent)
 {
+	queryText->centerHorizontallyIn(this);
+
 	// draw a big dim layer around the entire window before drawing
 	CST_Rect dim = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
 
 	auto renderer = RootDisplay::mainDisplay->renderer;
 
+	CST_Rect dim2 = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT / 14 };
+
 	CST_SetDrawBlend(renderer, true);
-	CST_SetDrawColorRGBA(renderer, 0x00, 0x00, 0x00, 0xbb);
-	CST_FillRect(renderer, &dim);
+	CST_SetDrawColorRGBA(renderer, 0x11, 0x11, 0x11, 0xff);
+	CST_FillRect(renderer, &dim2);
 
 	super::render(this);
 }
