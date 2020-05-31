@@ -49,6 +49,15 @@ void TextInputElement::drawLineNo(int actualLineNo, int lineXPos, int actualLine
   FC_Draw(lineFont, renderer, lineXPos, actualLineYPos + 1, res.c_str());
 }
 
+void TextInputElement::setStatus(const char* status)
+{
+  auto editorView = ((MainDisplay*)RootDisplay::mainDisplay)->editorView;
+  auto toolbar = editorView->toolbar;
+  toolbar->stats->setText(status);
+  toolbar->stats->update();
+  this->customStatus = true;
+}
+
 void TextInputElement::render(Element* parent)
 {
 	if (this->hidden)
@@ -238,7 +247,7 @@ void TextInputElement::render(Element* parent)
 
   // counts for the status bar
   auto toolbar = editorView->toolbar;
-  if (toolbar->stats != NULL) {
+  if (toolbar->stats != NULL && !customStatus) {
     std::ostringstream status;
     status << len << " characters" << " (";
     status << currentLineNo << ", " << (selectedPos - editor->curLinePos);
@@ -247,4 +256,6 @@ void TextInputElement::render(Element* parent)
     toolbar->stats->setText(toolbar->statusText.c_str());
     toolbar->stats->update();
   }
+
+  customStatus = false;  
 }

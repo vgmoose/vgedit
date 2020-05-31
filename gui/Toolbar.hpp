@@ -2,6 +2,7 @@
 #define TOOLBAR_H
 
 #include "../libs/chesto/src/TextElement.hpp"
+#include "../libs/chesto/src/Button.hpp"
 #include "EditorView.hpp"
 
 class EditorView;
@@ -19,10 +20,14 @@ public:
 
 	TextElement* pathE = NULL;
 	TextElement* stats = NULL;
+
 	std::string statusText = "";
+	std::string searchQuery = "";
+
+	Button* findButton = NULL;
 
 	char path[MAX_PATH_LENGTH + 1];
-	bool modified = true;
+	bool modified = false;
 	bool keyboardShowing = false;
 };
 

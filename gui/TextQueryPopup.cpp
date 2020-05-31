@@ -34,7 +34,7 @@ TextQueryPopup::TextQueryPopup(const char* prompt, const char* ctaText, std::fun
 	child(keyboard);
 
 	std::function<void()> cleanUp = [this, mainDisplay](){
-		this->removeAll();
+		this->removeAll(true);
 		mainDisplay->switchSubscreen(NULL);
 	};
 
@@ -47,6 +47,11 @@ TextQueryPopup::TextQueryPopup(const char* prompt, const char* ctaText, std::fun
 		queryText->setText(query);
 		queryText->update();
 	}))->setPosition(SCREEN_WIDTH - 200, 230));
+
+	child(((new Button("Caps", L_BUTTON, dark))->setAction([keyboard](){
+		keyboard->shiftOn = !keyboard->shiftOn;
+		keyboard->updateSize();
+	}))->setPosition(20, 230));
 
 	con->add(((new Button("Cancel", Y_BUTTON, dark))->setAction(cleanUp)));
 

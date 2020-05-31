@@ -16,6 +16,7 @@ public:
 	void render(Element* parent);
 
 	void drawLineNo(int actualLineNo, int lineXPos, int actualLineYPos);
+	void setStatus(const char* status);
 
 	int selectedPos = 0;
 	int selectedWidth = 1;
@@ -29,6 +30,9 @@ public:
 	// variables to track the last touch for cursor positioning
 	int lastTouchX = -1;
 	int lastTouchY = -1;
+
+	// true if we want to display a custom status for a bit
+	bool customStatus = false;
 
 	int bonusWidthInSelection = 0;
 

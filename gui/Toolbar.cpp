@@ -1,8 +1,9 @@
+#include "../libs/chesto/src/Container.hpp"
+#include "../libs/chesto/src/Button.hpp"
 #include "Toolbar.hpp"
 #include "MainDisplay.hpp"
 #include "EKeyboard.hpp"
-#include "../libs/chesto/src/Container.hpp"
-#include "../libs/chesto/src/Button.hpp"
+#include "TextQueryPopup.hpp"
 
 Toolbar::Toolbar(const char* path, EditorView* editorView)
 {
@@ -18,10 +19,11 @@ Toolbar::Toolbar(const char* path, EditorView* editorView)
 
 void Toolbar::initButtons(EditorView* editorView)
 {
-	this->removeAll(true);	// TOOD: memory leak from old toolbar
+	this->removeAll(true);
 
 	pathE = new TextElement(this->path, 20, 0, MONOSPACED);
 	pathE->position(10, 13);
+	setModified(modified);
 	elements.push_back(pathE);
 
 	stats = new TextElement("ZZ characters", 20, 0, MONOSPACED);
@@ -49,19 +51,23 @@ void Toolbar::initButtons(EditorView* editorView)
 		((MainDisplay*)RootDisplay::mainDisplay)->closeEditor();
 	}));
 
-	con->add((new Button("Save", START_BUTTON, dark, bsize))->setAction([this, editor](){
+	con->add((new Button("Save", START_BUTTON, dark, bsize))->setAction([this, textField, editor](){
 		// perform a save
 		this->setModified(false);
-		editor->save();
+		bool success = editor->save();
+		if (success) {
+			textField->setStatus("File saved successfully");
+		}
 	})),
 
-	con->add((new Button(isInsert ? "Caps" : "Copy", X_BUTTON, dark, bsize))->setAction([isInsert, editorView, keyboard](){
+	con->add((new Button(isInsert ? "Caps" : "Copy", X_BUTTON, dark, bsize))->setAction([isInsert, textField, editorView, keyboard](){
 		if (isInsert) {
 			keyboard->shiftOn = !keyboard->shiftOn;
 			keyboard->updateSize();
 			return;
 		}
 		editorView->copySelection();
+		textField->setStatus("Copied selection to clipboard");
 	}));
 
 	con->add((new Button(isInsert ? "Stow Keyboard" : "Paste", Y_BUTTON, dark, bsize))->setAction([this, isInsert, textField, keyboard, editorView](){
@@ -81,21 +87,50 @@ void Toolbar::initButtons(EditorView* editorView)
 	if (!isInsert)
 	{
 		bot->add((new Button("Undo", ZL_BUTTON, dark, bsize))->setAction([textField, editorView](){
-			// TODO: add undo
+			textField->setStatus("Nothing to undo!");
 		}));
 
 		bot->add((new Button("Redo", ZR_BUTTON, dark, bsize))->setAction([textField, editorView](){
-			// TODO: add redo
+			textField->setStatus("Nothing to redo!");
 		}));
 
-		bot->add((new Button("Find", L_BUTTON, dark, bsize))->setAction([textField, editorView](){
+		Button deselect("Deslct", L_BUTTON, dark, bsize);
+		findButton = (Button*)(new Button("Find...", L_BUTTON, dark, bsize, deselect.width))->setAction([this, textField, editorView, editor](){
+			if (textField->selectedWidth == 1) {
+				// size 1 uses Find function since we're out of buttons
+				auto popup = new TextQueryPopup("Enter search criteria", "Find", [this, textField, editor](const char* query){
+					// we're gonna try to find the first occurrence of the case-insensitive string they give us
+					int res = editor->text->find(query, textField->selectedPos + 1);
+					if (res == std::string::npos) {
+						// no match found, retry with no bounds
+						res = editor->text->find(query);
+						if (res == std::string::npos) {
+							// still not found...
+							textField->setStatus("No match found in file");
+							this->searchQuery.assign(""); // reset saved search
+							return;
+						}
+						textField->setStatus("Search hit bottom, continued at top");
+					}
+					textField->selectedPos = res;
+					this->searchQuery.assign(query); // save query if we had a match
+				});
+				popup->query = this->searchQuery.c_str();
+				popup->queryText->setText(popup->query);
+				popup->queryText->update();
+				RootDisplay::mainDisplay->switchSubscreen(popup);
+				return;
+			}
 			textField->selectedWidth -= 1;
+			if (textField->selectedWidth <= 1) findButton->updateText("Find...");
 			editorView->reset_bounds();
-		}));
+		});
+		bot->add(findButton);
 
-		bot->add((new Button("Select", R_BUTTON, dark, bsize))->setAction([textField, editorView](){
+		bot->add((new Button("Select", R_BUTTON, dark, bsize))->setAction([this, textField, editorView](){
 			textField->selectedWidth += 1;
 			editorView->reset_bounds();
+			if (textField->selectedWidth > 1) findButton->updateText("Deslct");
 		}));
 
 		bot->add((new Button("Show Keyboard", A_BUTTON, dark, bsize))->setAction([this, textField, keyboard, editorView](){
@@ -134,6 +169,12 @@ void Toolbar::initButtons(EditorView* editorView)
 
 		editor->del(textField->selectedPos, textField->selectedWidth);
 		editorView->syncText();
+
+		// if the file is empty, append empty line
+		if (editor->text->length() == 0)
+			editor->text->append("\n");
+
+		textField->render(editorView);
 	}));
 
 	con->position(SCREEN_WIDTH - 10 - con->width, 5);
