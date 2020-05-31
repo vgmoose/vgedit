@@ -352,6 +352,12 @@ void EKeyboard::updateSize()
 void EKeyboard::type(int y, int x)
 {
 	const char input = (*(rows[y]))[x * 2];
+
+	if (typeAction != NULL) {
+		typeAction(input);
+		return;
+	}
+
 	auto pos = editorView->mainTextField->selectedPos;
 	editorView->editor->type(pos, input);
 

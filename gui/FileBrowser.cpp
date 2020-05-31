@@ -4,9 +4,12 @@
 #include "../libs/chesto/src/Container.hpp"
 #include "FileCard.hpp"
 #include "MainDisplay.hpp"
+#include "TextQueryPopup.hpp"
 #include <dirent.h>
 #include <string.h>
 #include <unistd.h>
+#include <fstream>
+#include <sys/stat.h>
 
 FileBrowser::FileBrowser(const char* pwd)
 {
@@ -195,14 +198,30 @@ void FileBrowser::listfiles()
 	path->position(10, 30);
 	this->elements.push_back(path);
 
+	auto mainDisplay = RootDisplay::mainDisplay;
+
 	// new folder, file, and exit buttons
 	Container* con = new Container(ROW_LAYOUT, 10);
-	con->add((new Button("Exit", SELECT_BUTTON, true))->setAction([](){
-		RootDisplay::mainDisplay->exitRequested = true;
+	con->add((new Button("Exit", SELECT_BUTTON, true))->setAction([mainDisplay](){
+		mainDisplay->exitRequested = true;
 	}));
 
-	con->add(new Button("New Folder", X_BUTTON, true));
-	con->add(new Button("New File", Y_BUTTON, true));
+	con->add((new Button("New Folder", X_BUTTON, true))->setAction([this, mainDisplay](){
+		std::function<void(const char*)> createFunc = [this](const char* name){
+			printf("Creating folder [%s]\n", name);
+			::mkdir((*this->pwd + "/" + name).c_str(), 0775);
+			this->listfiles();
+		};
+		mainDisplay->switchSubscreen(new TextQueryPopup("Enter new folder name", "Create", createFunc));
+	}));
+	con->add((new Button("New File", Y_BUTTON, true))->setAction([this, mainDisplay](){
+		std::function<void(const char*)> createFunc = [this](const char* name){
+			printf("Creating file [%s]\n", name);
+			std::ofstream output((*this->pwd + "/" + name).c_str());
+			this->listfiles();
+		};
+		mainDisplay->switchSubscreen(new TextQueryPopup("Enter new file name", "Create", createFunc));
+	}));
 	con->position(750, 30);
 	this->elements.push_back(con);
 }

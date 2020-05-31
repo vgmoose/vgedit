@@ -32,7 +32,7 @@ void MainDisplay::openFile(bool isFolder, std::string* path)
 bool MainDisplay::process(InputEvents* event)
 {
 	// keep processing child elements
-	return super::process(event) || showingSplash;
+	return RootDisplay::process(event) || showingSplash;
 }
 
 void MainDisplay::closeEditor()

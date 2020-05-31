@@ -18,6 +18,7 @@ public:
 	void just_type(const char input);
 
 	EditorView* editorView = NULL;
+	std::function<void(char)> typeAction = NULL;
 
 	// information representing a default qwerty EKeyboard, lower and upper
 	// alongside default EKeyboards will also be: tab, caps lock, return, delete, and shifts
