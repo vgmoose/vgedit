@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <fstream>
 #include <sys/stat.h>
+#include <algorithm>
 
 FileBrowser::FileBrowser(const char* pwd)
 {
@@ -194,7 +195,15 @@ void FileBrowser::listfiles()
 
 	// current path at the top
 	CST_Color white = { 0xFF, 0xFF, 0xFF, 0xFF };
-	TextElement* path = new TextElement(pwd->c_str(), 25, &white, MONOSPACED);
+
+	// limit it to 45 chars
+	std::string clippedPath(*pwd);
+	if (clippedPath.length() > 45) {
+		clippedPath.erase(clippedPath.begin(), clippedPath.end() - 45);
+		clippedPath.insert(0, "...");
+	}
+
+	TextElement* path = new TextElement(clippedPath.c_str(), 25, &white, MONOSPACED);
 	path->position(10, 30);
 	this->elements.push_back(path);
 

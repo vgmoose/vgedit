@@ -40,6 +40,9 @@ bool Toolbar::commonHistoryLogic(bool isUndo, Editor* editor, TextInputElement* 
 		editor->text->insert(pos, chars->c_str());
 	}
 
+	// move cursor
+	textField->selectedPos = pos;
+
 	// for (int x=0; x<history.size(); x++) {
 	// 	auto event = history.at(x);
 	// 	printf("%d (%d): chars: [%s], pos: %d, action: %d\n", x, x == historyPos, event.chars.c_str(), event.pos, event.isDelete);

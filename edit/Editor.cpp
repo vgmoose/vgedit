@@ -73,8 +73,9 @@ bool Editor::appendHistory(const char* chars, int pos, bool isDelete)
 	// trim history size to current historyPos (removes future redo's)
 	if (historyPos != undoHistory.size() - 1)
 		undoHistory.erase(undoHistory.begin() + historyPos, undoHistory.end());
-	undoHistory.push_back({ .chars = chars, .pos = pos, .isDelete = isDelete });
+	undoHistory.push_back({ .chars = chars, .isDelete = isDelete, .pos = pos,  });
 	historyPos++;
+	return true;
 }
 
 bool Editor::type(int pos, const char input)

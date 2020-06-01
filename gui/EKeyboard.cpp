@@ -113,9 +113,9 @@ bool EKeyboard::process(InputEvents* event)
 
 	if (event->type == SDL_KEYDOWN)
 		return listenForPhysicalKeys(event);
-	if (event->type == SDL_KEYUP && (event->keyCode == SDLK_LSHIFT ||
-	event->keyCode == SDLK_RSHIFT ||
-	event->keyCode == SDLK_CAPSLOCK)) {
+	if (event->type == SDL_KEYUP &&	(event->keyCode == SDLK_LSHIFT ||
+	                                 event->keyCode == SDLK_RSHIFT ||
+		                             event->keyCode == SDLK_CAPSLOCK)) {
 		shiftOn = false;
 		updateSize();
 		return true;
