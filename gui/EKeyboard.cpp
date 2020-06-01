@@ -316,11 +316,14 @@ void EKeyboard::updateSize()
 
 	CST_Color gray = { 0x52, 0x52, 0x52, 0xff };
 
+	int targetHeight = -1;
+
 	// go through and draw each of the three rows at the right position
 	for (int x = 0; x < rowCount(); x++)
 	{
 		TextElement* rowText = new TextElement(rows[x]->c_str(), textSize, &gray, true);
-		rowText->position(kXPad + x * kXOff, kYPad + x * kYOff);
+		if (targetHeight < 0) targetHeight = rowText->height;
+		rowText->position(kXPad + x * kXOff, kYPad + x * kYOff + targetHeight/2 - rowText->height/2);
 		this->elements.push_back(rowText);
 	}
 
