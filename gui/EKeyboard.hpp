@@ -5,6 +5,8 @@
 
 class EditorView;
 
+#define KEYCODE_COUNT 47
+
 class EKeyboard : public Element
 {
 public:
@@ -16,6 +18,7 @@ public:
 	// setup field variables
 	void updateSize();
 	void just_type(const char input);
+	bool listenForPhysicalKeys(InputEvents* e);
 
 	EditorView* editorView = NULL;
 	std::function<void(char)> typeAction = NULL;
@@ -30,6 +33,13 @@ public:
 	// these EKeyboards will fill the extra space with more characters
 
 	std::vector<std::string*> rows;
+
+	const CST_Keycode usbKeys[KEYCODE_COUNT] = {
+		SDLK_BACKQUOTE, SDLK_1, SDLK_2, SDLK_3, SDLK_4, SDLK_5, SDLK_6, SDLK_7, SDLK_8, SDLK_9, SDLK_0, SDLK_MINUS, SDLK_EQUALS,
+		 SDLK_q, SDLK_w, SDLK_e, SDLK_r, SDLK_t, SDLK_y, SDLK_u, SDLK_i, SDLK_o, SDLK_p, SDLK_LEFTBRACKET, SDLK_RIGHTBRACKET, SDLK_BACKSLASH,
+		  SDLK_a, SDLK_s, SDLK_d, SDLK_f, SDLK_g, SDLK_h, SDLK_j, SDLK_k, SDLK_l, SDLK_SEMICOLON, SDLK_QUOTE,
+		   SDLK_z, SDLK_x, SDLK_c, SDLK_v, SDLK_b, SDLK_n, SDLK_m, SDLK_COMMA, SDLK_PERIOD, SDLK_SLASH
+	};
 
 	inline int rowCount() {
 		return (int)rows.size();

@@ -102,9 +102,24 @@ void EKeyboard::render(Element* parent)
 
 bool EKeyboard::process(InputEvents* event)
 {
+	InputEvents::passThroughKeyEvents = false;
+
 	// don't do anything if we're hidden, or there's a sidebar and it's active
 	if (hidden)
 		return false;
+	
+	// our keyboard will be processing its own key events (not button events)
+	InputEvents::passThroughKeyEvents = true;
+
+	if (event->type == SDL_KEYDOWN)
+		return listenForPhysicalKeys(event);
+	if (event->type == SDL_KEYUP && (event->keyCode == SDLK_LSHIFT ||
+	event->keyCode == SDLK_RSHIFT ||
+	event->keyCode == SDLK_CAPSLOCK)) {
+		shiftOn = false;
+		updateSize();
+		return true;
+	}
 
 	if (event->isTouchDown())
 	{
@@ -270,6 +285,65 @@ bool EKeyboard::process(InputEvents* event)
 	return false;
 }
 
+bool EKeyboard::listenForPhysicalKeys(InputEvents* e)
+{
+	int curBreak = 0;
+	int offset = 0;
+
+	auto keyCode = e->keyCode;
+	auto mod = e->mod;
+
+	if (keyCode == SDLK_LSHIFT || keyCode == SDLK_RSHIFT || keyCode == SDLK_CAPSLOCK) {
+		shiftOn = true;
+		updateSize();
+		return true;
+	}
+
+	if (keyCode == SDLK_TAB) {
+		just_type('\t');
+		return true;
+	}
+	if (keyCode == SDLK_SPACE) {
+		just_type(' ');
+		return true;
+	}
+	if (keyCode == SDLK_RETURN) {
+		just_type('\n');
+		return true;
+	}
+
+	if (keyCode == SDLK_BACKSPACE) {
+		// programatically invoke the B button event
+		SDL_Event sdlevent;
+		sdlevent.type = SDL_JOYBUTTONDOWN;
+		sdlevent.jbutton.button = SDL_B;
+		SDL_PushEvent(&sdlevent);
+		return true;
+	}
+
+	for (int x=0; x<KEYCODE_COUNT; x++)
+	{
+		int xx = x - offset;
+
+		if (keyCode == usbKeys[x])
+		{
+			// we got a key down for this code, type our current position
+			// and update cursor
+			type(curBreak, xx);
+			curRow = curBreak;
+			index = xx;
+			return true;
+		}
+
+		if (xx + 1 >= breaks[curBreak]) {
+			curBreak++;
+			offset = x + 1;
+		}
+	}
+
+	return false;
+}
+
 void EKeyboard::updateSize()
 {
 	this->elements.clear();
@@ -389,8 +463,8 @@ void EKeyboard::just_type(const char input)
 
 void EKeyboard::backspace()
 {
-	// if (!myText->empty())
-	// 	myText->pop_back();
+	// auto textField = editorView->mainTextField;
+	// auto editor = editorView->editor;
 }
 
 void EKeyboard::space()
@@ -441,4 +515,5 @@ void EKeyboard::generateEKeyboard()
 
 EKeyboard::~EKeyboard()
 {
+	InputEvents::passThroughKeyEvents = false;
 }
