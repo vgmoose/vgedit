@@ -17,9 +17,51 @@ Toolbar::Toolbar(const char* path, EditorView* editorView)
 	this->initButtons(editorView);
 }
 
+bool Toolbar::commonHistoryLogic(bool isUndo, Editor* editor, TextInputElement* textField)
+{
+	auto history = editor->undoHistory;
+	auto historyPos = editor->historyPos;
+
+	// out of bounds, stop
+	if (historyPos < 0 || historyPos >= history.size())
+		return false;
+
+	auto event = history.at(historyPos);
+
+	// we need to flip the event's delete boolean if we're doing an undo
+	bool isDelete = event.isDelete != isUndo;
+
+	int pos = event.pos;
+	std::string* chars = &event.chars;
+
+	if (isDelete) {
+		editor->text->erase(pos, chars->length());
+	} else {
+		editor->text->insert(pos, chars->c_str());
+	}
+
+	// for (int x=0; x<history.size(); x++) {
+	// 	auto event = history.at(x);
+	// 	printf("%d (%d): chars: [%s], pos: %d, action: %d\n", x, x == historyPos, event.chars.c_str(), event.pos, event.isDelete);
+	// }
+
+	return true;
+}
+
+void Toolbar::stowKeyboard(EKeyboard* keyboard, TextInputElement* textField, EditorView* editorView)
+{
+	keyboard->hidden = true;
+	textField->insertMode = false;
+	this->keyboardShowing = false;
+
+	// reload toolbar
+	this->initButtons(editorView);
+}
+
 void Toolbar::initButtons(EditorView* editorView)
 {
 	this->removeAll(true);
+	displayedPrompt = false;
 
 	pathE = new TextElement(this->path, 20, 0, MONOSPACED);
 	pathE->position(10, 13);
@@ -47,7 +89,16 @@ void Toolbar::initButtons(EditorView* editorView)
 	elements.push_back(con);
 	elements.push_back(bot);
 
-	con->add((new Button("Exit", SELECT_BUTTON, dark, bsize))->setAction([](){
+	con->add((new Button("Exit", SELECT_BUTTON, dark, bsize))->setAction([this, isInsert, keyboard, textField, editorView](){
+		if (isInsert) {
+			stowKeyboard(keyboard, textField, editorView);
+			return;
+		}
+		if (modified && !displayedPrompt) {
+			displayedPrompt = true;
+			textField->setStatus("Unsaved changes! Press [Exit] again to confirm");
+			return;
+		}
 		((MainDisplay*)RootDisplay::mainDisplay)->closeEditor();
 	}));
 
@@ -72,26 +123,31 @@ void Toolbar::initButtons(EditorView* editorView)
 
 	con->add((new Button(isInsert ? "Stow Keyboard" : "Paste", Y_BUTTON, dark, bsize))->setAction([this, isInsert, textField, keyboard, editorView](){
 		if (isInsert) {
-			keyboard->hidden = true;
-			textField->insertMode = false;
-			this->keyboardShowing = false;
-
-			// reload toolbar
-			this->initButtons(editorView);
+			stowKeyboard(keyboard, textField, editorView);
 			return;
 		}
-		editorView->pasteSelection();
+		if (!editorView->pasteSelection()) {
+			textField->setStatus("Nothing on clipboard to paste!");
+		}
 	}));
 
 	// L and R don't do anything in insert mode (no selections)
 	if (!isInsert)
 	{
-		bot->add((new Button("Undo", ZL_BUTTON, dark, bsize))->setAction([textField, editorView](){
-			textField->setStatus("Nothing to undo!");
+		auto historyPos = editor->historyPos;
+		auto undoHistory = editor->undoHistory;
+		bot->add((new Button("Undo", ZL_BUTTON, dark, bsize))->setAction([this, editor, textField](){
+			auto success = commonHistoryLogic(true, editor, textField);
+			editor->historyPos--;
+			if (editor->historyPos < 0) editor->historyPos = -1;
+			if (!success) textField->setStatus("Nothing to undo!");
 		}));
 
-		bot->add((new Button("Redo", ZR_BUTTON, dark, bsize))->setAction([textField, editorView](){
-			textField->setStatus("Nothing to redo!");
+		bot->add((new Button("Redo", ZR_BUTTON, dark, bsize))->setAction([this, editor, textField](){
+			editor->historyPos++;
+			auto success = commonHistoryLogic(false, editor, textField);
+			if (editor->historyPos > editor->undoHistory.size()) editor->historyPos = editor->undoHistory.size();
+			if (!success) textField->setStatus("Nothing to redo!");
 		}));
 
 		Button deselect("Deslct", L_BUTTON, dark, bsize);

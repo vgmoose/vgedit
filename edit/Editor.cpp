@@ -68,6 +68,15 @@ bool Editor::save()
 	return true;
 }
 
+bool Editor::appendHistory(const char* chars, int pos, bool isDelete)
+{
+	// trim history size to current historyPos (removes future redo's)
+	if (historyPos != undoHistory.size() - 1)
+		undoHistory.erase(undoHistory.begin() + historyPos, undoHistory.end());
+	undoHistory.push_back({ .chars = chars, .pos = pos, .isDelete = isDelete });
+	historyPos++;
+}
+
 bool Editor::type(int pos, const char input)
 {
 	// TODO: handle vertical selections
@@ -77,12 +86,16 @@ bool Editor::type(int pos, const char input)
 		text->erase(pos, 1);	
 
 	text->insert(pos, 1, input);
+
 	return true;
 }
 
 bool Editor::del(int pos, int size)
 {
 	// TODO: take in a Selection instead and work accordingly
+	string deleted(text->substr(pos, size));
+	appendHistory(deleted.c_str(), pos, true);
+
 	text->erase(pos, size);
 
 	return true;
@@ -90,6 +103,9 @@ bool Editor::del(int pos, int size)
 
 bool Editor::newline(int pos)
 {
+	string sym(1, '\n');
+	appendHistory(sym.c_str(), pos, false);
+
 	type(pos, '\n');
 
 	return true;

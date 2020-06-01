@@ -6,6 +6,7 @@
 #include "EditorView.hpp"
 
 class EditorView;
+class EKeyboard;
 
 class Toolbar : public Element
 {
@@ -17,6 +18,8 @@ public:
 	void setModified(bool modified);
 	
 	void render(Element* parent);
+	bool commonHistoryLogic(bool isUndo, Editor* editor, TextInputElement* textField);
+	void stowKeyboard(EKeyboard* keyboard, TextInputElement* textField, EditorView* editorView);
 
 	TextElement* pathE = NULL;
 	TextElement* stats = NULL;
@@ -29,6 +32,7 @@ public:
 	char path[MAX_PATH_LENGTH + 1];
 	bool modified = false;
 	bool keyboardShowing = false;
+	bool displayedPrompt = false;
 };
 
 #endif

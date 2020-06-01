@@ -1,5 +1,6 @@
 #include "EditorView.hpp"
 #include "EKeyboard.hpp"
+#include "MainDisplay.hpp"
 
 EditorView::EditorView(Editor* editor)
 {
@@ -74,18 +75,24 @@ bool EditorView::copySelection()
 
 	if (copiedText)
 		delete copiedText;
-
+	
 	int pos = mainTextField->selectedPos;
-  int width = mainTextField->selectedWidth;
+  	int width = mainTextField->selectedWidth;
 
 	copiedText = new std::string(text->substr(pos, width));
+	((MainDisplay*)RootDisplay::mainDisplay)->copiedText = copiedText;
+
 	return true;
 }
 
 bool EditorView::pasteSelection()
 {
 	if (copiedText == NULL)
+		copiedText = ((MainDisplay*)RootDisplay::mainDisplay)->copiedText;
+	if (copiedText == NULL)
 		return false;
+	
+	editor->appendHistory(copiedText->c_str(), mainTextField->selectedPos, false);
 
 	for (char& letter : *copiedText)
 		editor->type(mainTextField->selectedPos++, letter);

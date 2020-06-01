@@ -22,6 +22,8 @@ public:
 	FileBrowser* browser = NULL;
 	EditorView* editorView = NULL;
 
+	std::string* copiedText = NULL;
+
 	char path_string[2048];
 
 	bool error = false;

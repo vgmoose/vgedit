@@ -9,6 +9,13 @@
 
 using namespace std;
 
+// stores characters that were added/deleted at a position in history
+struct HistoryData {
+	std::string chars;
+	bool isDelete;
+	int pos;
+};
+
 class Editor
 {
 public:
@@ -20,6 +27,7 @@ public:
 	bool type(int pos, const char input);
 	bool del(int pos, int size);
 	bool newline(int pos);
+	bool appendHistory(const char* chars, int pos, bool isDelete);
 
 	// variables for the current, prev, next lines
 	int curLinePos = 0;
@@ -28,6 +36,11 @@ public:
 	int nextLineLength = 0;
 
 	int lineNoPlaces = 0;
+
+	// undo/redo tracking variables
+	// historyPos is where we are in the undoHistory vector
+	vector<HistoryData> undoHistory;
+	int historyPos = -1;
   
 	const char* filename = NULL;
 	bool overwriteMode = false;

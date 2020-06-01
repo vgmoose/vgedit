@@ -354,6 +354,9 @@ void EKeyboard::type(int y, int x)
 		return;
 	}
 
+	string sym(1, input);
+	editorView->editor->appendHistory(sym.c_str(), editorView->mainTextField->selectedPos, false);
+
 	auto pos = editorView->mainTextField->selectedPos;
 	editorView->editor->type(pos, input);
 
