@@ -1,5 +1,6 @@
 #include "MainDisplay.hpp"
 #include "EditorView.hpp"
+#include <iomanip> 
 
 TextInputElement::TextInputElement(Editor* editor)
 {
