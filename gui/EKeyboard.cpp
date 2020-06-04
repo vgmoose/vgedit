@@ -311,7 +311,7 @@ bool EKeyboard::listenForPhysicalKeys(InputEvents* e)
 		just_type(' ');
 		return true;
 	}
-	if (keyCode == SDLK_RETURN) {
+	if (keyCode == SDLK_RETURN && typeAction == NULL) {
 		just_type('\n');
 		return true;
 	}
