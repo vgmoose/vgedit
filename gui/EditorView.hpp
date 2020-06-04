@@ -33,6 +33,7 @@ public:
 	bool copySelection();
 	bool pasteSelection();
 
+	void moveCursor(InputEvents* e);
 	void reset_bounds();
 };
 #endif

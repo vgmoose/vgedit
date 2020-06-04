@@ -61,7 +61,9 @@ void EditorView::reset_bounds()
 		if (mainTextField->selectedPos == 0)
 			mainTextField->y = 0;
 
-		if (cursor_y > (mainTextField->insertMode ? 200 : (SCREEN_HEIGHT - 100)))
+		bool blockKeyboardDraws = mainTextField->insertMode &&  !editor->immersiveView;
+
+		if (cursor_y > (blockKeyboardDraws ? 200 : (SCREEN_HEIGHT - 100)))
 			mainTextField->y -= h/2;
 
 		if (cursor_y < 50 && mainTextField->y < -1 * h/4)
@@ -107,39 +109,53 @@ void EditorView::syncText()
 	toolbar->setModified(true);
 }
 
+void EditorView::moveCursor(InputEvents* e)
+{
+	int relPos = (mainTextField->selectedPos - editor->curLinePos);
+
+	if (e->pressed(LEFT_BUTTON))
+		mainTextField->selectedPos -= 1;
+	if (e->pressed(RIGHT_BUTTON))
+		mainTextField->selectedPos += 1;
+	if (e->pressed(UP_BUTTON))
+	{
+		int prev_rpos = editor->curLinePos - 1;
+		int up_pos = editor->prevLinePos + relPos;
+		mainTextField->selectedPos = min(up_pos, prev_rpos);
+	}
+	if (e->pressed(DOWN_BUTTON))
+	{
+		int next_lpos = editor->curLinePos + editor->curLineLength;
+		int next_rpos = next_lpos + editor->nextLineLength;
+		int down_pos = next_lpos + relPos;
+		mainTextField->selectedPos = min(next_rpos, down_pos) + 1;
+	}
+}
+
 bool EditorView::process(InputEvents* e)
 {
+	bool isPhysicalKey = e->type == SDL_KEYDOWN;
+	bool processInput = keyboard == NULL || keyboard->hidden || isPhysicalKey;
+
+	bool prevPassthrough = InputEvents::bypassKeyEvents;
+	InputEvents::bypassKeyEvents = false;
+
 	// move the cursoraround the editor
-	if ((keyboard == NULL || keyboard->hidden) && e->pressed(LEFT_BUTTON | RIGHT_BUTTON | UP_BUTTON | DOWN_BUTTON))
+	if (processInput && e->pressed(LEFT_BUTTON | RIGHT_BUTTON | UP_BUTTON | DOWN_BUTTON))
 	{
 		// relative cursor position from the start
-		int relPos = (mainTextField->selectedPos - editor->curLinePos);
-
-		if (e->pressed(LEFT_BUTTON))
-			mainTextField->selectedPos -= 1;
-		if (e->pressed(RIGHT_BUTTON))
-			mainTextField->selectedPos += 1;
-		if (e->pressed(UP_BUTTON))
-		{
-			int prev_rpos = editor->curLinePos - 1;
-			int up_pos = editor->prevLinePos + relPos;
-			mainTextField->selectedPos = min(up_pos, prev_rpos);
-		}
-		if (e->pressed(DOWN_BUTTON))
-		{
-			int next_lpos = editor->curLinePos + editor->curLineLength;
-			int next_rpos = next_lpos + editor->nextLineLength;
-			int down_pos = next_lpos + relPos;
-			mainTextField->selectedPos = min(next_rpos, down_pos) + 1;
-		}
+		moveCursor(e);
 
 		// when we use a directional button for movement, start locking the cursor on screen
 		keepCursorOnscreen = true;
+		InputEvents::bypassKeyEvents = prevPassthrough;
 
 		return true;
 	}
 
-	keepCursorOnscreen = !(e->isTouch() || e->isScroll());
+	InputEvents::bypassKeyEvents = prevPassthrough;
+	keepCursorOnscreen = !(e->isTouch() || e->isScroll() || mainTextField->dragging || mainTextField->elasticCounter != 0);
+	// printf("status: %d, Event: %d (%d, %d, %d, %d)\n", keepCursorOnscreen, e->type, e->isTouch(), e->isScroll(), mainTextField->dragging, mainTextField->elasticCounter );
 
 	return toolbar->process(e) || super::process(e);
 }

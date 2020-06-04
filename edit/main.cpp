@@ -19,6 +19,7 @@ int main(int argc, char* argv[])
 
 	// the main input handler
 	InputEvents* events = new InputEvents();
+	events->rapidFireRate = 6; // 2x faster directional key repeat
 
 	FileBrowser* fileBrowser = new FileBrowser(START_PATH);
 	display->browser = fileBrowser;

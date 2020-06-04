@@ -43,7 +43,9 @@ public:
 	int historyPos = -1;
   
 	const char* filename = NULL;
+
 	bool overwriteMode = false;
+	bool immersiveView = false; // if using a USB keyboard, they can hide the on-screen one
 
   	std::string* text = NULL; // entire file in memory
 

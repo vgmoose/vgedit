@@ -1,4 +1,4 @@
-CHESTO  := ./libs/chesto/src
+CHESTO := ./libs/chesto/src
 RESINFS := ./libs/chesto/libs/resinfs
 FONTCACHE := ./libs/SDL_FontCache
 
@@ -22,7 +22,7 @@ EXEFS_SRC	:=	exefs_src
 
 APP_TITLE	:= vgedit
 APP_AUTHOR 	:= vgmoose
-APP_VERSION 	:= 1.9
+APP_VERSION 	:= 2.0
 ICON		:= resin/res/icon.jpg
 
 #---------------------------------------------------------------------------------

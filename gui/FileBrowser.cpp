@@ -65,11 +65,11 @@ bool FileBrowser::process(InputEvents* events)
 		else
 		{
 			if (cardY < 10) {
-				this->y += currentCard->height / 2;
+				this->y += currentCard->height;
 				updateUI |= true;
 			}
 			if (cardY > SCREEN_HEIGHT - (currentCard->height + 10)) {
-				this->y -= currentCard->height / 2;
+				this->y -= currentCard->height;
 				updateUI |= true;
 			}
 		}
@@ -79,6 +79,14 @@ bool FileBrowser::process(InputEvents* events)
 	{
 		// activate this file's editor
 		currentCard->openMyFile();
+		updateUI = true;
+	}
+
+	if (events->released(B_BUTTON))
+	{
+		// activate an upCard if it exists, to go back
+		if (upCard != NULL)
+			upCard->openMyFile();
 		updateUI = true;
 	}
 
@@ -142,6 +150,7 @@ void FileBrowser::listfiles()
 {
 	// go through all files in current directory and create FileCard children out of them
 
+	upCard = NULL;
 	this->elements.clear();
 
 	DIR* dirp;
@@ -160,6 +169,7 @@ void FileBrowser::listfiles()
 		card->path = new std::string(cwd == "" ? "/" : cwd);
 		card->action = std::bind(&FileCard::openMyFile, card);
 		this->elements.push_back(card);
+		upCard = card;
 		count++;
 	}
 
@@ -200,7 +210,7 @@ void FileBrowser::listfiles()
 	std::string clippedPath(*pwd);
 	if (clippedPath.length() > 45) {
 		clippedPath.erase(clippedPath.begin(), clippedPath.end() - 45);
-		clippedPath.insert(0, "...");
+		clippedPath.insert(0, "…");
 	}
 
 	TextElement* path = new TextElement(clippedPath.c_str(), 25, &white, MONOSPACED);
@@ -231,6 +241,7 @@ void FileBrowser::listfiles()
 		};
 		mainDisplay->switchSubscreen(new TextQueryPopup("Enter new file name", "Create", createFunc));
 	}));
+
 	con->position(750, 30);
 	this->elements.push_back(con);
 }

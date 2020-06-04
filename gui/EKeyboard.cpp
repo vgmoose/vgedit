@@ -17,7 +17,7 @@ EKeyboard::EKeyboard(EditorView* editorView)
 
 void EKeyboard::render(Element* parent)
 {
-	if (hidden)
+	if (hidden || (editorView != NULL && editorView->editor->immersiveView))
 		return;
 
 	CST_Rect dimens = { this->x, this->y, this->width + 305, this->height + 140 };
@@ -102,14 +102,14 @@ void EKeyboard::render(Element* parent)
 
 bool EKeyboard::process(InputEvents* event)
 {
-	InputEvents::passThroughKeyEvents = false;
+	InputEvents::bypassKeyEvents = false;
 
 	// don't do anything if we're hidden, or there's a sidebar and it's active
 	if (hidden)
 		return false;
 	
 	// our keyboard will be processing its own key events (not button events)
-	InputEvents::passThroughKeyEvents = true;
+	InputEvents::bypassKeyEvents = true;
 
 	if (event->type == SDL_KEYDOWN)
 		return listenForPhysicalKeys(event);
@@ -120,6 +120,9 @@ bool EKeyboard::process(InputEvents* event)
 		updateSize();
 		return true;
 	}
+
+	// immersive view doesn't use any keyboard touch events
+	if (editorView != NULL && editorView->editor->immersiveView) return false;
 
 	if (event->isTouchDown())
 	{
@@ -293,6 +296,7 @@ bool EKeyboard::listenForPhysicalKeys(InputEvents* e)
 	auto keyCode = e->keyCode;
 	auto mod = e->mod;
 
+	// special keys
 	if (keyCode == SDLK_LSHIFT || keyCode == SDLK_RSHIFT || keyCode == SDLK_CAPSLOCK) {
 		shiftOn = true;
 		updateSize();
@@ -311,16 +315,12 @@ bool EKeyboard::listenForPhysicalKeys(InputEvents* e)
 		just_type('\n');
 		return true;
 	}
-
-	if (keyCode == SDLK_BACKSPACE) {
-		// programatically invoke the B button event
-		SDL_Event sdlevent;
-		sdlevent.type = SDL_JOYBUTTONDOWN;
-		sdlevent.jbutton.button = SDL_B;
-		SDL_PushEvent(&sdlevent);
+	if ((keyCode == SDLK_LALT || keyCode == SDLK_RALT) && editorView != NULL) {
+		editorView->editor->immersiveView = !editorView->editor->immersiveView;
 		return true;
 	}
 
+	// primary typing loop, handles all the keycodes on our keyboard
 	for (int x=0; x<KEYCODE_COUNT; x++)
 	{
 		int xx = x - offset;
@@ -339,6 +339,36 @@ bool EKeyboard::listenForPhysicalKeys(InputEvents* e)
 			curBreak++;
 			offset = x + 1;
 		}
+	}
+
+	// below are progammatic invocations of certain features we expect to be there
+	// in vgedit
+
+	if (keyCode == SDLK_BACKSPACE) {
+		// programatically invoke the B button event
+		SDL_Event sdlevent;
+		sdlevent.type = SDL_JOYBUTTONDOWN;
+		sdlevent.jbutton.button = SDL_B;
+		SDL_PushEvent(&sdlevent);
+		return true;
+	}
+
+	if (keyCode == SDLK_RETURN && typeAction != NULL) {
+		// if we have a type action, let's consider RETURN as submitting that action
+		SDL_Event sdlevent;
+		sdlevent.type = SDL_JOYBUTTONDOWN;
+		sdlevent.jbutton.button = SDL_X;
+		SDL_PushEvent(&sdlevent);
+		return true;
+	}
+	
+	if (keyCode == SDLK_ESCAPE) {
+		// dismiss keyboard, also programmatically
+		SDL_Event sdlevent;
+		sdlevent.type = SDL_JOYBUTTONDOWN;
+		sdlevent.jbutton.button = SDL_Y;
+		SDL_PushEvent(&sdlevent);
+		return true;
 	}
 
 	return false;
@@ -515,5 +545,5 @@ void EKeyboard::generateEKeyboard()
 
 EKeyboard::~EKeyboard()
 {
-	InputEvents::passThroughKeyEvents = false;
+	InputEvents::bypassKeyEvents = false;
 }

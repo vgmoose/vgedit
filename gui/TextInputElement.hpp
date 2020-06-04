@@ -36,6 +36,9 @@ public:
 
 	int bonusWidthInSelection = 0;
 
+	// set to true after the first render, to help prevent strange touch-racing inputs
+	bool hasRendered = false;
+
   int COLS = 95;
   int lineSpacing = 2;
 
