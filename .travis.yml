@@ -10,6 +10,5 @@ matrix:
     - env: PLATFORM=switch
 
 script:
-  - docker run -e PLATFORM="$PLATFORM"
-               -v $(pwd):/code ubuntu:18.04
-               /bin/bash -c "cd /code && ./dependency_helper.sh && make -f Makefile.$PLATFORM"
+  - docker run  -v $(pwd):/code registry.gitlab.com/4tu/spheal
+               /bin/bash -c "cd /code && make -f Makefile.$PLATFORM"
