@@ -10,6 +10,7 @@
 #define START_PATH "/"
 #else
 #define START_PATH "/vol/external01/"
+#include "../libs/wiiu_kbd/keybdwrapper.h"
 #endif
 
 int main(int argc, char* argv[])
@@ -24,6 +25,10 @@ int main(int argc, char* argv[])
 	FileBrowser* fileBrowser = new FileBrowser(START_PATH);
 	display->browser = fileBrowser;
 	display->elements.push_back(fileBrowser);
+
+#if defined(__WIIU__)
+	KBWrapper* kbdwrapper = new KBWrapper(true, true);
+#endif
 
 	while (!display->exitRequested)
 	{

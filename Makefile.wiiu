@@ -1,6 +1,7 @@
 CHESTO  := ./libs/chesto/src
 RESINFS := ./libs/chesto/libs/resinfs
 FONTCACHE := ./libs/SDL_FontCache
+WIIUKBD := ./libs/wiiu_kbd
 
 # default this environment variable
 DEVKITPRO ?= /opt/devkitpro
@@ -22,7 +23,7 @@ include $(DEVKITPRO)/wut/share/wut_rules
 #-------------------------------------------------------------------------------
 TARGET		:=	vgedit
 BUILD		:=	build
-SOURCES		:=	. gui edit $(RESINFS)/source $(CHESTO) $(FONTCACHE)
+SOURCES		:=	. gui edit $(RESINFS)/source $(CHESTO) $(FONTCACHE) $(WIIUKBD)
 INCLUDES	:=	.
 RAMFS_DIR		:=	resin
 
