@@ -1,4 +1,4 @@
-# vgedit
+# vgedit+
 [![GPLv3 License](https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat-square)](https://opensource.org/licenses/GPL-3.0)
 [![gitlab ci](https://gitlab.com/vgmoose/vgedit/badges/master/pipeline.svg?style=flat-square)](https://gitlab.com/vgmoose/vgedit/pipelines)
 [![travis](https://img.shields.io/travis/vgmoose/vgedit.svg?label=travis&style=flat-square)](https://travis-ci.org/vgmoose/vgedit)
@@ -72,4 +72,4 @@ It's not required, but running a clang-format before making a PR helps to clean 
 find . \( -name "*.cpp" -or -name "*.hpp" \) -not -path "./libs/*" -exec clang-format -i {} \;
 ```
 
-Any and all PRs are welcome and appreciated! In particular, there is still some work to be done to properly align the cursor on text files with long lines, or when switching between touch screen and controller. You can also find me to talk directly about these issues on discord as vgmoose#3545 .
+Any and all PRs are welcome and appreciated!
