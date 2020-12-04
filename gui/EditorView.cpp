@@ -1,5 +1,5 @@
+#include "../libs/chesto/src/EKeyboard.hpp"
 #include "EditorView.hpp"
-#include "EKeyboard.hpp"
 #include "MainDisplay.hpp"
 
 EditorView::EditorView(Editor* editor)
@@ -61,7 +61,7 @@ void EditorView::reset_bounds()
 		if (mainTextField->selectedPos == 0)
 			mainTextField->y = 0;
 
-		bool blockKeyboardDraws = mainTextField->insertMode &&  !editor->immersiveView;
+		bool blockKeyboardDraws = mainTextField->insertMode && !keyboard->immersiveMode;
 
 		if (cursor_y > (blockKeyboardDraws ? 200 : (SCREEN_HEIGHT - 100)))
 			mainTextField->y -= h/2;

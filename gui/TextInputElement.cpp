@@ -26,7 +26,9 @@ bool TextInputElement::process(InputEvents* event)
 {
   bool ret = false;
 
-  bool blockKeyboardDraws = insertMode && !editor->immersiveView;
+  auto editorView = ((MainDisplay*)RootDisplay::mainDisplay)->editorView;
+  bool isImmersive = editorView && editorView->keyboard && editorView->keyboard->immersiveMode;
+  bool blockKeyboardDraws = insertMode && !isImmersive;
 
   if (hasRendered && event->isTouchUp() && elasticCounter == 0 && (!blockKeyboardDraws || event->yPos < 300)) {
     lastTouchX = event->xPos;

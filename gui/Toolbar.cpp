@@ -1,8 +1,8 @@
 #include "../libs/chesto/src/Container.hpp"
 #include "../libs/chesto/src/Button.hpp"
+#include "../libs/chesto/src/EKeyboard.hpp"
 #include "Toolbar.hpp"
 #include "MainDisplay.hpp"
-#include "EKeyboard.hpp"
 #include "TextQueryPopup.hpp"
 
 Toolbar::Toolbar(const char* path, EditorView* editorView)
@@ -195,8 +195,23 @@ void Toolbar::initButtons(EditorView* editorView)
 		bot->add((new Button("Show Keyboard", A_BUTTON, dark, bsize))->setAction([this, textField, keyboard, editorView](){
 			if (keyboard == NULL)
 			{
-				editorView->keyboard = new EKeyboard(editorView);
-				editorView->elements.push_back(editorView->keyboard);
+				auto keyboard = new EKeyboard([editorView](char input) {
+					// main callback action that enters text into the editor
+					string sym(1, input);
+					editorView->editor->appendHistory(sym.c_str(), editorView->mainTextField->selectedPos, false);
+
+					auto pos = editorView->mainTextField->selectedPos;
+					if (input == '\n')
+						editorView->editor->newline(pos);
+					else
+						editorView->editor->type(pos, input);
+
+					editorView->mainTextField->selectedPos++;
+					editorView->syncText();
+				});
+
+				editorView->keyboard = keyboard;
+				editorView->elements.push_back(keyboard);
 			}
 
 			editorView->keyboard->hidden = false;

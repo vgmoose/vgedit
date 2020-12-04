@@ -1,7 +1,7 @@
 #include "../libs/chesto/src/Button.hpp"
 #include "../libs/chesto/src/Container.hpp"
+#include "../libs/chesto/src/EKeyboard.hpp"
 #include "TextQueryPopup.hpp"
-#include "EKeyboard.hpp"
 
 TextQueryPopup::TextQueryPopup(const char* prompt, const char* ctaText, std::function<void(const char*)> onConfirm)
 {
@@ -24,12 +24,12 @@ TextQueryPopup::TextQueryPopup(const char* prompt, const char* ctaText, std::fun
 	auto promptText = new TextElement(prompt, 22);
 	queryText = new TextElement("", 28);
 
-	auto keyboard = new EKeyboard(NULL);
-	keyboard->typeAction = [this](char input) {
+	auto keyboard = new EKeyboard([this](char input) {
 		query += input;
 		queryText->setText(query);
 		queryText->update();
-	};
+	});
+	keyboard->preventEnterAndTab = true;
 	keyboard->updateSize();
 	child(keyboard);
 

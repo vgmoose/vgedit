@@ -3,10 +3,10 @@
 
 #include "../libs/chesto/src/TextElement.hpp"
 #include "../libs/chesto/src/Button.hpp"
+#include "../libs/chesto/src/EKeyboard.hpp"
 #include "EditorView.hpp"
 
 class EditorView;
-class EKeyboard;
 
 class Toolbar : public Element
 {
