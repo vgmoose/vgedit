@@ -223,6 +223,7 @@ void FileBrowser::listfiles()
 	Container* con = new Container(ROW_LAYOUT, 10);
 	con->add((new Button("Exit", SELECT_BUTTON, true))->setAction([mainDisplay](){
 		mainDisplay->exitRequested = true;
+		mainDisplay->isRunning = false;
 	}));
 
 	con->add((new Button("New Folder", X_BUTTON, true))->setAction([this, mainDisplay](){

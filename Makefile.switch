@@ -1,11 +1,11 @@
-CHESTO := ./libs/chesto/src
-RESINFS := ./libs/chesto/libs/resinfs
-FONTCACHE := ./libs/SDL_FontCache
+CHESTO    := ./libs/chesto/src
+RESINFS   := ./libs/chesto/libs/resinfs
+FONTCACHE := ./libs/chesto/libs/SDL_FontCache
 
 # default this environment variable
 DEVKITPRO ?= /opt/devkitpro
 DEVKITPPC ?= $(DEVKITPRO)/devkitPPC
-WUT_ROOT ?= $(DEVKITPRO)/wut
+WUT_ROOT  ?= $(DEVKITPRO)/wut
 export DEVKITPRO
 export DEVKITPPC
 export WUT_ROOT
@@ -17,12 +17,12 @@ TARGET		:=	vgedit
 BUILD		:=	build
 SOURCES		:=	. gui edit $(RESINFS)/source $(CHESTO) $(FONTCACHE)
 INCLUDES	:=	. $(CHESTO)
-RAMFS_DIR		:=	resin
+RAMFS_DIR	:=	resin
 EXEFS_SRC	:=	exefs_src
 
 APP_TITLE	:= vgedit
 APP_AUTHOR 	:= vgmoose
-APP_VERSION 	:= 2.0.1
+APP_VERSION := 2.0.1
 ICON		:= resin/res/icon.jpg
 
 #---------------------------------------------------------------------------------
@@ -148,7 +148,7 @@ else
 #-------------------------------------------------------------------------------
 # romfs
 #-------------------------------------------------------------------------------
-include $(PWD)/libs/chesto/libs/resinfs/share/romfs-wiiu.mk
+include $(PWD)/$(RESINFS)/share/romfs-wiiu.mk
 CFLAGS		+=	$(ROMFS_CFLAGS)
 CXXFLAGS	+=	$(ROMFS_CFLAGS)
 LIBS		+=	$(ROMFS_LIBS)

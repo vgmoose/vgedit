@@ -20,12 +20,12 @@ EditorView::EditorView(Editor* editor)
 
 void EditorView::render(Element* parent)
 {
-	SDL_SetRenderDrawColor(parent->renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-	SDL_RenderFillRect(parent->renderer, NULL);
+	CST_SetDrawColorRGBA(parent->renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+	CST_FillRect(parent->renderer, NULL);
 
-	// SDL_SetRenderDrawColor(parent->renderer, 0xee, 0xee, 0xee, 0xff);
-	// SDL_Rect rect = {0, 0, 10 + editor->lineNoPlaces * mainTextField->fontWidth, SCREEN_HEIGHT};
-	// SDL_RenderFillRect(parent->renderer, &rect);
+	// CST_SetDrawColorRGBA(parent->renderer, 0xee, 0xee, 0xee, 0xff);
+	// CST_Rect rect = {0, 0, 10 + editor->lineNoPlaces * mainTextField->fontWidth, SCREEN_HEIGHT};
+	// CST_FillRect(parent->renderer, &rect);
 
 	super::render(parent);
 

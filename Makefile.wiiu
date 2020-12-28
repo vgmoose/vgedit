@@ -1,12 +1,12 @@
-CHESTO  := ./libs/chesto/src
-RESINFS := ./libs/chesto/libs/resinfs
-FONTCACHE := ./libs/SDL_FontCache
-WIIUKBD := ./libs/wiiu_kbd
+CHESTO    := ./libs/chesto/src
+RESINFS   := ./libs/chesto/libs/resinfs
+FONTCACHE := ./libs/chesto/libs/SDL_FontCache
+WIIUKBD   := ./libs/chesto/libs/wiiu_kbd
 
 # default this environment variable
 DEVKITPRO ?= /opt/devkitpro
 DEVKITPPC ?= $(DEVKITPRO)/devkitPPC
-WUT_ROOT ?= $(DEVKITPRO)/wut
+WUT_ROOT  ?= $(DEVKITPRO)/wut
 export DEVKITPRO
 export DEVKITPPC
 export WUT_ROOT
@@ -14,13 +14,6 @@ export WUT_ROOT
 TOPDIR ?= $(CURDIR)
 include $(DEVKITPRO)/wut/share/wut_rules
 
-#-------------------------------------------------------------------------------
-# TARGET is the name of the output
-# BUILD is the directory where object files & intermediate files will be placed
-# SOURCES is a list of directories containing source code
-# INCLUDES is a list of directories containing header files
-# ROMFS is a folder to generate app's romfs
-#-------------------------------------------------------------------------------
 TARGET		:=	vgedit
 BUILD		:=	build
 SOURCES		:=	. gui edit $(RESINFS)/source $(CHESTO) $(FONTCACHE) $(WIIUKBD)
@@ -34,7 +27,7 @@ CFLAGS		:=	-g -Wall -O2 -ffunction-sections \
 			-ffast-math \
 			$(MACHDEP)
 
-CFLAGS		+=	$(INCLUDE) -D__WIIU__ -D__WUT__ -DUSE_FILE32API -DNOCRYPT -DINPUT_JOYSTICK -DMUSIC -D_XOPEN_SOURCE -DUSE_RAMFS
+CFLAGS		+=	$(INCLUDE) -D__WIIU__ -DUSE_KEYBOARD -D__WUT__ -DUSE_FILE32API -DNOCRYPT -DINPUT_JOYSTICK -DMUSIC -D_XOPEN_SOURCE -DUSE_RAMFS
 
 CXXFLAGS	:=	$(CFLAGS) -std=gnu++14
 
@@ -49,10 +42,6 @@ LIBS		:=	-lSDL2_ttf -lSDL2_mixer -lSDL2_gfx -lSDL2_image -lSDL2 -lfreetype -lpng
 #-------------------------------------------------------------------------------
 LIBDIRS		:=	$(PORTLIBS) $(WUT_ROOT)
 
-
-#-------------------------------------------------------------------------------
-# no real need to edit anything past this point unless you need to add additional
-# rules for different file extensions
 #-------------------------------------------------------------------------------
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #-------------------------------------------------------------------------------
@@ -110,7 +99,7 @@ else
 #-------------------------------------------------------------------------------
 # romfs
 #-------------------------------------------------------------------------------
-include $(PWD)/libs/chesto/libs/resinfs/share/romfs-wiiu.mk
+include $(PWD)/$(RESINFS)/share/romfs-wiiu.mk
 CFLAGS		+=	$(ROMFS_CFLAGS)
 CXXFLAGS	+=	$(ROMFS_CFLAGS)
 LIBS		+=	$(ROMFS_LIBS)

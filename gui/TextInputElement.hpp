@@ -1,6 +1,6 @@
 #include <string>
 #include "../libs/chesto/src/ListElement.hpp"
-#include "../libs/SDL_FontCache/SDL_FontCache.h"
+#include "../libs/chesto/src/DrawUtils.hpp"
 #include "../edit/Editor.hpp"
 
 #ifndef TEXTINPUTELEMENT_H
@@ -39,17 +39,17 @@ public:
 	// set to true after the first render, to help prevent strange touch-racing inputs
 	bool hasRendered = false;
 
-  int COLS = 95;
-  int lineSpacing = 2;
+	int COLS = 95;
+	int lineSpacing = 2;
 
-  int fontHeight;
-  int fontWidth;
+	int fontHeight;
+	int fontWidth;
 
 	bool insertMode = false;
 
 	Editor* editor;
-	FC_Font* font = NULL;
-	FC_Font* lineFont = NULL;
+	CST_Font* font = NULL;
+	CST_Font* lineFont = NULL;
 };
 
 #endif

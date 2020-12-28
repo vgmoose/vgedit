@@ -10,14 +10,14 @@ TextInputElement::TextInputElement(Editor* editor)
 
   auto fontPath = RAMFS "./res/mono.ttf";
 
-  font = FC_CreateFont();  
-  FC_LoadFont(font, renderer, fontPath, size, FC_MakeColor(0,0,0,255), TTF_STYLE_NORMAL); 
+  font = CST_CreateFont();  
+  CST_LoadFont(font, renderer, fontPath, size, CST_MakeColor(0,0,0,255), TTF_STYLE_NORMAL); 
 
-  lineFont = FC_CreateFont();  
-  FC_LoadFont(lineFont, renderer, fontPath, size - 5, FC_MakeColor(0x40,0x40,0x40,255), TTF_STYLE_NORMAL);
+  lineFont = CST_CreateFont();  
+  CST_LoadFont(lineFont, renderer, fontPath, size - 5, CST_MakeColor(0x40,0x40,0x40,255), TTF_STYLE_NORMAL);
 
-  fontHeight = FC_GetLineHeight(font) + lineSpacing;
-  fontWidth = FC_GetWidth(font, "A"); // width of one char
+  fontHeight = CST_GetFontLineHeight(font) + lineSpacing;
+  fontWidth = CST_GetFontWidth(font, "A"); // width of one char
 
 	this->editor = editor;
 }
@@ -51,7 +51,7 @@ void TextInputElement::drawLineNo(int actualLineNo, int lineXPos, int actualLine
   std::stringstream stream;
   stream << std::setw(editor->lineNoPlaces) << std::setfill('0') << actualLineNo;
   auto res = stream.str();
-  FC_Draw(lineFont, renderer, lineXPos, actualLineYPos + 1, res.c_str());
+  CST_DrawFont(lineFont, renderer, lineXPos, actualLineYPos + 1, res.c_str());
 }
 
 void TextInputElement::setStatus(const char* status)
@@ -237,7 +237,7 @@ void TextInputElement::render(Element* parent)
     {
       // draw this part of current line
       auto lineText = text->substr(lpos, curPos - lpos + 1);
-      FC_Draw(font, renderer, xPos, lineYPos, lineText.c_str());
+      CST_DrawFont(font, renderer, xPos, lineYPos, lineText.c_str());
       hasWrapped = curPos - lpos + bonusWidth == COLS; // we wrapped if our line width (and tabs) is equal to max
     }
   

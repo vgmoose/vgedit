@@ -1,5 +1,5 @@
 CHESTO :=		./libs/chesto/src/*.cpp
-FONTCACHE :=	./libs/SDL_FontCache/*.c
+FONTCACHE :=	./libs/chesto/libs/SDL_FontCache/*.c
 
 all:
 	g++ -g -std=gnu++14 gui/*.cpp edit/*.cpp ${CHESTO} ${FONTCACHE} -I /opt/homebrew/include -L /opt/homebrew/lib -lSDL2 -lSDL2main -lcurl -lSDL2_image -lSDL2_ttf -lSDL2_gfx -I /usr/local/include  -lz -o vgedit.bin -fstack-protector-all -Wno-narrowing -DPC
