@@ -12,48 +12,20 @@ This program is written using [Chesto](https://gitlab.com/4TU/chesto) and has a 
 
 You can get pre-compiled binaries for each platform under [Pipelines](https://gitlab.com/vgmoose/vgedit/pipelines) for a given commit. The download artifacts dropdown is to the right of the build passing status.
 
-### Building for Switch (with libnx)
-1. Install [dkp-pacman](https://devkitpro.org/viewtopic.php?f=13&t=8702)
-2. Install devkitA64 and needed Switch dependencies via dkp-pacman:
-```
-sudo dkp-pacman -S devkitA64 libnx switch-tools switch-bzip2 switch-freetype switch-libjpeg-turbo switch-sdl2 switch-sdl2_gfx switch-sdl2_image switch-sdl2_ttf switch-libpng switch-mesa
-```
-3. Once it's all setup, recursively clone the repo and run make:
+### Building with Docker
+The [4tu/spheal image](https://gitlab.com/4TU/spheal) has all required dependencies to build on any of the target platforms:
 ```
 git clone --recursive https://github.com/vgmoose/vgedit.git
-cd vgedit
-make -f Makefile.switch
+export PLATFORM=wiiu    # or switch, 3ds, wii, pc, pc-sdl1
+docker run -v $(pwd):/code -it registry.gitlab.com/4tu/spheal /bin/bash -c "cd /code && make $PLATFORM"
 ```
 
-If all goes well, `vgedit.nro` should be sitting in the current directory.
+The result should be a `vgedit.rpx` (or `.nro`, `.3dsx`, `.dol`, `.bin`, `.bin-sdl1`) file in the current directory.
 
-### Building for Wii U (with WUT)
-The below instructions are currently for Linux and macOS
-1. Install [dkp-pacman](https://devkitpro.org/viewtopic.php?f=13&t=8702)
-2. Setup [wiiu-fling](https://gitlab.com/QuarkTheAwesome/wiiu-fling#wiiu-fling) according to the instructions
-3. Install sdl2, wut, devkitPPC and other dependencies (on macOS, use `wut-osx` instead of `wut-linux`)
-```
-sudo dkp-pacman -S wut-linux wiiu-sdl2 devkitPPC wiiu-libromfs wiiu-sdl2_gfx wiiu-sdl2_image wiiu-sdl2_ttf ppc-bzip2 ppc-freetype ppc-libpng
-```
-4. Once the environment is setup:
-```
-git clone --recursive https://github.com/vgmoose/vgedit.git
-cd vgedit
-make -f Makefile.wiiu
-```
+### Building Manually
+Depending on your target platform and the current state of its toolchain, you should be able to build it by installing the deps and running: `make <platform>`
 
-If all goes well, `vgedit.rpx` should be sitting in the current directory.
-
-### Building for PC
-There's a separate makefile for building the SDL2 app for PC. Below instructions are for Ubuntu, but should be similar on other platforms:
-```
-sudo apt-get install libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev libsdl2-gfx-dev gcc g++ git
-git clone --recursive https://github.com/vgmoose/vgedit.git
-cd vgedit
-make -f Makefile.pc
-```
-
-You can also build for PC using the [bake](https://github.com/SanderMertens/bake) build system.
+For a list of platforms and their dependencies as of this time of writing, see [Spheal's configuration script](https://gitlab.com/4TU/spheal/-/blob/master/dependency_helper.sh#L25-45).
 
 ## License
 This software is licensed under the GPLv3.

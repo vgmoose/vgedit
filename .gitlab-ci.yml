@@ -5,7 +5,7 @@ variables:
 
 .common: &common
   script:
-    - make -f Makefile.$PLATFORM
+    - make $PLATFORM
   artifacts:
     paths:
       - vgedit.$EXT
@@ -15,6 +15,12 @@ PC:
   variables:
     PLATFORM: pc
     EXT: bin
+
+PC-sdl1:
+  <<: *common
+  variables:
+    PLATFORM: pc-sdl1
+    EXT: bin-sdl1
 
 WiiU:
   <<: *common
@@ -27,3 +33,15 @@ Switch:
   variables:
     PLATFORM: switch
     EXT: nro
+
+3ds:
+  <<: *common
+  variables:
+    PLATFORM: 3ds
+    EXT: 3dsx
+
+Wii:
+  <<: *common
+  variables:
+    PLATFORM: wii
+    EXT: rol
