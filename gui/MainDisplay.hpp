@@ -30,6 +30,5 @@ public:
 
 	int lastFrameTime = 99;
 
-	bool showingSplash = true;
 	int count = 0;
 };
