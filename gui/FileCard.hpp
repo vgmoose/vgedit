@@ -1,6 +1,8 @@
 #include <string>
 #include "../libs/chesto/src/Element.hpp"
 
+#define FILE_CARD_WIDTH 220
+
 class FileCard : public Element
 {
 public:

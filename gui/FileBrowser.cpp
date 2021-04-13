@@ -16,7 +16,9 @@ FileBrowser::FileBrowser(const char* pwd)
 {
 	update_path(pwd);
 
-	x = 40;
+	cardsPerRow = SCREEN_WIDTH / FILE_CARD_WIDTH;
+
+	x = ((SCREEN_WIDTH - (cardsPerRow * FILE_CARD_WIDTH)) / 4);
 	y = 0;
 
 	listfiles();
@@ -164,7 +166,7 @@ void FileBrowser::listfiles()
 	if (*pwd != std::string("/"))
 	{
 		FileCard* card = new FileCard(true, ".. (parent)");
-		card->position(this->x + (count % 5) * card->width, this->y + 115 + (count / 5) * card->height);
+		card->position(this->x + (count % cardsPerRow) * card->width, this->y + 115 + (count / cardsPerRow) * card->height);
 		std::string cwd = dir_name(*pwd);
 		card->path = new std::string(cwd == "" ? "/" : cwd);
 		card->action = std::bind(&FileCard::openMyFile, card);
@@ -196,7 +198,7 @@ void FileBrowser::listfiles()
 		// make children of the browser
 		for (auto card : fileCards) {
 			child(card);
-			card->position(this->x + (count % 5) * card->width, this->y + 115 + (count / 5) * card->height);
+			card->position(this->x + (count % cardsPerRow) * card->width, this->y + 115 + (count / cardsPerRow) * card->height);
 			count++;
 		}
 
@@ -234,6 +236,7 @@ void FileBrowser::listfiles()
 		};
 		mainDisplay->switchSubscreen(new TextQueryPopup("Enter new folder name", "Create", createFunc));
 	}));
+
 	con->add((new Button("New File", Y_BUTTON, true))->setAction([this, mainDisplay](){
 		std::function<void(const char*)> createFunc = [this](const char* name){
 			printf("Creating file [%s]\n", name);
@@ -243,6 +246,6 @@ void FileBrowser::listfiles()
 		mainDisplay->switchSubscreen(new TextQueryPopup("Enter new file name", "Create", createFunc));
 	}));
 
-	con->position(750, 30);
+	con->position(SCREEN_WIDTH - con->width - this->x * 2, 30);
 	this->elements.push_back(con);
 }

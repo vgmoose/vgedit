@@ -6,7 +6,7 @@
 
 FileCard::FileCard(bool isFolder, const char* name)
 {
-	this->width = 220;
+	this->width = FILE_CARD_WIDTH;
 	this->height = 200;
 	touchable = true;
 	update(isFolder, name);
