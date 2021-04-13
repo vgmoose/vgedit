@@ -26,7 +26,7 @@ WiiU:
   <<: *common
   variables:
     PLATFORM: wiiu
-    EXT: rpx
+    EXT: wuhb
 
 Switch:
   <<: *common
@@ -44,4 +44,4 @@ Wii:
   <<: *common
   variables:
     PLATFORM: wii
-    EXT: rol
+    EXT: dol
