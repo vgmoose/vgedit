@@ -16,7 +16,7 @@ FileBrowser::FileBrowser(const char* pwd)
 {
 	update_path(pwd);
 
-	cardsPerRow = SCREEN_WIDTH / FILE_CARD_WIDTH;
+	cardsPerRow = LISTING_SCREEN_WIDTH / FILE_CARD_WIDTH;
 
 	x = ((SCREEN_WIDTH - (cardsPerRow * FILE_CARD_WIDTH)) / 4);
 	y = 0;
@@ -40,8 +40,8 @@ bool FileBrowser::process(InputEvents* events)
 	{
 		touchMode = false;
 
-		selected -= events->pressed(UP_BUTTON) * 5;
-		selected += events->pressed(DOWN_BUTTON) * 5;
+		selected -= events->pressed(UP_BUTTON) * cardsPerRow;
+		selected += events->pressed(DOWN_BUTTON) * cardsPerRow;
 		selected += events->pressed(RIGHT_BUTTON);
 		selected -= events->pressed(LEFT_BUTTON);
 
@@ -161,12 +161,17 @@ void FileBrowser::listfiles()
 	dirp = opendir(pwd->c_str());
 
 	int count = 0;
+	int topOfList = 115;
+
+#ifdef _3DS_MOCK
+	topOfList = SCREEN_HEIGHT / 2 + 40;
+#endif
 
 	// create a hardcoded "up" link to the parent directory
 	if (*pwd != std::string("/"))
 	{
 		FileCard* card = new FileCard(true, ".. (parent)");
-		card->position(this->x + (count % cardsPerRow) * card->width, this->y + 115 + (count / cardsPerRow) * card->height);
+		card->position(this->x + (count % cardsPerRow) * card->width, this->y + topOfList + (count / cardsPerRow) * card->height);
 		std::string cwd = dir_name(*pwd);
 		card->path = new std::string(cwd == "" ? "/" : cwd);
 		card->action = std::bind(&FileCard::openMyFile, card);
@@ -198,7 +203,7 @@ void FileBrowser::listfiles()
 		// make children of the browser
 		for (auto card : fileCards) {
 			child(card);
-			card->position(this->x + (count % cardsPerRow) * card->width, this->y + 115 + (count / cardsPerRow) * card->height);
+			card->position(this->x + (count % cardsPerRow) * card->width, this->y + topOfList + (count / cardsPerRow) * card->height);
 			count++;
 		}
 
@@ -215,14 +220,15 @@ void FileBrowser::listfiles()
 		clippedPath.insert(0, "…");
 	}
 
-	TextElement* path = new TextElement(clippedPath.c_str(), 25, &white, MONOSPACED);
-	path->position(10, 30);
+	TextElement* path = new TextElement(clippedPath.c_str(), 25 / SCALER, &white, MONOSPACED);
+	path->position(10 / SCALER, topOfList - 85 / SCALER);
 	this->elements.push_back(path);
 
 	auto mainDisplay = RootDisplay::mainDisplay;
 
 	// new folder, file, and exit buttons
 	Container* con = new Container(ROW_LAYOUT, 10);
+
 	con->add((new Button("Exit", SELECT_BUTTON, true))->setAction([mainDisplay](){
 		mainDisplay->exitRequested = true;
 		mainDisplay->isRunning = false;
@@ -246,6 +252,19 @@ void FileBrowser::listfiles()
 		mainDisplay->switchSubscreen(new TextQueryPopup("Enter new file name", "Create", createFunc));
 	}));
 
-	con->position(SCREEN_WIDTH - con->width - this->x * 2, 30);
+	con->position(SCREEN_WIDTH - con->width - this->x * 2, topOfList - 85 / SCALER);
+#ifdef _3DS_MOCK
+	con->position(SCREEN_WIDTH / 2 - con->width / 2 - this->x, topOfList - 30);
+	path->position(10 / SCALER, topOfList - 60);
+
+	// for 3ds, the top screen will show the title initially
+	Container* titleCon = new Container(ROW_LAYOUT, 10);
+
+	titleCon->add((new ImageElement(RAMFS "res/icon.jpg"))->setSize(50, 50));
+	titleCon->add(new TextElement("VGEdit", 30, &white));
+	titleCon->position(SCREEN_WIDTH / 2 - con->width / 2, SCREEN_HEIGHT / 4 - con->height);
+	this->elements.push_back(titleCon);
+
+#endif
 	this->elements.push_back(con);
 }

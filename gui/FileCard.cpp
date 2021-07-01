@@ -7,7 +7,7 @@
 FileCard::FileCard(bool isFolder, const char* name)
 {
 	this->width = FILE_CARD_WIDTH;
-	this->height = 200;
+	this->height = FILE_CARD_WIDTH - (this->width > 100 ? 20 : 0);
 	touchable = true;
 	update(isFolder, name);
 }
@@ -19,11 +19,11 @@ void FileCard::update(bool isFolder, const char* name)
 
 	// folder or file icon
 	auto thumbPath = isFolder ? RAMFS "res/folder.png" : RAMFS "res/file.png";
-	auto thumbIcon = con->add((new ImageElement(thumbPath))->setSize(110, 100));
+	auto thumbIcon = con->add((new ImageElement(thumbPath))->setSize(this->width / 2, this->height / 2));
 
 	// text label (centered)
 	CST_Color color = { 0xFF, 0xFF, 0xFF, 0xFF };
-	con->add((new TextElement(name, 20, &color, NORMAL, this->width)))->centerHorizontallyIn(con);
+	con->add((new TextElement(name, this->width / 11, &color, NORMAL, this->width)))->centerHorizontallyIn(con);
 	thumbIcon->centerHorizontallyIn(con);
 
 	// add and center container
