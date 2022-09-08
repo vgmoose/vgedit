@@ -1,4 +1,4 @@
-image: registry.gitlab.com/4tu/spheal
+image: ghcr.io/fortheusers/sealeo
 
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
@@ -23,6 +23,12 @@ PC-sdl1:
     EXT: bin-sdl1
 
 WiiU:
+  <<: *common
+  variables:
+    PLATFORM: wiiu
+    EXT: rpx
+
+WiiU-wuhb:
   <<: *common
   variables:
     PLATFORM: wiiu

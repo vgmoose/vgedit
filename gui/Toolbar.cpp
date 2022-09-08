@@ -217,6 +217,12 @@ void Toolbar::initButtons(EditorView* editorView)
 			editorView->keyboard->hidden = false;
 			editorView->keepCursorOnscreen = true;
 
+#if defined(_3DS_MOCK)
+			editorView->keyboard->width = SCREEN_WIDTH - 140;
+			editorView->keyboard->position(40, 360);
+			editorView->keyboard->updateSize();
+#endif
+
 			// force selection to be width 1 (more than 1 doesn't make sense in insert mode)
 			// (but it does make sense for vertical selections, to type on multiple lines)
 			textField->selectedWidth = 1;
@@ -271,15 +277,17 @@ void Toolbar::render(Element* parent)
 {
 	CST_Rect topBg = { 0, 0, SCREEN_WIDTH, 50 };
 
+	auto renderer = RootDisplay::renderer;
+
 	// draw top bar on top of other things
-	CST_SetDrawColor(parent->renderer, { 0x40, 0x40, 0x40, 0xFF });
-	CST_FillRect(parent->renderer, &topBg);
+	CST_SetDrawColor(renderer, { 0x40, 0x40, 0x40, 0xFF });
+	CST_FillRect(renderer, &topBg);
 
 	if (!keyboardShowing) {
 		CST_Rect botBg = { 0, SCREEN_HEIGHT - 50, SCREEN_WIDTH, 50 };
 
 		// draw top bar on top of other things
-		CST_FillRect(parent->renderer, &botBg);
+		CST_FillRect(renderer, &botBg);
 	}
 
 	super::render(parent);

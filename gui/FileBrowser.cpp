@@ -102,6 +102,8 @@ void FileBrowser::render(Element* parent)
 
 	ListElement::render(parent);
 
+	auto renderer = RootDisplay::renderer;
+
 	if (selected >= 0 && !touchMode) 
 	{
 		// draw the cursor for this file
@@ -109,12 +111,12 @@ void FileBrowser::render(Element* parent)
 		CST_Rect dimens4 = selectedElement->getBounds();
 		for (int z = 4; z >= 0; z--)
 		{
-			CST_SetDrawColor(parent->renderer, { 0x66 - z * 10, 0x7c + z * 20, 0x89 + z * 10, 0xFF });
+			CST_SetDrawColor(renderer, { 0x66 - z * 10, 0x7c + z * 20, 0x89 + z * 10, 0xFF });
 			dimens4.x--;
 			dimens4.y--;
 			dimens4.w += 2;
 			dimens4.h += 2;
-			CST_DrawRect(parent->renderer, &dimens4);
+			CST_DrawRect(renderer, &dimens4);
 		}
 	}
 }

@@ -4,9 +4,9 @@
 
 TextInputElement::TextInputElement(Editor* editor)
 {
-  int size = 20;
+  int size = 20 / SCALER;
 
-  renderer = (RootDisplay::mainDisplay)->renderer;
+  auto renderer = (RootDisplay::mainDisplay)->renderer;
 
   auto fontPath = RAMFS "./res/mono.ttf";
 
@@ -48,6 +48,7 @@ bool TextInputElement::process(InputEvents* event)
 
 void TextInputElement::drawLineNo(int actualLineNo, int lineXPos, int actualLineYPos)
 {
+  auto renderer = (RootDisplay::mainDisplay)->renderer;
   std::stringstream stream;
   stream << std::setw(editor->lineNoPlaces) << std::setfill('0') << actualLineNo;
   auto res = stream.str();
@@ -67,6 +68,8 @@ void TextInputElement::render(Element* parent)
 {
 	if (this->hidden)
 		return;
+
+  auto renderer = (RootDisplay::mainDisplay)->renderer;
 
   hasRendered = true;
 

@@ -1,0 +1,42 @@
+name: Build app
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  all:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - platform: pc
+            ext: bin
+          - platform: wiiu
+            ext: rpx
+          - platform: wiiu
+            ext: wuhb
+          - platform: switch
+            ext: nro
+          - platform: 3ds
+            ext: 3dsx
+          - platform: wii
+            ext: dol
+          - platform: pc-sdl1
+            ext: bin-sdl1
+    container:
+      image: ghcr.io/fortheusers/sealeo:latest
+    steps:
+    - uses: actions/checkout@main
+      with:
+        submodules: recursive
+    - name: Build ${{ matrix.platform }}
+      run: make ${{ matrix.platform }}
+    - uses: actions/upload-artifact@v3
+      with:
+        name: vgedit.${{ matrix.ext }}
+        path: /__w/vgedit/vgedit/vgedit.${{ matrix.ext }}

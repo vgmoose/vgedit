@@ -10,6 +10,11 @@ EditorView::EditorView(Editor* editor)
 	mainTextField->y = 70;
 	this->elements.push_back(mainTextField);
 
+#if defined(_3DS_MOCK)
+	mainTextField->x += 40;
+	mainTextField->y += SCREEN_HEIGHT;
+#endif
+
 	this->editor = editor;
 	this->text = editor->text;
 
@@ -20,12 +25,13 @@ EditorView::EditorView(Editor* editor)
 
 void EditorView::render(Element* parent)
 {
-	CST_SetDrawColorRGBA(parent->renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-	CST_FillRect(parent->renderer, NULL);
+	auto renderer = RootDisplay::renderer;
+	CST_SetDrawColorRGBA(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+	CST_FillRect(renderer, NULL);
 
-	// CST_SetDrawColorRGBA(parent->renderer, 0xee, 0xee, 0xee, 0xff);
+	// CST_SetDrawColorRGBA(renderer, 0xee, 0xee, 0xee, 0xff);
 	// CST_Rect rect = {0, 0, 10 + editor->lineNoPlaces * mainTextField->fontWidth, SCREEN_HEIGHT};
-	// CST_FillRect(parent->renderer, &rect);
+	// CST_FillRect(renderer, &rect);
 
 	super::render(parent);
 
@@ -58,6 +64,12 @@ void EditorView::reset_bounds()
 
 	// if this boolean is set, adjust the textfield in the direction of the cursor
 	if (keepCursorOnscreen) {
+#if defined(_3DS_MOCK)
+		if (cursor_y > SCREEN_HEIGHT - 150)
+			mainTextField->y -= h/2;
+		if (cursor_y < 50)
+			mainTextField->y += h/2;
+#else
 		if (mainTextField->selectedPos == 0)
 			mainTextField->y = 0;
 
@@ -68,6 +80,7 @@ void EditorView::reset_bounds()
 
 		if (cursor_y < 50 && mainTextField->y < -1 * h/4)
 			mainTextField->y += h/2;
+#endif
 	}
 }
 

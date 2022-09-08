@@ -12,12 +12,14 @@ TextQueryPopup::TextQueryPopup(const char* prompt, const char* ctaText, std::fun
 	this->y = 0;
 	this->isAbsolute = true;
 
+	auto renderer = (RootDisplay::mainDisplay)->renderer;
+
 	// draw a big dim layer around the entire window before drawing this progress bar
 	CST_Rect dim = { 0, 0, 1280, 720 };
 
-	CST_SetDrawBlend(this->renderer, true);
-	CST_SetDrawColorRGBA(this->renderer, 0x00, 0x00, 0x00, 0xbb);
-	CST_FillRect(this->renderer, &dim);
+	CST_SetDrawBlend(renderer, true);
+	CST_SetDrawColorRGBA(renderer, 0x00, 0x00, 0x00, 0xbb);
+	CST_FillRect(renderer, &dim);
 
 	auto mainDisplay = RootDisplay::mainDisplay;
 
@@ -30,6 +32,12 @@ TextQueryPopup::TextQueryPopup(const char* prompt, const char* ctaText, std::fun
 		queryText->update();
 	});
 	keyboard->preventEnterAndTab = true;
+
+#if defined(_3DS_MOCK)
+	keyboard->width = SCREEN_WIDTH - 140;
+	keyboard->position(40, 360);
+#endif
+
 	keyboard->updateSize();
 	child(keyboard);
 
