@@ -12,6 +12,10 @@
 #include <sys/stat.h>
 #include <algorithm>
 
+#if defined(__WIIU__)
+#include <sysapp/launch.h>
+#endif
+
 FileBrowser::FileBrowser(const char* pwd)
 {
 	update_path(pwd);
@@ -231,10 +235,18 @@ void FileBrowser::listfiles()
 	// new folder, file, and exit buttons
 	Container* con = new Container(ROW_LAYOUT, 10);
 
-	con->add((new Button("Exit", SELECT_BUTTON, true))->setAction([mainDisplay](){
+	auto quitaction = [mainDisplay](){
+#ifdef __WIIU__
+		// will exit via procui loop in RootDisplay
+		SYSLaunchMenu();
+#else
 		mainDisplay->exitRequested = true;
 		mainDisplay->isRunning = false;
-	}));
+#endif
+	};
+
+	con->add((new Button("Exit", SELECT_BUTTON, true))->setAction(quitaction));
+	mainDisplay->events->quitaction = quitaction;
 
 	con->add((new Button("New Folder", X_BUTTON, true))->setAction([this, mainDisplay](){
 		std::function<void(const char*)> createFunc = [this](const char* name){
