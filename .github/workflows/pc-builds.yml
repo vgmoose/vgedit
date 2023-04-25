@@ -1,0 +1,28 @@
+name: Build PC client apps
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  all:
+    strategy:
+      matrix:
+        os: [ubuntu, windows, macos]
+        library: [sdl2]
+    runs-on: ${{ matrix.os }}-latest
+    steps:
+    - uses: actions/checkout@main
+      with:
+        submodules: recursive
+    - name: Build ${{ matrix.platform }}
+      shell: bash
+      run: ./libs/chesto/helpers/build_pc.sh vgedit ${{ matrix.os }} ${{ matrix.library }}
+    - uses: actions/upload-artifact@v3
+      with:
+        name: vgedit_${{ matrix.os }}_${{ matrix.library }}
+        path: ./vgedit_${{ matrix.os }}_${{ matrix.library }}.zip

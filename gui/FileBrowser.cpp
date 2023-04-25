@@ -16,6 +16,10 @@
 #include <sysapp/launch.h>
 #endif
 
+#if defined(WIN32)
+#include <sys/types.h>
+#endif
+
 FileBrowser::FileBrowser(const char* pwd)
 {
 	update_path(pwd);
@@ -154,6 +158,18 @@ void FileBrowser::update_path(const char* pwd)
 #endif
 }
 
+bool is_dir(struct dirent* entry)
+{
+#ifndef WIN32
+	return entry->d_type & DT_DIR;
+#else
+	// windows check, using stat
+	struct stat s;
+	stat(entry->d_name, &s);
+	return s.st_mode & S_IFDIR;
+#endif
+}
+
 void FileBrowser::listfiles()
 {
 	// go through all files in current directory and create FileCard children out of them
@@ -195,7 +211,7 @@ void FileBrowser::listfiles()
 			if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
 				continue;
 
-			FileCard* card = new FileCard(entry->d_type == DT_DIR, entry->d_name);
+			FileCard* card = new FileCard(is_dir(entry), entry->d_name);
 			card->path = new std::string(*pwd + (*pwd != "/" ? std::string("/") : "") + entry->d_name);
 			card->action = std::bind(&FileCard::openMyFile, card);
 			fileCards.push_back(card);
@@ -251,7 +267,11 @@ void FileBrowser::listfiles()
 	con->add((new Button("New Folder", X_BUTTON, true))->setAction([this, mainDisplay](){
 		std::function<void(const char*)> createFunc = [this](const char* name){
 			printf("Creating folder [%s]\n", name);
+#ifndef WIN32
 			::mkdir((*this->pwd + "/" + name).c_str(), 0775);
+#else
+			mkdir((*this->pwd + "/" + name).c_str());
+#endif
 			this->listfiles();
 		};
 		mainDisplay->switchSubscreen(new TextQueryPopup("Enter new folder name", "Create", createFunc));
