@@ -26,7 +26,7 @@ The result should be a `vgedit.rpx` (or `.wuhb`, `.nro`, `.bin`) file in the cur
 ### Building Manually
 Depending on your target platform and the current state of its toolchain, you should be able to build it by installing the deps and running: `make <platform>`
 
-For a list of platforms and their dependencies as of this time of writing, see [Spheal's configuration script](https://github.com/fortheusers/sealeo/blob/main/dependency_helper.sh).
+For a list of platforms and their dependencies as of this time of writing, see [Sealeo's configuration script](https://github.com/fortheusers/sealeo/blob/main/dependency_helper.sh).
 
 ## License
 This software is licensed under the GPLv3.

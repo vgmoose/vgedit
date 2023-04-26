@@ -149,7 +149,7 @@ void FileBrowser::update_path(const char* pwd)
 		delete this->pwd;
 
 	char path[2048];
-#if defined(PC)
+#if defined(PC) && !defined(WIN32)
 	// PC can use realpath, other platforms might not have it
 	realpath(pwd, path);
 	this->pwd = new std::string(path);
@@ -158,14 +158,16 @@ void FileBrowser::update_path(const char* pwd)
 #endif
 }
 
-bool is_dir(struct dirent* entry)
+bool is_dir(const char* pwd, struct dirent* entry)
 {
 #ifndef WIN32
 	return entry->d_type & DT_DIR;
 #else
 	// windows check, using stat
 	struct stat s;
-	stat(entry->d_name, &s);
+	// get full path using dir and entry
+	std::string full_path = std::string(pwd) + "/" + std::string(entry->d_name);
+	stat(full_path.c_str(), &s);
 	return s.st_mode & S_IFDIR;
 #endif
 }
@@ -210,8 +212,9 @@ void FileBrowser::listfiles()
 			// skip the '.' and '..' entries if they exist in the filesystem
 			if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
 				continue;
-
-			FileCard* card = new FileCard(is_dir(entry), entry->d_name);
+			
+			// full path to the file (C++ string)
+			FileCard* card = new FileCard(is_dir(pwd->c_str(), entry), entry->d_name);
 			card->path = new std::string(*pwd + (*pwd != "/" ? std::string("/") : "") + entry->d_name);
 			card->action = std::bind(&FileCard::openMyFile, card);
 			fileCards.push_back(card);
