@@ -242,6 +242,29 @@ void TextInputElement::render(Element* parent)
       auto lineText = text->substr(lpos, curPos - lpos + 1);
       CST_DrawFont(font, renderer, xPos, lineYPos, lineText.c_str());
       hasWrapped = curPos - lpos + bonusWidth == COLS; // we wrapped if our line width (and tabs) is equal to max
+ 
+      auto dictionary = ((MainDisplay*)RootDisplay::mainDisplay)->dictionary;
+      bool spellCheck = true;
+      // check the words in the current line and see if any are misspelled
+      if (spellCheck && !hasWrapped) {
+        std::string word;
+        for (int i=0; i<lineText.length(); i++) {
+          char curChar = lineText.at(i);
+          if (curChar == ' ' || curChar == '\t' || curChar == '\n') {
+            if (word.length() > 0) {
+              // if (!dictionary.checkWord(word)) {
+              //   // we have a misspelled word, draw a red underline
+              //   CST_SetDrawColor(renderer, { 0xFF, 0x00, 0x00, 0xFF });
+              //   CST_DrawLine(renderer, xPos + i * fontWidth, lineYPos + fontHeight, xPos + i * fontWidth + fontWidth, lineYPos + fontHeight);
+              // }
+              word = "";
+            }
+          }
+          else {
+            word += curChar;
+          }
+        }
+      }
     }
   
     curPos ++;

@@ -7,8 +7,8 @@ APP_VERSION := 2.1
 SOURCES		+=	. gui edit
 CFLAGS		+= -DUSE_KEYBOARD
 
-SOURCES += $(CHESTO_DIR)/libs/SDL_FontCache
-VPATH   += $(CHESTO_DIR)/libs/SDL_FontCache
+SOURCES += $(CHESTO_DIR)/libs/SDL_FontCache libs/robin-map/include/tsl
+VPATH   += $(	CHESTO_DIR)/libs/SDL_FontCache libs/robin-map
 
 ifeq (wiiu,$(MAKECMDGOALS))
 SOURCES += $(CHESTO_DIR)/libs/wiiu_kbd

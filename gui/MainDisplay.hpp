@@ -2,6 +2,7 @@
 #include "../libs/chesto/src/ImageElement.hpp"
 #include "../libs/chesto/src/TextElement.hpp"
 #include "../libs/chesto/src/RootDisplay.hpp"
+#include "../edit/SpellCheck.hpp"
 #include <unordered_map>
 
 // TODO: don't forward declare
@@ -31,4 +32,7 @@ public:
 	int lastFrameTime = 99;
 
 	int count = 0;
+
+	SpellCheck dictionary;
+	
 };
