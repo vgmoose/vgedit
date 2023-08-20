@@ -23,6 +23,7 @@ public:
 	EditorView* editorView = NULL;
 
 	std::string* copiedText = NULL;
+	std::string callbackPath = "";
 
 	char path_string[2048];
 

@@ -14,7 +14,7 @@ void MainDisplay::openFile(bool isFolder, std::string* path)
 	if (editorView != NULL)
 		return;
 
-	if (isFolder)
+	if (isFolder && browser != NULL)
 	{
 		browser->update_path(path->c_str());
 		browser->y = 0;
@@ -37,7 +37,21 @@ bool MainDisplay::process(InputEvents* event)
 
 void MainDisplay::closeEditor()
 {
-	// this is _probably_ safe
+	if (browser == NULL)
+	{
+		// The file browser was never created, so let's leave the whole app
+		// (single file mode)
+
+		if (callbackPath != "") {
+			// TODO: on switch/wiiu set the next nro/wuhb to launch
+			std::cout << "Launching " << callbackPath << std::endl;
+		}
+
+		exit(0);
+		return;
+	}
+
+	// otherwise, we'll go back to the file browser (this is _probably_ safe)
 	elements.erase(elements.begin() + 1); // second element should be the editor (TODO: something smarter)
 	editorView->wipeAll(); // destroy subelements
 	delete editorView;

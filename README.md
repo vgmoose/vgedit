@@ -5,6 +5,21 @@
 
 A basic SDL2 text editor designed for easy use on a video game console using a controller or touch screen. The primary goal of this project is to allow you to not have to turn to another device to edit text files.
 
+## Passing files to vgedit
+vgedit can be passed a file name to open by specifying it as the first argument on the command line. On PC this looks like `vgedit.exe test.txt`, and on Switch/Wii U, if supported, the calling homebrew can pass the argument before launching vgedit.
+
+Another way to pass a target file is to write an `args.json` file in the same directory as vgedit. For example, to open `test.txt`:
+```json
+{
+    "filename": "sd:/path/to/test.txt",
+    "callback": "sd:/switch/the_caller.nro"
+}
+```
+
+An optional callback can be specified, which will be launched when vgedit exits. This is useful for homebrew that want to open a file, edit it, and then return back.
+
+After reading the path info from the `args.json` file, vgedit will delete it, so it can be used as a one-time file opener. In this mode, vgedit will not show the file browser and close after saving or discarding changes.
+
 ## Compilation instructions
 This program is written using [Chesto](https://github.com/fortheusers/chesto) and has a dependency on SDL2. It targets Switch, Wii U, and PC.
 

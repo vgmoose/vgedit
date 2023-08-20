@@ -2,6 +2,8 @@
 #include "../gui/FileBrowser.hpp"
 #include "../gui/MainDisplay.hpp"
 #include "../libs/chesto/src/Element.hpp"
+
+#include "../libs/json/single_include/nlohmann/json.hpp"
 #include <algorithm>
 
 #if defined(PC)
@@ -21,9 +23,51 @@ int main(int argc, char* argv[])
 	auto events = display->events;
 	events->rapidFireRate = 6; // 2x faster directional key repeat
 
-	FileBrowser* fileBrowser = new FileBrowser(START_PATH);
-	display->browser = fileBrowser;
-	display->elements.push_back(fileBrowser);
+	std::string startPath = START_PATH;
+
+	if (argc > 1) {
+		// get the file path from the command line
+		startPath = argv[1];
+	}
+
+	// check if the args.json file exists
+	std::ifstream argsFile("args.json");
+	if (argsFile.good()) {
+		// parse the args.json file
+		std::string argsJson((std::istreambuf_iterator<char>(argsFile)), std::istreambuf_iterator<char>());
+		auto args = nlohmann::json::parse(argsJson);
+
+		// check if the file path is specified
+		if (args.contains("filename")) {
+			startPath = args["filename"];
+
+			// if there's a callback path, store it for later
+			if (args.contains("callback")) {
+				display->callbackPath = args["callback"];
+			}
+
+			// since we got the path, we can delete the args.json file
+			std::remove("args.json");
+		}
+	}
+
+	// if the start path isn't a directory,use single file mode
+	if (startPath != START_PATH && !std::filesystem::is_directory(startPath))
+	{
+		// if the file doesn't exist, create it TODO: entire path?
+		if (!std::filesystem::exists(startPath)) {
+			std::ofstream file(startPath);
+			file.close();
+		}
+
+		display->openFile(false, &startPath);
+
+	} else {
+		// otherwise, open a file browser to the start path
+		FileBrowser* fileBrowser = new FileBrowser(startPath.c_str());
+		display->browser = fileBrowser;
+		display->elements.push_back(fileBrowser);
+	}
 
 	display->mainLoop();
 

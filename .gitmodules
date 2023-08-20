@@ -4,3 +4,6 @@
 [submodule "libs/chesto"]
 	path = libs/chesto
 	url = https://github.com/fortheusers/chesto.git
+[submodule "libs/json"]
+	path = libs/json
+	url = https://github.com/nlohmann/json.git

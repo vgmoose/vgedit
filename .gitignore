@@ -1,0 +1,10 @@
+*.o
+*.DS_Store
+.vscode
+*.bin
+build*
+vgedit_*
+*.rpx
+*.nro
+*.wuhb
+*.kra
