@@ -2,13 +2,10 @@ BINARY      := vgedit
 
 APP_TITLE	:= vgedit+
 APP_AUTHOR 	:= vgmoose
-APP_VERSION := 2.1
+APP_VERSION := 2.2
 
 SOURCES		+=	. gui edit
 CFLAGS		+= -DUSE_KEYBOARD
-
-SOURCES		+= $(CHESTO_DIR)/libs/SDL_FontCache
-VPATH   	+= $(CHESTO_DIR)/libs/SDL_FontCache
 
 ifeq (wiiu,$(MAKECMDGOALS))
 SOURCES 	+= $(CHESTO_DIR)/libs/wiiu_kbd libs/librpxloader/source
