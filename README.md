@@ -5,7 +5,9 @@
 
 A basic SDL2 text editor designed for easy use on a video game console using a controller or touch screen. The primary goal of this project is to allow you to not have to turn to another device to edit text files.
 
-## Passing files to vgedit
+<img src="https://user-images.githubusercontent.com/2467473/83720891-fb573600-a607-11ea-9c18-42e5e75994fe.png" width="400" alt="File browser" /> <img src="https://user-images.githubusercontent.com/2467473/83720896-fdb99000-a607-11ea-9f8c-439da907aa76.png" width="400" alt="Editor View" />
+
+### Passing files to vgedit
 vgedit can be passed a file name to open by specifying it as the first argument on the command line. On PC this looks like `vgedit.exe test.txt`, and on Switch/Wii U, if supported, the calling homebrew can pass the argument before launching vgedit.
 
 Another way to pass a target file is to write an `args.json` file in the same directory as vgedit. For example, to open `test.txt`:

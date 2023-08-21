@@ -21,7 +21,7 @@ jobs:
           - platform: switch
             ext: nro
     container:
-      image: ghcr.io/fortheusers/sealeo:latest
+      image: ghcr.io/fortheusers/sealeo:sha-1474053
     steps:
     - uses: actions/checkout@main
       with:

@@ -25,9 +25,15 @@ int main(int argc, char* argv[])
 
 	std::string startPath = START_PATH;
 
+	// USAGE: vgedit [file to edit path] [callback path]
 	if (argc > 1) {
 		// get the file path from the command line
 		startPath = argv[1];
+
+		// if there's a callback path, store it for later
+		if (argc > 2) {
+			display->callbackPath = argv[2];
+		}
 	}
 
 	// check if the args.json file exists

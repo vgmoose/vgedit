@@ -7,3 +7,6 @@
 [submodule "libs/json"]
 	path = libs/json
 	url = https://github.com/nlohmann/json.git
+[submodule "libs/librpxloader"]
+	path = libs/librpxloader
+	url = https://github.com/wiiu-env/librpxloader.git

@@ -2,6 +2,14 @@
 #include "EditorView.hpp"
 #include "FileBrowser.hpp"
 
+#if defined(__WIIU__)
+#include "../libs/librpxloader/include/rpxloader/rpxloader.h"
+#endif
+
+#if defined(SWITCH)
+#include <switch.h>
+#endif
+
 MainDisplay::MainDisplay()
 {
 	RootDisplay::super();
@@ -43,8 +51,29 @@ void MainDisplay::closeEditor()
 		// (single file mode)
 
 		if (callbackPath != "") {
-			// TODO: on switch/wiiu set the next nro/wuhb to launch
 			std::cout << "Launching " << callbackPath << std::endl;
+			bool success = false;
+
+			#ifdef __WIIU__
+			RPXLoaderStatus ret = RPXLoader_InitLibrary();
+			if (ret == RPX_LOADER_RESULT_SUCCESS) {
+				auto res = RPXLoader_LaunchHomebrew(callbackPath.c_str());
+				success = res == RPX_LOADER_RESULT_SUCCESS;
+			}
+			#endif
+
+			#ifdef SWITCH
+			// use envSetNextLoad to set the path to the app to launch
+			if (envHasNextLoad()) {
+				auto res = envSetNextLoad(callbackPath.c_str(), editorView->editor->filename); // give it the filename of the file we edited
+				success = R_SUCCEEDED(res);
+			}
+			#endif
+
+			if (!success) {
+				std::cout << "Failed to launch " << callbackPath << std::endl;
+				exit(1);
+			}
 		}
 
 		exit(0);
