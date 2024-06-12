@@ -24,7 +24,7 @@ jobs:
           - platform: 3ds
             ext: 3dsx
     container:
-      image: ghcr.io/fortheusers/sealeo:sha-1474053
+      image: ghcr.io/fortheusers/sealeo:sha-f207849
     steps:
     - uses: actions/checkout@main
       with:
