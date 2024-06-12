@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - sdl2-only
   pull_request:
     branches:
       - main

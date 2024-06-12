@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - sdl2-only
   pull_request:
     branches:
       - main
@@ -15,11 +16,13 @@ jobs:
       matrix:
         include:
           - platform: wiiu
-            ext: rpx
-          - platform: wiiu
             ext: wuhb
           - platform: switch
             ext: nro
+          - platform: wii
+            ext: dol
+          - platform: 3ds
+            ext: 3dsx
     container:
       image: ghcr.io/fortheusers/sealeo:sha-1474053
     steps:
