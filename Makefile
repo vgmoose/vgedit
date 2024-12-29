@@ -5,7 +5,8 @@ APP_AUTHOR 	:= vgmoose
 APP_VERSION := 2.2
 
 SOURCES		+=	. gui edit
-CFLAGS		+= -DUSE_KEYBOARD
+CFLAGS		+= -DUSE_KEYBOARD 
+# -D_3DS_MOCK
 
 ifeq (wiiu,$(MAKECMDGOALS))
 SOURCES 	+= $(CHESTO_DIR)/libs/wiiu_kbd libs/librpxloader/source

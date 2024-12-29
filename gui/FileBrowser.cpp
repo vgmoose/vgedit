@@ -2,6 +2,7 @@
 #include "../libs/chesto/src/Button.hpp"
 #include "../libs/chesto/src/TextElement.hpp"
 #include "../libs/chesto/src/Container.hpp"
+#include "../libs/chesto/src/Constraint.hpp"
 #include "FileCard.hpp"
 #include "MainDisplay.hpp"
 #include "TextQueryPopup.hpp"
@@ -27,6 +28,7 @@ FileBrowser::FileBrowser(const char* pwd)
 	cardsPerRow = LISTING_SCREEN_WIDTH / FILE_CARD_WIDTH;
 
 	x = ((SCREEN_WIDTH - (cardsPerRow * FILE_CARD_WIDTH)) / 4);
+	width = -1 * x; // the other margin
 	y = 0;
 
 	listfiles();
@@ -187,7 +189,7 @@ void FileBrowser::listfiles()
 	int count = 0;
 	int topOfList = 115;
 
-#ifdef _3DS_MOCK
+#if defined(_3DS) || defined(_3DS_MOCK)
 	topOfList = SCREEN_HEIGHT / 2 + 40;
 #endif
 
@@ -290,16 +292,15 @@ void FileBrowser::listfiles()
 	}));
 
 	con->position(SCREEN_WIDTH - con->width - this->x * 2, topOfList - 85 / SCALER);
-#ifdef _3DS_MOCK
+#if defined(_3DS) || defined(_3DS_MOCK)
 	con->position(SCREEN_WIDTH / 2 - con->width / 2 - this->x, topOfList - 30);
 	path->position(10 / SCALER, topOfList - 60);
 
 	// for 3ds, the top screen will show the title initially
 	Container* titleCon = new Container(ROW_LAYOUT, 10);
-
-	titleCon->add((new ImageElement(RAMFS "res/icon.jpg"))->setSize(50, 50));
+	titleCon->add((new ImageElement(RAMFS "res/icon_nobg.png"))->setSize(50, 50));
 	titleCon->add(new TextElement("VGEdit", 30, &white));
-	titleCon->position(SCREEN_WIDTH / 2 - con->width / 2, SCREEN_HEIGHT / 4 - con->height);
+	titleCon->constrain(ALIGN_CENTER_HORIZONTAL);
 	this->elements.push_back(titleCon);
 
 #endif

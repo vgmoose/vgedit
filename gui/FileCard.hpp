@@ -1,7 +1,7 @@
 #include <string>
 #include "../libs/chesto/src/Element.hpp"
 
-#ifdef _3DS_MOCK
+#if defined(_3DS) || defined(_3DS_MOCK)
 #define FILE_CARD_WIDTH 80
 #define LISTING_SCREEN_WIDTH (SCREEN_WIDTH - 80)
 #else

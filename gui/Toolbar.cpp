@@ -32,12 +32,12 @@ bool Toolbar::commonHistoryLogic(bool isUndo, Editor* editor, TextInputElement* 
 	bool isDelete = event.isDelete != isUndo;
 
 	int pos = event.pos;
-	std::string* chars = &event.chars;
+	std::string& chars = event.chars;
 
 	if (isDelete) {
-		editor->text->erase(pos, chars->length());
+		editor->text->erase(pos, chars.length());
 	} else {
-		editor->text->insert(pos, chars->c_str());
+		editor->text->insert(pos, chars.c_str());
 	}
 
 	// move cursor
@@ -217,7 +217,7 @@ void Toolbar::initButtons(EditorView* editorView)
 			editorView->keyboard->hidden = false;
 			editorView->keepCursorOnscreen = true;
 
-#if defined(_3DS_MOCK)
+#if defined(_3DS) || defined(_3DS_MOCK)
 			editorView->keyboard->width = SCREEN_WIDTH - 140;
 			editorView->keyboard->position(40, 360);
 			editorView->keyboard->updateSize();

@@ -14,6 +14,8 @@ MainDisplay::MainDisplay()
 {
 	RootDisplay::super();
 	backgroundColor = fromRGB(0x42, 0x45, 0x48);
+
+	RootDisplay::idleCursorPulsing = true;
 }
 
 void MainDisplay::openFile(bool isFolder, std::string* path)

@@ -33,7 +33,7 @@ TextQueryPopup::TextQueryPopup(const char* prompt, const char* ctaText, std::fun
 	});
 	keyboard->preventEnterAndTab = true;
 
-#if defined(_3DS_MOCK)
+#if defined(_3DS) || defined(_3DS_MOCK)
 	keyboard->width = SCREEN_WIDTH - 140;
 	keyboard->position(40, 360);
 #endif

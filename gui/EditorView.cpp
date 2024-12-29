@@ -10,7 +10,7 @@ EditorView::EditorView(Editor* editor)
 	mainTextField->y = 70;
 	this->elements.push_back(mainTextField);
 
-#if defined(_3DS_MOCK)
+#if defined(_3DS) || defined(_3DS_MOCK)
 	mainTextField->x += 40;
 	mainTextField->y += SCREEN_HEIGHT;
 #endif
@@ -64,7 +64,7 @@ void EditorView::reset_bounds()
 
 	// if this boolean is set, adjust the textfield in the direction of the cursor
 	if (keepCursorOnscreen) {
-#if defined(_3DS_MOCK)
+#if defined(_3DS) || defined(_3DS_MOCK)
 		if (cursor_y > SCREEN_HEIGHT - 150)
 			mainTextField->y -= h/2;
 		if (cursor_y < 50)
