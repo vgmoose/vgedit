@@ -41,36 +41,47 @@ bool FileBrowser::process(InputEvents* events)
 		return false;
 
 	if (events->isTouchDown())
-	{
+{
+		// remove a highlight if it exists (TODO: same as an above if statement)
+		if (this->highlighted >= 0 && this->highlighted < this->elements.size() && this->elements[this->highlighted])
+			this->elements[this->highlighted]->elasticCounter = NO_HIGHLIGHT;
+
 		touchMode = true;
-		selected = -1;
 	}
 
 	else if (events->pressed(UP_BUTTON) || events->pressed(DOWN_BUTTON) || events->pressed(LEFT_BUTTON) || events->pressed(RIGHT_BUTTON))
 	{
+		if (touchMode) highlighted = 0;
 		touchMode = false;
 
-		selected -= events->pressed(UP_BUTTON) * cardsPerRow;
-		selected += events->pressed(DOWN_BUTTON) * cardsPerRow;
-		selected += events->pressed(RIGHT_BUTTON);
-		selected -= events->pressed(LEFT_BUTTON);
+		// look up whatever is currently chosen as the highlighted position
+		// and remove its highlight
+		// (copypasta'd from AppList in HBAS, TODO: consolidate logic in a GridView in chesto)
+		if (this->highlighted >= 0 && this->elements[this->highlighted])
+			this->elements[this->highlighted]->elasticCounter = NO_HIGHLIGHT;
+
+
+		highlighted -= events->pressed(UP_BUTTON) * cardsPerRow;
+		highlighted += events->pressed(DOWN_BUTTON) * cardsPerRow;
+		highlighted += events->pressed(RIGHT_BUTTON);
+		highlighted -= events->pressed(LEFT_BUTTON);
 
 		updateUI |= true;
 	}
 
-	if (selected < 0) selected = 0;
-	if (selected >= elements.size() - 2) selected = elements.size() - 3;
+	if (highlighted < 0) highlighted = 0;
+	if (highlighted >= elements.size() - 2) highlighted = elements.size() - 3;
 
 	updateUI |= ListElement::process(events);
 
 	// excluding path and buttons at the end, this should be a FileCard
-	auto currentCard = (FileCard*)elements[selected];
+	auto currentCard = (FileCard*)elements[highlighted];
 
 	int cardY = currentCard->yAbs;
 
 	if (!touchMode) {
 		// keep the cursor on screen if using buttons
-		if (selected <= 3) {
+		if (highlighted <= 3) {
 			this->y = 0;
 			updateUI |= true;
 		}
@@ -84,6 +95,12 @@ bool FileBrowser::process(InputEvents* events)
 				this->y -= currentCard->height;
 				updateUI |= true;
 			}
+		}
+
+		if (this->elements[this->highlighted] && this->elements[this->highlighted]->elasticCounter == NO_HIGHLIGHT)
+		{
+			this->elements[this->highlighted]->elasticCounter = THICK_HIGHLIGHT;
+			updateUI |= true;
 		}
 	}
 
@@ -111,24 +128,6 @@ void FileBrowser::render(Element* parent)
 		return;
 
 	ListElement::render(parent);
-
-	auto renderer = RootDisplay::renderer;
-
-	if (selected >= 0 && !touchMode) 
-	{
-		// draw the cursor for this file
-		auto selectedElement = elements[selected];
-		CST_Rect dimens4 = selectedElement->getBounds();
-		for (int z = 4; z >= 0; z--)
-		{
-			CST_SetDrawColor(renderer, { 0x66 - z * 10, 0x7c + z * 20, 0x89 + z * 10, 0xFF });
-			dimens4.x--;
-			dimens4.y--;
-			dimens4.w += 2;
-			dimens4.h += 2;
-			CST_DrawRect(renderer, &dimens4);
-		}
-	}
 }
 
 // copy-pasta'd from Utils.cpp in hb-appstore
