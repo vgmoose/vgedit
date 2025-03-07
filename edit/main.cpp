@@ -56,13 +56,8 @@ int main(int argc, char* argv[])
 
 	// setup the quit callback (used by FileBrowser or EditorView in single file mode)
 	auto quitaction = [display]() {
-#ifdef __WIIU__
-		// will exit via procui loop in RootDisplay
-		SYSLaunchMenu();
-#else
 		display->exitRequested = true;
 		display->isRunning = false;
-#endif
 	};
 
 	events->quitaction = quitaction;

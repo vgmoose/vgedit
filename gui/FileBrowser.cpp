@@ -17,6 +17,10 @@
 #include <sys/types.h>
 #endif
 
+#ifdef __WIIU__
+#include <sysapp/launch.h>
+#endif
+
 FileBrowser::FileBrowser(const char* pwd)
 {
 	update_path(pwd);
@@ -268,7 +272,16 @@ void FileBrowser::listfiles()
 	// new folder, file, and exit buttons
 	Container* con = new Container(ROW_LAYOUT, 10);
 
-	con->add((new Button("Exit", SELECT_BUTTON, true))->setAction(mainDisplay->events->quitaction));
+	std::function<void()> quitWrapper = [mainDisplay](){
+#ifdef __WIIU__
+		// will signal to SDL to call quit after procui stuff
+		SYSLaunchMenu();
+#else
+		mainDisplay->events->quitaction();
+#endif
+	};
+
+	con->add((new Button("Exit", SELECT_BUTTON, true))->setAction(quitWrapper));
 
 	con->add((new Button("New Folder", X_BUTTON, true))->setAction([this, mainDisplay](){
 		std::function<void(const char*)> createFunc = [this](const char* name){

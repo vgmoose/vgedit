@@ -6,6 +6,10 @@
 #include "../libs/librpxloader/include/rpxloader/rpxloader.h"
 #endif
 
+#ifdef __WIIU__
+#include <sysapp/launch.h>
+#endif
+
 #if defined(SWITCH)
 #include <switch.h>
 #endif
@@ -79,7 +83,12 @@ void MainDisplay::closeEditor()
 		}
 
 		if (events->quitaction != NULL) {
+#ifdef __WIIU__
+			// will signal to SDL to call quit after procui stuff
+			SYSLaunchMenu();
+#else
 			events->quitaction();
+#endif
 			return;
 		}
 
