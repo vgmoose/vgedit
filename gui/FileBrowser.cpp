@@ -88,11 +88,11 @@ bool FileBrowser::process(InputEvents* events)
 
 		// if we're FAR out of range upwards, speed up the scroll wheel (additive) to get back in range quicker
 		if (normalizedY < -200)
-			events->wheelScroll += 0.15;
+			events->wheelScroll += 0.3;
 
 		// far out of range, for bottom of screen
 		else if (normalizedY > SCREEN_HEIGHT - curTile->height + 200)
-			events->wheelScroll -= 0.15;
+			events->wheelScroll -= 0.3;
 
 		// if we're slightly out of range above, recenter at the top row slowly
 		else if (normalizedY < -100)
