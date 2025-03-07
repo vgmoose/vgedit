@@ -13,10 +13,6 @@
 #include <sys/stat.h>
 #include <algorithm>
 
-#if defined(__WIIU__)
-#include <sysapp/launch.h>
-#endif
-
 #if defined(WIN32)
 #include <sys/types.h>
 #endif
@@ -79,23 +75,40 @@ bool FileBrowser::process(InputEvents* events)
 
 	int cardY = currentCard->yAbs;
 
-	if (!touchMode) {
-		// keep the cursor on screen if using buttons
-		if (highlighted <= 3) {
-			this->y = 0;
-			updateUI |= true;
-		}
-		else
-		{
-			if (cardY < 10) {
-				this->y += currentCard->height;
-				updateUI |= true;
-			}
-			if (cardY > SCREEN_HEIGHT - (currentCard->height + 10)) {
-				this->y -= currentCard->height;
-				updateUI |= true;
-			}
-		}
+	// Below code is lifted from HBAS's AppList.cpp
+	// TODO: consolidate into Chesto's ListElement
+	if (!touchMode && this->elements.size() > this->highlighted && this->highlighted >= 0 && this->elements[this->highlighted])
+	{
+		// if our highlighted position is large enough, force scroll the screen so that our cursor stays on screen
+		Element* curTile = this->elements[this->highlighted];
+
+		// the y-position of the currently highlighted tile, precisely on them screen (accounting for scroll)
+		// this means that if it's < 0 or > SCREEN_HEIGHT then it's not visible
+		int normalizedY = curTile->y + this->y;
+
+		// if we're FAR out of range upwards, speed up the scroll wheel (additive) to get back in range quicker
+		if (normalizedY < -200)
+			events->wheelScroll += 0.15;
+
+		// far out of range, for bottom of screen
+		else if (normalizedY > SCREEN_HEIGHT - curTile->height + 200)
+			events->wheelScroll -= 0.15;
+
+		// if we're slightly out of range above, recenter at the top row slowly
+		else if (normalizedY < -100)
+			events->wheelScroll = 1;
+
+		// special case, scroll when we're on the bottom row of the top of the not-yet-scrolled screen
+		else if (this->y == 0 && normalizedY > SCREEN_HEIGHT/2)
+			events->wheelScroll -= 0.5;
+
+		// if we're out of range below, recenter at bottom row
+		else if (normalizedY > SCREEN_HEIGHT - curTile->height + 100)
+			events->wheelScroll = -1;
+
+		// if the card is this close to the top, just set it the list offset to 0 to scroll up to the top
+		else if (this->y != 0 && this->highlighted < cardsPerRow)
+			events->wheelScroll = 1;
 
 		if (this->elements[this->highlighted] && this->elements[this->highlighted]->elasticCounter == NO_HIGHLIGHT)
 		{
@@ -255,18 +268,7 @@ void FileBrowser::listfiles()
 	// new folder, file, and exit buttons
 	Container* con = new Container(ROW_LAYOUT, 10);
 
-	auto quitaction = [mainDisplay](){
-#ifdef __WIIU__
-		// will exit via procui loop in RootDisplay
-		SYSLaunchMenu();
-#else
-		mainDisplay->exitRequested = true;
-		mainDisplay->isRunning = false;
-#endif
-	};
-
-	con->add((new Button("Exit", SELECT_BUTTON, true))->setAction(quitaction));
-	mainDisplay->events->quitaction = quitaction;
+	con->add((new Button("Exit", SELECT_BUTTON, true))->setAction(mainDisplay->events->quitaction));
 
 	con->add((new Button("New Folder", X_BUTTON, true))->setAction([this, mainDisplay](){
 		std::function<void(const char*)> createFunc = [this](const char* name){

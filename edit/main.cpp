@@ -6,6 +6,11 @@
 #include "../libs/json/single_include/nlohmann/json.hpp"
 #include <algorithm>
 
+
+#if defined(__WIIU__)
+#include <sysapp/launch.h>
+#endif
+
 #if defined(PC)
 #define START_PATH "."
 #elif defined(SWITCH)
@@ -56,6 +61,19 @@ int main(int argc, char* argv[])
 			std::remove("args.json");
 		}
 	}
+
+	// setup the quit callback (used by FileBrowser or EditorView in single file mode)
+	auto quitaction = [display]() {
+#ifdef __WIIU__
+		// will exit via procui loop in RootDisplay
+		SYSLaunchMenu();
+#else
+		display->exitRequested = true;
+		display->isRunning = false;
+#endif
+	};
+
+	events->quitaction = quitaction;
 
 	// if the start path isn't a directory,use single file mode
 	if (startPath != START_PATH && !std::filesystem::is_directory(startPath))

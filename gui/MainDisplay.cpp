@@ -74,12 +74,15 @@ void MainDisplay::closeEditor()
 
 			if (!success) {
 				std::cout << "Failed to launch " << callbackPath << std::endl;
-				exit(1);
 			}
 		}
 
-		exit(0);
-		return;
+		if (events->quitaction != NULL) {
+			events->quitaction();
+			return;
+		}
+
+		// if the quitaction didn't work, just let the editor close
 	}
 
 	// otherwise, we'll go back to the file browser (this is _probably_ safe)
