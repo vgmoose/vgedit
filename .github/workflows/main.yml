@@ -24,14 +24,14 @@ jobs:
           - platform: 3ds
             ext: 3dsx
     container:
-      image: ghcr.io/fortheusers/sealeo:sha-f207849
+      image: ghcr.io/fortheusers/sealeo
     steps:
     - uses: actions/checkout@main
       with:
         submodules: recursive
     - name: Build ${{ matrix.platform }}
       run: make ${{ matrix.platform }}
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: vgedit.${{ matrix.ext }}
         path: /__w/vgedit/vgedit/vgedit.${{ matrix.ext }}

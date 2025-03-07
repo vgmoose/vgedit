@@ -205,7 +205,7 @@ void TextInputElement::render(Element* parent)
       {
         // traditional line cursor, between characters
         // CST_SetDrawColor(renderer, { 0x00, 0x00, 0x00, 0xFF });
-        CST_SetDrawColor(renderer, { 0x3e, 0xcc, 0xb1, 0xFF });
+        CST_SetDrawColor(renderer, { 0x10, 0xD9, 0xD9, 0xFF });
         for (int i=-1; i<2; i++) {
           CST_DrawLine(renderer, cursor_pos.x + i, cursor_pos.y - 1, cursor_pos.x + i, cursor_pos.y + cursor_pos.h + 1);
         }
@@ -214,10 +214,10 @@ void TextInputElement::render(Element* parent)
       {
         // highlight cursor for overview screen
         // CST_SetDrawColor(renderer, { 0xDD, 0xDD, 0xDD, 0xFF });
-        CST_SetDrawColor(renderer, { 0xd6, 0xf5, 0xef, 0xFF });
+        CST_SetDrawColor(renderer, { 0xd6, 0xff, 0xff, 0xFF });
         CST_FillRect(renderer, &cursor_pos);
         // CST_SetDrawColor(renderer, { 0x90, 0x90, 0x90, 0xFF });
-        CST_SetDrawColor(renderer, { 0x3e, 0xcc, 0xb1, 0xFF });
+        CST_SetDrawColor(renderer, { 0x10, 0xD9, 0xD9, 0xFF });
         for (int i=0; i<2; i++) {
           cursor_pos.x -= 1;
           cursor_pos.y -= 1;
