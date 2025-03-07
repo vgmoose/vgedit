@@ -2,7 +2,7 @@ BINARY      := vgedit
 
 APP_TITLE	:= vgedit+
 APP_AUTHOR 	:= vgmoose
-APP_VERSION := 2.2
+APP_VERSION := 2.2.1
 
 SOURCES		+=	. gui edit
 CFLAGS		+= -DUSE_KEYBOARD 
