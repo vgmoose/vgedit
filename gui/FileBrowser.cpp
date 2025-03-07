@@ -206,7 +206,7 @@ void FileBrowser::listfiles()
 #endif
 
 	// create a hardcoded "up" link to the parent directory
-	if (*pwd != std::string("/"))
+	if (*pwd != std::string("/") && *pwd != std::string(START_PATH))
 	{
 		FileCard* card = new FileCard(true, ".. (parent)");
 		card->position(this->x + (count % cardsPerRow) * card->width, this->y + topOfList + (count / cardsPerRow) * card->height);

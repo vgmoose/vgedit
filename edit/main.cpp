@@ -11,14 +11,6 @@
 #include <sysapp/launch.h>
 #endif
 
-#if defined(PC)
-#define START_PATH "."
-#elif defined(SWITCH)
-#define START_PATH "/"
-#else
-#define START_PATH "/vol/external01/"
-#endif
-
 int main(int argc, char* argv[])
 {
 	// initialize main title screen
