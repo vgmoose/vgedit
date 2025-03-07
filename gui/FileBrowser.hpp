@@ -28,6 +28,4 @@ public:
 	std::string* pwd = NULL;
 	bool touchMode = true;
 	int cardsPerRow = 5;
-
-	int selected = -1;
 };

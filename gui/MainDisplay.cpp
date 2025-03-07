@@ -33,7 +33,7 @@ void MainDisplay::openFile(bool isFolder, std::string* path)
 	{
 		browser->update_path(path->c_str());
 		browser->y = 0;
-		browser->selected = 0;
+		browser->highlighted = 0;
 		browser->listfiles();
 	}
 	else
