@@ -273,12 +273,7 @@ void FileBrowser::listfiles()
 	Container* con = new Container(ROW_LAYOUT, 10);
 
 	std::function<void()> quitWrapper = [mainDisplay](){
-#ifdef __WIIU__
-		// will signal to SDL to call quit after procui stuff
-		SYSLaunchMenu();
-#else
-		mainDisplay->events->quitaction();
-#endif
+		mainDisplay->requestQuit();
 	};
 
 	con->add((new Button("Exit", SELECT_BUTTON, true))->setAction(quitWrapper));

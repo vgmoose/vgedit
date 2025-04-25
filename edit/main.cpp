@@ -54,14 +54,6 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	// setup the quit callback (used by FileBrowser or EditorView in single file mode)
-	auto quitaction = [display]() {
-		display->exitRequested = true;
-		display->isRunning = false;
-	};
-
-	events->quitaction = quitaction;
-
 	// if the start path isn't a directory,use single file mode
 	if (startPath != START_PATH && !std::filesystem::is_directory(startPath))
 	{

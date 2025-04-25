@@ -81,18 +81,8 @@ void MainDisplay::closeEditor()
 				std::cout << "Failed to launch " << callbackPath << std::endl;
 			}
 		}
-
-		if (events->quitaction != NULL) {
-#ifdef __WIIU__
-			// will signal to SDL to call quit after procui stuff
-			SYSLaunchMenu();
-#else
-			events->quitaction();
-#endif
-			return;
-		}
-
-		// if the quitaction didn't work, just let the editor close
+		mainDisplay->requestQuit();
+		return;
 	}
 
 	// otherwise, we'll go back to the file browser (this is _probably_ safe)
