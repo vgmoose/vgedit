@@ -1,16 +1,21 @@
-#include "../libs/chesto/src/Container.hpp"
-#include "../libs/chesto/src/Button.hpp"
-#include "../libs/chesto/src/EKeyboard.hpp"
 #include "Toolbar.hpp"
+#include "../libs/chesto/src/Button.hpp"
+#include "../libs/chesto/src/Container.hpp"
+#include "../libs/chesto/src/EKeyboard.hpp"
 #include "MainDisplay.hpp"
 #include "TextQueryPopup.hpp"
 
+using namespace Chesto;
+
 Toolbar::Toolbar(const char* path, EditorView* editorView)
 {
-	if (strlen(path) > MAX_PATH_LENGTH) {
+	if (strlen(path) > MAX_PATH_LENGTH)
+	{
 		strcpy(this->path, "...");
 		strcpy(this->path + 3, path + strlen(path) - (MAX_PATH_LENGTH - 3));
-	} else {
+	}
+	else
+	{
 		strcpy(this->path, path);
 	}
 
@@ -34,9 +39,12 @@ bool Toolbar::commonHistoryLogic(bool isUndo, Editor* editor, TextInputElement* 
 	int pos = event.pos;
 	std::string& chars = event.chars;
 
-	if (isDelete) {
+	if (isDelete)
+	{
 		editor->text->erase(pos, chars.length());
-	} else {
+	}
+	else
+	{
 		editor->text->insert(pos, chars.c_str());
 	}
 
@@ -57,23 +65,25 @@ void Toolbar::stowKeyboard(EKeyboard* keyboard, TextInputElement* textField, Edi
 	textField->insertMode = false;
 	this->keyboardShowing = false;
 
-	// reload toolbar
-	this->initButtons(editorView);
+	RootDisplay::deferAction([this]()
+		{ this->needsRebuild = true; });
 }
 
 void Toolbar::initButtons(EditorView* editorView)
 {
-	this->removeAll(true);
+	this->removeAll();
 	displayedPrompt = false;
 
-	pathE = new TextElement(this->path, 20, 0, MONOSPACED);
-	pathE->position(10, 13);
+	auto pathEPtr = std::make_unique<TextElement>(this->path, 20, nullptr, MONOSPACED);
+	pathEPtr->position(10, 13);
+	pathE = pathEPtr.get();
 	setModified(modified);
-	elements.push_back(pathE);
+	addNode(std::move(pathEPtr));
 
-	stats = new TextElement("ZZ characters", 20, 0, MONOSPACED);
-	stats->position(10, SCREEN_HEIGHT - 35);
-	elements.push_back(stats);
+	auto statsPtr = std::make_unique<TextElement>("ZZ characters", 20, nullptr, MONOSPACED);
+	statsPtr->position(10, SCREEN_HEIGHT - 35);
+	stats = statsPtr.get();
+	addNode(std::move(statsPtr));
 
 	CST_Color white = { 0xFF, 0xFF, 0xFF, 0xFF };
 
@@ -82,17 +92,20 @@ void Toolbar::initButtons(EditorView* editorView)
 
 	bool dark = true;
 	int bsize = 16;
-	
+
 	// member vars
 	auto isInsert = textField->insertMode;
 	auto keyboard = editorView->keyboard;
 
-	Container* con = new Container(ROW_LAYOUT, 5);
-	Container* bot = new Container(ROW_LAYOUT, 5);
-	elements.push_back(con);
-	elements.push_back(bot);
+	auto conPtr = std::make_unique<Container>(ROW_LAYOUT, 5);
+	auto botPtr = std::make_unique<Container>(ROW_LAYOUT, 5);
+	auto con = conPtr.get();
+	auto bot = botPtr.get();
+	addNode(std::move(conPtr));
+	addNode(std::move(botPtr));
 
-	con->add((new Button("Exit", SELECT_BUTTON, dark, bsize))->setAction([this, isInsert, keyboard, textField, editorView](){
+	con->createNode<Button>("Exit", SELECT_BUTTON, dark, bsize)->setAction([this, isInsert, keyboard, textField, editorView]()
+		{
 		if (isInsert) {
 			stowKeyboard(keyboard, textField, editorView);
 			return;
@@ -102,62 +115,66 @@ void Toolbar::initButtons(EditorView* editorView)
 			textField->setStatus("Unsaved changes! Press [Exit] again to confirm");
 			return;
 		}
-		((MainDisplay*)RootDisplay::mainDisplay)->closeEditor();
-	}));
+		RootDisplay::deferAction([]() {
+			((MainDisplay*)RootDisplay::mainDisplay)->closeEditor();
+		}); });
 
-	con->add((new Button("Save", START_BUTTON, dark, bsize))->setAction([this, textField, editor](){
+	con->createNode<Button>("Save", START_BUTTON, dark, bsize)->setAction([this, textField, editor]()
+		{
 		// perform a save
 		this->setModified(false);
 		bool success = editor->save();
 		if (success) {
 			textField->setStatus("File saved successfully");
-		}
-	})),
+		} });
 
-	con->add((new Button(isInsert ? "Caps" : "Copy", X_BUTTON, dark, bsize))->setAction([isInsert, textField, editorView, keyboard](){
+	con->createNode<Button>(isInsert ? "Caps" : "Copy", X_BUTTON, dark, bsize)->setAction([isInsert, textField, editorView, keyboard]()
+		{
 		if (isInsert) {
 			keyboard->shiftOn = !keyboard->shiftOn;
 			keyboard->updateSize();
 			return;
 		}
 		editorView->copySelection();
-		textField->setStatus("Copied selection to clipboard");
-	}));
+		textField->setStatus("Copied selection to clipboard"); });
 
-	con->add((new Button(isInsert ? "Stow Keyboard" : "Paste", Y_BUTTON, dark, bsize))->setAction([this, isInsert, textField, keyboard, editorView](){
+	con->createNode<Button>(isInsert ? "Stow Keyboard" : "Paste", Y_BUTTON, dark, bsize)->setAction([this, isInsert, textField, keyboard, editorView]()
+		{
 		if (isInsert) {
 			stowKeyboard(keyboard, textField, editorView);
 			return;
 		}
 		if (!editorView->pasteSelection()) {
 			textField->setStatus("Nothing on clipboard to paste!");
-		}
-	}));
+		} });
 
 	// L and R don't do anything in insert mode (no selections)
 	if (!isInsert)
 	{
 		auto historyPos = editor->historyPos;
 		auto undoHistory = editor->undoHistory;
-		bot->add((new Button("Undo", ZL_BUTTON, dark, bsize))->setAction([this, editor, textField](){
+		bot->createNode<Button>("Undo", ZL_BUTTON, dark, bsize)->setAction([this, editor, textField]()
+			{
 			auto success = commonHistoryLogic(true, editor, textField);
 			editor->historyPos--;
 			if (editor->historyPos < 0) editor->historyPos = -1;
-			if (!success) textField->setStatus("Nothing to undo!");
-		}));
+			if (!success) textField->setStatus("Nothing to undo!"); });
 
-		bot->add((new Button("Redo", ZR_BUTTON, dark, bsize))->setAction([this, editor, textField](){
+		bot->createNode<Button>("Redo", ZR_BUTTON, dark, bsize)->setAction([this, editor, textField]()
+			{
 			editor->historyPos++;
 			auto success = commonHistoryLogic(false, editor, textField);
 			if (editor->historyPos > editor->undoHistory.size()) editor->historyPos = editor->undoHistory.size();
-			if (!success) textField->setStatus("Nothing to redo!");
-		}));
+			if (!success) textField->setStatus("Nothing to redo!"); });
 
 		Button deselect("Deslct", L_BUTTON, dark, bsize);
-		findButton = (Button*)(new Button("Find...", L_BUTTON, dark, bsize, deselect.width))->setAction([this, textField, editorView, editor](){
+		auto findButtonPtr = std::make_unique<Button>("Find...", L_BUTTON, dark, bsize, deselect.width);
+		findButton = findButtonPtr.get();
+		findButton->setAction([this, textField, editorView, editor]()
+			{
 			if (textField->selectedWidth == 1) {
 				// size 1 uses Find function since we're out of buttons
-				auto popup = new TextQueryPopup("Enter search criteria", "Find", [this, textField, editor](const char* query){
+				auto popup = std::make_unique<TextQueryPopup>("Enter search criteria", "Find", [this, textField, editor](const char* query){
 					// we're gonna try to find the first occurrence of the case-insensitive string they give us
 					int res = editor->text->find(query, textField->selectedPos + 1);
 					if (res == std::string::npos) {
@@ -177,27 +194,27 @@ void Toolbar::initButtons(EditorView* editorView)
 				popup->query = this->searchQuery.c_str();
 				popup->queryText->setText(popup->query);
 				popup->queryText->update();
-				RootDisplay::mainDisplay->switchSubscreen(popup);
+				RootDisplay::pushScreen(std::move(popup));
 				return;
 			}
 			textField->selectedWidth -= 1;
 			if (textField->selectedWidth <= 1) findButton->updateText("Find...");
-			editorView->reset_bounds();
-		});
-		bot->add(findButton);
+			editorView->reset_bounds(); });
+		bot->addNode(std::move(findButtonPtr));
 
-		bot->add((new Button("Select", R_BUTTON, dark, bsize))->setAction([this, textField, editorView](){
+		bot->createNode<Button>("Select", R_BUTTON, dark, bsize)->setAction([this, textField, editorView]()
+			{
 			textField->selectedWidth += 1;
 			editorView->reset_bounds();
-			if (textField->selectedWidth > 1) findButton->updateText("Deslct");
-		}));
+			if (textField->selectedWidth > 1) findButton->updateText("Deslct"); });
 
-		bot->add((new Button("Show Keyboard", A_BUTTON, dark, bsize))->setAction([this, textField, keyboard, editorView](){
+		bot->createNode<Button>("Show Keyboard", A_BUTTON, dark, bsize)->setAction([this, textField, keyboard, editorView]()
+			{
 			if (keyboard == NULL)
 			{
-				auto keyboard = new EKeyboard([editorView](char input) {
+				auto keyboardPtr = std::make_unique<EKeyboard>([editorView](char input) {
 					// main callback action that enters text into the editor
-					string sym(1, input);
+					std::string sym(1, input);
 					editorView->editor->appendHistory(sym.c_str(), editorView->mainTextField->selectedPos, false);
 
 					auto pos = editorView->mainTextField->selectedPos;
@@ -210,8 +227,8 @@ void Toolbar::initButtons(EditorView* editorView)
 					editorView->syncText();
 				});
 
-				editorView->keyboard = keyboard;
-				editorView->elements.push_back(keyboard);
+				editorView->keyboard = keyboardPtr.get();
+				editorView->addNode(std::move(keyboardPtr));
 			}
 
 			editorView->keyboard->hidden = false;
@@ -231,13 +248,13 @@ void Toolbar::initButtons(EditorView* editorView)
 
 			editorView->reset_bounds();
 
-			// re-init toolbar with insert mode options
-			this->initButtons(editorView);
-		}));
-
+			RootDisplay::deferAction([this]() {
+				this->needsRebuild = true;
+			}); });
 	}
 
-	con->add((new Button(isInsert ? "Backspace" : "Delete", B_BUTTON, dark, bsize))->setAction([textField, editor, editorView](){
+	con->createNode<Button>(isInsert ? "Backspace" : "Delete", B_BUTTON, dark, bsize)->setAction([textField, editor, editorView]()
+		{
 		// in insert mode, delete is a "backspace-style" action, and moves the cursor left if it can
 		if (textField->insertMode)
 		{
@@ -254,11 +271,25 @@ void Toolbar::initButtons(EditorView* editorView)
 		if (editor->text->length() == 0)
 			editor->text->append("\n");
 
-		textField->render(editorView);
-	}));
+		textField->render(editorView); });
 
 	con->position(SCREEN_WIDTH - 10 - con->width, 5);
 	bot->position(SCREEN_WIDTH - 10 - bot->width, SCREEN_HEIGHT - bot->height - 5);
+}
+
+bool Toolbar::process(InputEvents* event)
+{
+	// Check and manually rebuild if flagged TODO: just use defers? Ideally we shouldn't have to override this
+	if (needsRebuild && parent)
+	{
+		needsRebuild = false;
+		auto editorView = (EditorView*)parent;
+		initButtons(editorView);
+		return true;
+	}
+
+	bool ret = Element::process(event);
+	return ret;
 }
 
 void Toolbar::setModified(bool modified)
@@ -269,8 +300,8 @@ void Toolbar::setModified(bool modified)
 	text += path;
 	text += (modified ? "*" : "");
 
-  pathE->setText(text);
-  pathE->update();
+	pathE->setText(text);
+	pathE->update();
 }
 
 void Toolbar::render(Element* parent)
@@ -283,7 +314,8 @@ void Toolbar::render(Element* parent)
 	CST_SetDrawColor(renderer, { 0x40, 0x40, 0x40, 0xFF });
 	CST_FillRect(renderer, &topBg);
 
-	if (!keyboardShowing) {
+	if (!keyboardShowing)
+	{
 		CST_Rect botBg = { 0, SCREEN_HEIGHT - 50, SCREEN_WIDTH, 50 };
 
 		// draw top bar on top of other things

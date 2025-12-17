@@ -6,6 +6,7 @@
 #include "../libs/json/single_include/nlohmann/json.hpp"
 #include <algorithm>
 
+using namespace Chesto;
 
 #if defined(__WIIU__)
 #include <sysapp/launch.h>
@@ -14,38 +15,42 @@
 int main(int argc, char* argv[])
 {
 	// initialize main title screen
-	MainDisplay* display = new MainDisplay();
+	auto display = std::make_unique<MainDisplay>();
 
 	// the main input handler
-	auto events = display->events;
-	events->rapidFireRate = 6; // 2x faster directional key repeat
+	display->events->rapidFireRate = 6; // 2x faster directional key repeat
 
 	std::string startPath = START_PATH;
 
 	// USAGE: vgedit [file to edit path] [callback path]
-	if (argc > 1) {
+	if (argc > 1)
+	{
 		// get the file path from the command line
 		startPath = argv[1];
 
 		// if there's a callback path, store it for later
-		if (argc > 2) {
+		if (argc > 2)
+		{
 			display->callbackPath = argv[2];
 		}
 	}
 
 	// check if the args.json file exists
 	std::ifstream argsFile("args.json");
-	if (argsFile.good()) {
+	if (argsFile.good())
+	{
 		// parse the args.json file
 		std::string argsJson((std::istreambuf_iterator<char>(argsFile)), std::istreambuf_iterator<char>());
 		auto args = nlohmann::json::parse(argsJson);
 
 		// check if the file path is specified
-		if (args.contains("filename")) {
+		if (args.contains("filename"))
+		{
 			startPath = args["filename"];
 
 			// if there's a callback path, store it for later
-			if (args.contains("callback")) {
+			if (args.contains("callback"))
+			{
 				display->callbackPath = args["callback"];
 			}
 
@@ -58,21 +63,23 @@ int main(int argc, char* argv[])
 	if (startPath != START_PATH && !std::filesystem::is_directory(startPath))
 	{
 		// if the file doesn't exist, create it TODO: entire path?
-		if (!std::filesystem::exists(startPath)) {
+		if (!std::filesystem::exists(startPath))
+		{
 			std::ofstream file(startPath);
 			file.close();
 		}
 
 		display->openFile(false, &startPath);
-
-	} else {
+	}
+	else
+	{
 		// otherwise, open a file browser to the start path
-		FileBrowser* fileBrowser = new FileBrowser(startPath.c_str());
-		display->browser = fileBrowser;
-		display->elements.push_back(fileBrowser);
+		auto fileBrowser = std::make_unique<FileBrowser>(startPath.c_str());
+		display->browser = fileBrowser.get();
+		display->addNode(std::move(fileBrowser));
 	}
 
-	display->mainLoop();
-
-	return 0;
+	// main loop
+	auto* displayPtr = display.release();
+	return displayPtr->mainLoop();
 }

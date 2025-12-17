@@ -4,6 +4,8 @@
 #include "../libs/chesto/src/RootDisplay.hpp"
 #include <unordered_map>
 
+using namespace Chesto;
+
 // TODO: don't forward declare
 class FileBrowser;
 class EditorView;

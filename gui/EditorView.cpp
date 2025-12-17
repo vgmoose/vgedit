@@ -1,19 +1,23 @@
-#include "../libs/chesto/src/EKeyboard.hpp"
 #include "EditorView.hpp"
+#include "../libs/chesto/src/EKeyboard.hpp"
 #include "MainDisplay.hpp"
+
+using namespace Chesto;
 
 EditorView::EditorView(Editor* editor)
 {
 	// initialize the text view for the first time, using whatever's in the editor
-	mainTextField = new TextInputElement(editor);
-	mainTextField->x = 10;
-	mainTextField->y = 70;
-	this->elements.push_back(mainTextField);
+	auto mainTextFieldPtr = std::make_unique<TextInputElement>(editor);
+	mainTextFieldPtr->x = 10;
+	mainTextFieldPtr->y = 70;
 
 #if defined(_3DS) || defined(_3DS_MOCK)
-	mainTextField->x += 40;
-	mainTextField->y += SCREEN_HEIGHT;
+	mainTextFieldPtr->x += 40;
+	mainTextFieldPtr->y += SCREEN_HEIGHT;
 #endif
+
+	mainTextField = mainTextFieldPtr.get();
+	this->addNode(std::move(mainTextFieldPtr));
 
 	this->editor = editor;
 	this->text = editor->text;
@@ -63,12 +67,13 @@ void EditorView::reset_bounds()
 	float cursor_y = mainTextField->selectedYPos;
 
 	// if this boolean is set, adjust the textfield in the direction of the cursor
-	if (keepCursorOnscreen) {
+	if (keepCursorOnscreen)
+	{
 #if defined(_3DS) || defined(_3DS_MOCK)
 		if (cursor_y > SCREEN_HEIGHT - 150)
-			mainTextField->y -= h/2;
+			mainTextField->y -= h / 2;
 		if (cursor_y < 50)
-			mainTextField->y += h/2;
+			mainTextField->y += h / 2;
 #else
 		if (mainTextField->selectedPos == 0)
 			mainTextField->y = 0;
@@ -76,10 +81,10 @@ void EditorView::reset_bounds()
 		bool blockKeyboardDraws = mainTextField->insertMode && !keyboard->immersiveMode;
 
 		if (cursor_y > (blockKeyboardDraws ? 200 : (SCREEN_HEIGHT - 100)))
-			mainTextField->y -= h/2;
+			mainTextField->y -= h / 2;
 
-		if (cursor_y < 50 && mainTextField->y < -1 * h/4)
-			mainTextField->y += h/2;
+		if (cursor_y < 50 && mainTextField->y < -1 * h / 4)
+			mainTextField->y += h / 2;
 #endif
 	}
 }
@@ -90,9 +95,9 @@ bool EditorView::copySelection()
 
 	if (copiedText)
 		delete copiedText;
-	
+
 	int pos = mainTextField->selectedPos;
-  	int width = mainTextField->selectedWidth;
+	int width = mainTextField->selectedWidth;
 
 	copiedText = new std::string(text->substr(pos, width));
 	((MainDisplay*)RootDisplay::mainDisplay)->copiedText = copiedText;
@@ -106,7 +111,7 @@ bool EditorView::pasteSelection()
 		copiedText = ((MainDisplay*)RootDisplay::mainDisplay)->copiedText;
 	if (copiedText == NULL)
 		return false;
-	
+
 	editor->appendHistory(copiedText->c_str(), mainTextField->selectedPos, false);
 
 	for (char& letter : *copiedText)

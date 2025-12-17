@@ -1,7 +1,10 @@
+#include "TextQueryPopup.hpp"
 #include "../libs/chesto/src/Button.hpp"
+#include "../libs/chesto/src/Constraint.hpp"
 #include "../libs/chesto/src/Container.hpp"
 #include "../libs/chesto/src/EKeyboard.hpp"
-#include "TextQueryPopup.hpp"
+
+using namespace Chesto;
 
 TextQueryPopup::TextQueryPopup(const char* prompt, const char* ctaText, std::function<void(const char*)> onConfirm)
 {
@@ -23,14 +26,18 @@ TextQueryPopup::TextQueryPopup(const char* prompt, const char* ctaText, std::fun
 
 	auto mainDisplay = RootDisplay::mainDisplay;
 
-	auto promptText = new TextElement(prompt, 22);
-	queryText = new TextElement("", 28);
+	auto promptTextPtr = std::make_unique<TextElement>(prompt, 22);
+	auto promptText = promptTextPtr.get();
 
-	auto keyboard = new EKeyboard([this](char input) {
+	auto queryTextPtr = std::make_unique<TextElement>("", 28);
+	queryText = queryTextPtr.get();
+
+	auto keyboardPtr = std::make_unique<EKeyboard>([this](char input)
+		{
 		query += input;
 		queryText->setText(query);
-		queryText->update();
-	});
+		queryText->update(); });
+	auto keyboard = keyboardPtr.get();
 	keyboard->preventEnterAndTab = true;
 
 #if defined(_3DS) || defined(_3DS_MOCK)
@@ -39,38 +46,55 @@ TextQueryPopup::TextQueryPopup(const char* prompt, const char* ctaText, std::fun
 #endif
 
 	keyboard->updateSize();
-	child(keyboard);
+	addNode(std::move(keyboardPtr));
 
-	std::function<void()> cleanUp = [this, mainDisplay](){
-		this->removeAll(true);
-		mainDisplay->switchSubscreen(NULL);
+	std::function<void()> cleanUp = [this, mainDisplay]()
+	{
+		this->removeAll();
+		RootDisplay::popScreen();
 	};
 
-	auto con = new Container(ROW_LAYOUT);
+	auto conPtr = std::make_unique<Container>(ROW_LAYOUT);
+	auto con = conPtr.get();
 	bool dark = true;
 
-	child(((new Button("Backspace", B_BUTTON, dark))->setAction([this](){
+	auto backspaceBtn = std::make_unique<Button>("Backspace", B_BUTTON, dark);
+	backspaceBtn->setAction([this]()
+		{
 		if (!query.empty())
 			query.pop_back();
 		queryText->setText(query);
-		queryText->update();
-	}))->setPosition(SCREEN_WIDTH - 200, 230));
+		queryText->update(); });
+	backspaceBtn->setPosition(SCREEN_WIDTH - 200, 230);
+	addNode(std::move(backspaceBtn));
 
-	child(((new Button("Caps", L_BUTTON, dark))->setAction([keyboard](){
+	auto capsBtn = std::make_unique<Button>("Caps", L_BUTTON, dark);
+	capsBtn->setAction([keyboard]()
+		{
 		keyboard->shiftOn = !keyboard->shiftOn;
-		keyboard->updateSize();
-	}))->setPosition(20, 230));
+		keyboard->updateSize(); });
+	capsBtn->setPosition(20, 230);
+	addNode(std::move(capsBtn));
 
-	con->add(((new Button("Cancel", Y_BUTTON, dark))->setAction(cleanUp)));
+	con->createNode<Button>("Cancel", Y_BUTTON, dark)->setAction([cleanUp]()
+		{ RootDisplay::deferAction(cleanUp); });
 
-	con->add(((new Button(ctaText, X_BUTTON, dark))->setAction([this, onConfirm, cleanUp](){
+	con->createNode<Button>(ctaText, X_BUTTON, dark)->setAction([this, onConfirm, cleanUp]()
+		{
 		onConfirm(query.c_str());
-		cleanUp();
-	})));
+		RootDisplay::deferAction(cleanUp); });
 
-	child(promptText->setPosition(0, 15)->centerHorizontallyIn(this));
-	child(con->setPosition(0, 230)->centerHorizontallyIn(this));
-	child(queryText->setPosition(0, 100)->centerHorizontallyIn(this));
+	promptText->setPosition(0, 15);
+	promptText->constrain(ALIGN_CENTER_HORIZONTAL);
+	addNode(std::move(promptTextPtr));
+
+	con->setPosition(0, 230);
+	con->constrain(ALIGN_CENTER_HORIZONTAL);
+	addNode(std::move(conPtr));
+
+	queryText->setPosition(0, 100);
+	queryText->constrain(ALIGN_CENTER_HORIZONTAL);
+	addNode(std::move(queryTextPtr));
 
 	hasBackground = true;
 	backgroundColor = fromRGB(0x42, 0x45, 0x48);
@@ -78,7 +102,7 @@ TextQueryPopup::TextQueryPopup(const char* prompt, const char* ctaText, std::fun
 
 void TextQueryPopup::render(Element* parent)
 {
-	queryText->centerHorizontallyIn(this);
+	queryText->constrain(ALIGN_CENTER_HORIZONTAL);
 
 	// draw a big dim layer around the entire window before drawing
 	CST_Rect dim = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
@@ -96,5 +120,4 @@ void TextQueryPopup::render(Element* parent)
 
 TextQueryPopup::~TextQueryPopup()
 {
-	this->wipeAll();
 }

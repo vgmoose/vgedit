@@ -1,17 +1,19 @@
 #include "FileBrowser.hpp"
 #include "../libs/chesto/src/Button.hpp"
-#include "../libs/chesto/src/TextElement.hpp"
-#include "../libs/chesto/src/Container.hpp"
 #include "../libs/chesto/src/Constraint.hpp"
+#include "../libs/chesto/src/Container.hpp"
+#include "../libs/chesto/src/TextElement.hpp"
 #include "FileCard.hpp"
 #include "MainDisplay.hpp"
 #include "TextQueryPopup.hpp"
-#include <dirent.h>
-#include <string.h>
-#include <unistd.h>
-#include <fstream>
-#include <sys/stat.h>
 #include <algorithm>
+#include <dirent.h>
+#include <fstream>
+#include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+using namespace Chesto;
 
 #if defined(WIN32)
 #include <sys/types.h>
@@ -41,7 +43,7 @@ bool FileBrowser::process(InputEvents* events)
 		return false;
 
 	if (events->isTouchDown())
-{
+	{
 		// remove a highlight if it exists (TODO: same as an above if statement)
 		if (this->highlighted >= 0 && this->highlighted < this->elements.size() && this->elements[this->highlighted])
 			this->elements[this->highlighted]->elasticCounter = NO_HIGHLIGHT;
@@ -60,7 +62,6 @@ bool FileBrowser::process(InputEvents* events)
 		if (this->highlighted >= 0 && this->elements[this->highlighted])
 			this->elements[this->highlighted]->elasticCounter = NO_HIGHLIGHT;
 
-
 		highlighted -= events->pressed(UP_BUTTON) * cardsPerRow;
 		highlighted += events->pressed(DOWN_BUTTON) * cardsPerRow;
 		highlighted += events->pressed(RIGHT_BUTTON);
@@ -75,7 +76,7 @@ bool FileBrowser::process(InputEvents* events)
 	updateUI |= ListElement::process(events);
 
 	// excluding path and buttons at the end, this should be a FileCard
-	auto currentCard = (FileCard*)elements[highlighted];
+	auto currentCard = (FileCard*)elements[highlighted].get();
 
 	int cardY = currentCard->yAbs;
 
@@ -84,7 +85,7 @@ bool FileBrowser::process(InputEvents* events)
 	if (!touchMode && this->elements.size() > this->highlighted && this->highlighted >= 0 && this->elements[this->highlighted])
 	{
 		// if our highlighted position is large enough, force scroll the screen so that our cursor stays on screen
-		Element* curTile = this->elements[this->highlighted];
+		Element* curTile = this->elements[this->highlighted].get();
 
 		// the y-position of the currently highlighted tile, precisely on them screen (accounting for scroll)
 		// this means that if it's < 0 or > SCREEN_HEIGHT then it's not visible
@@ -103,7 +104,7 @@ bool FileBrowser::process(InputEvents* events)
 			events->wheelScroll = 1;
 
 		// special case, scroll when we're on the bottom row of the top of the not-yet-scrolled screen
-		else if (this->y == 0 && normalizedY > SCREEN_HEIGHT/2)
+		else if (this->y == 0 && normalizedY > SCREEN_HEIGHT / 2)
 			events->wheelScroll -= 0.5;
 
 		// if we're out of range below, recenter at bottom row
@@ -133,6 +134,15 @@ bool FileBrowser::process(InputEvents* events)
 		// activate an upCard if it exists, to go back
 		if (upCard != NULL)
 			upCard->openMyFile();
+		updateUI = true;
+	}
+
+	// do we need reo reload the file list?
+	if (needsReload)
+	{
+		needsReload = false;
+		RootDisplay::deferAction([this]()
+			{ listfiles(); });
 		updateUI = true;
 	}
 
@@ -195,7 +205,7 @@ void FileBrowser::listfiles()
 	// go through all files in current directory and create FileCard children out of them
 
 	upCard = NULL;
-	this->elements.clear();
+	this->removeAll();
 
 	DIR* dirp;
 	struct dirent* entry;
@@ -212,41 +222,64 @@ void FileBrowser::listfiles()
 	// create a hardcoded "up" link to the parent directory
 	if (*pwd != std::string("/") && *pwd != std::string(START_PATH))
 	{
-		FileCard* card = new FileCard(true, ".. (parent)");
+		auto card = std::make_unique<FileCard>(true, ".. (parent)");
 		card->position(this->x + (count % cardsPerRow) * card->width, this->y + topOfList + (count / cardsPerRow) * card->height);
 		std::string cwd = dir_name(*pwd);
-		card->path = new std::string(cwd == "" ? "/" : cwd);
-		card->action = std::bind(&FileCard::openMyFile, card);
-		this->elements.push_back(card);
-		upCard = card;
+		card->path = std::make_unique<std::string>(cwd == "" ? "/" : cwd);
+		this->addNode(std::move(card));
+
+		upCard = (FileCard*)elements.back().get();
+		auto pathCopy = std::make_shared<std::string>(*upCard->path);
+		upCard->action = [pathCopy]()
+		{
+			((MainDisplay*)RootDisplay::mainDisplay)->openFile(true, pathCopy.get());
+		};
 		count++;
 	}
 
 	if (dirp)
 	{
-		std::vector<FileCard*> fileCards;
+		struct FileInfo
+		{
+			bool isFolder;
+			std::string name;
+			std::string path;
+		};
+		std::vector<FileInfo> fileInfos;
+
 		while ((entry = readdir(dirp)) != NULL)
 		{
 			// skip the '.' and '..' entries if they exist in the filesystem
 			if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
 				continue;
-			
+
 			// full path to the file (C++ string)
-			FileCard* card = new FileCard(is_dir(pwd->c_str(), entry), entry->d_name);
-			card->path = new std::string(*pwd + (*pwd != "/" ? std::string("/") : "") + entry->d_name);
-			card->action = std::bind(&FileCard::openMyFile, card);
-			fileCards.push_back(card);
+			FileInfo info;
+			info.isFolder = is_dir(pwd->c_str(), entry);
+			info.name = entry->d_name;
+			info.path = *pwd + (*pwd != "/" ? std::string("/") : "") + entry->d_name;
+			fileInfos.push_back(info);
 		}
 
 		// sort alphabetically
-		std::sort(fileCards.begin(), fileCards.end(), [](FileCard* a, FileCard* b){
-			return strncasecmp(a->path->c_str(), b->path->c_str(), std::min(a->path->length(), b->path->length())) < 0;
-		});
+		std::sort(fileInfos.begin(), fileInfos.end(), [](const FileInfo& a, const FileInfo& b)
+			{ return strncasecmp(a.path.c_str(), b.path.c_str(), std::min(a.path.length(), b.path.length())) < 0; });
 
 		// make children of the browser
-		for (auto card : fileCards) {
-			child(card);
+		for (auto& info : fileInfos)
+		{
+			auto card = std::make_unique<FileCard>(info.isFolder, info.name.c_str());
+			card->path = std::make_unique<std::string>(info.path);
 			card->position(this->x + (count % cardsPerRow) * card->width, this->y + topOfList + (count / cardsPerRow) * card->height);
+			addNode(std::move(card));
+
+			auto cardPtr = (FileCard*)elements.back().get();
+			auto isFolder = cardPtr->isFolder;
+			auto pathCopy = std::make_shared<std::string>(*cardPtr->path);
+			cardPtr->action = [isFolder, pathCopy]()
+			{
+				((MainDisplay*)RootDisplay::mainDisplay)->openFile(isFolder, pathCopy.get());
+			};
 			count++;
 		}
 
@@ -258,27 +291,32 @@ void FileBrowser::listfiles()
 
 	// limit it to 45 chars
 	std::string clippedPath(*pwd);
-	if (clippedPath.length() > 45) {
+	if (clippedPath.length() > 45)
+	{
 		clippedPath.erase(clippedPath.begin(), clippedPath.end() - 45);
 		clippedPath.insert(0, "…");
 	}
 
-	TextElement* path = new TextElement(clippedPath.c_str(), 25 / SCALER, &white, MONOSPACED);
-	path->position(10 / SCALER, topOfList - 85 / SCALER);
-	this->elements.push_back(path);
+	auto pathPtr = std::make_unique<TextElement>(clippedPath.c_str(), 25, &white, MONOSPACED);
+	pathPtr->position(10, topOfList - 85);
+	auto path = pathPtr.get();
+	this->addNode(std::move(pathPtr));
 
 	auto mainDisplay = RootDisplay::mainDisplay;
 
 	// new folder, file, and exit buttons
-	Container* con = new Container(ROW_LAYOUT, 10);
+	auto conPtr = std::make_unique<Container>(ROW_LAYOUT, 10);
+	auto con = conPtr.get();
 
-	std::function<void()> quitWrapper = [mainDisplay](){
+	std::function<void()> quitWrapper = [mainDisplay]()
+	{
 		mainDisplay->requestQuit();
 	};
 
-	con->add((new Button("Exit", SELECT_BUTTON, true))->setAction(quitWrapper));
+	con->createNode<Button>("Exit", SELECT_BUTTON, true)->setAction(quitWrapper);
 
-	con->add((new Button("New Folder", X_BUTTON, true))->setAction([this, mainDisplay](){
+	con->createNode<Button>("New Folder", X_BUTTON, true)->setAction([this, mainDisplay]()
+		{
 		std::function<void(const char*)> createFunc = [this](const char* name){
 			printf("Creating folder [%s]\n", name);
 #ifndef WIN32
@@ -286,32 +324,34 @@ void FileBrowser::listfiles()
 #else
 			mkdir((*this->pwd + "/" + name).c_str());
 #endif
-			this->listfiles();
+			this->needsReload = true;
 		};
-		mainDisplay->switchSubscreen(new TextQueryPopup("Enter new folder name", "Create", createFunc));
-	}));
+		auto popup = std::make_unique<TextQueryPopup>("Enter new folder name", "Create", createFunc);
+		RootDisplay::pushScreen(std::move(popup)); });
 
-	con->add((new Button("New File", Y_BUTTON, true))->setAction([this, mainDisplay](){
+	con->createNode<Button>("New File", Y_BUTTON, true)->setAction([this, mainDisplay]()
+		{
 		std::function<void(const char*)> createFunc = [this](const char* name){
 			printf("Creating file [%s]\n", name);
 			std::ofstream output((*this->pwd + "/" + name).c_str());
-			this->listfiles();
+			this->needsReload = true;
 		};
-		mainDisplay->switchSubscreen(new TextQueryPopup("Enter new file name", "Create", createFunc));
-	}));
+		auto popup = std::make_unique<TextQueryPopup>("Enter new file name", "Create", createFunc);
+		RootDisplay::pushScreen(std::move(popup)); });
 
-	con->position(SCREEN_WIDTH - con->width - this->x * 2, topOfList - 85 / SCALER);
+	con->position(SCREEN_WIDTH - con->width - this->x * 2, topOfList - 85);
 #if defined(_3DS) || defined(_3DS_MOCK)
 	con->position(SCREEN_WIDTH / 2 - con->width / 2 - this->x, topOfList - 30);
-	path->position(10 / SCALER, topOfList - 60);
+	path->position(10, topOfList - 60);
 
 	// for 3ds, the top screen will show the title initially
-	Container* titleCon = new Container(ROW_LAYOUT, 10);
-	titleCon->add((new ImageElement(RAMFS "res/icon_nobg.png"))->setSize(50, 50));
-	titleCon->add(new TextElement("VGEdit", 30, &white));
+	auto titleConPtr = std::make_unique<Container>(ROW_LAYOUT, 10);
+	auto titleCon = titleConPtr.get();
+	titleCon->createNode<ImageElement>(RAMFS "res/icon_nobg.png")->setSize(50, 50);
+	titleCon->createNode<TextElement>("VGEdit", 30, &white);
 	titleCon->constrain(ALIGN_CENTER_HORIZONTAL);
-	this->elements.push_back(titleCon);
+	this->addNode(std::move(titleConPtr));
 
 #endif
-	this->elements.push_back(con);
+	this->addNode(std::move(conPtr));
 }

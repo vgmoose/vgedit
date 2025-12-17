@@ -6,7 +6,8 @@
 #include "TextInputElement.hpp"
 #include "Toolbar.hpp"
 
-class EKeyboard;
+using namespace Chesto;
+
 class Toolbar;
 
 class EditorView : public Element
@@ -19,10 +20,10 @@ public:
 	Toolbar* toolbar = NULL;
 	std::string* copiedText = NULL;
 
-  	std::string* text = NULL;
+	std::string* text = NULL;
 
 	// set to false when scrolling away with touch controls
-  	bool keepCursorOnscreen = true;
+	bool keepCursorOnscreen = true;
 
 	// the big, main text field for the editor
 	TextInputElement* mainTextField;

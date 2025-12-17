@@ -1,7 +1,9 @@
-#include <string>
-#include "../libs/chesto/src/ListElement.hpp"
-#include "../libs/chesto/src/DrawUtils.hpp"
 #include "../edit/Editor.hpp"
+#include "../libs/chesto/src/DrawUtils.hpp"
+#include "../libs/chesto/src/ListElement.hpp"
+#include <string>
+
+using namespace Chesto;
 
 #ifndef TEXTINPUTELEMENT_H
 #define TEXTINPUTELEMENT_H

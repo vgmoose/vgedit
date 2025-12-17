@@ -1,6 +1,8 @@
 #include "../libs/chesto/src/ListElement.hpp"
 #include <string>
 
+using namespace Chesto;
+
 // the root of the filesystem, that we can't go above
 #if defined(PC)
 #define START_PATH "."
@@ -28,4 +30,5 @@ public:
 	std::string* pwd = NULL;
 	bool touchMode = true;
 	int cardsPerRow = 5;
+	bool needsReload = false;
 };

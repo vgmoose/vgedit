@@ -1,5 +1,8 @@
-#include <string>
 #include "../libs/chesto/src/Element.hpp"
+#include <memory>
+#include <string>
+
+using namespace Chesto;
 
 #if defined(_3DS) || defined(_3DS_MOCK)
 #define FILE_CARD_WIDTH 80
@@ -18,5 +21,5 @@ public:
 	void openMyFile();
 
 	bool isFolder = false;
-	std::string* path = NULL;
+	std::unique_ptr<std::string> path;
 };

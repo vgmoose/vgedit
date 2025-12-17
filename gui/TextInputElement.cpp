@@ -4,7 +4,7 @@
 
 TextInputElement::TextInputElement(Editor* editor)
 {
-  int size = 20 / SCALER;
+  int size = 20;
 
   auto renderer = (RootDisplay::mainDisplay)->renderer;
 

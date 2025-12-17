@@ -1,10 +1,12 @@
 #ifndef TOOLBAR_H
 #define TOOLBAR_H
 
-#include "../libs/chesto/src/TextElement.hpp"
 #include "../libs/chesto/src/Button.hpp"
 #include "../libs/chesto/src/EKeyboard.hpp"
+#include "../libs/chesto/src/TextElement.hpp"
 #include "EditorView.hpp"
+
+using namespace Chesto;
 
 class EditorView;
 
@@ -16,7 +18,8 @@ public:
 	Toolbar(const char* path, EditorView* editorView);
 	void initButtons(EditorView* editorView);
 	void setModified(bool modified);
-	
+
+	bool process(InputEvents* event);
 	void render(Element* parent);
 	bool commonHistoryLogic(bool isUndo, Editor* editor, TextInputElement* textField);
 	void stowKeyboard(EKeyboard* keyboard, TextInputElement* textField, EditorView* editorView);
@@ -33,6 +36,8 @@ public:
 	bool modified = false;
 	bool keyboardShowing = false;
 	bool displayedPrompt = false;
+
+	bool needsRebuild = false;
 };
 
 #endif

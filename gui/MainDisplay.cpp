@@ -2,6 +2,8 @@
 #include "EditorView.hpp"
 #include "FileBrowser.hpp"
 
+using namespace Chesto;
+
 #if defined(__WIIU__)
 #include "../libs/librpxloader/include/rpxloader/rpxloader.h"
 #endif
@@ -16,7 +18,7 @@
 
 MainDisplay::MainDisplay()
 {
-	RootDisplay::super();
+	// Call parent constructor (no super() call needed in C++)
 	backgroundColor = fromRGB(0x42, 0x45, 0x48);
 
 	// cursor pulsing looks better, but it makes the fans spin while idle!
@@ -34,13 +36,14 @@ void MainDisplay::openFile(bool isFolder, std::string* path)
 		browser->update_path(path->c_str());
 		browser->y = 0;
 		browser->highlighted = 0;
-		browser->listfiles();
+		browser->needsReload = true;
 	}
 	else
 	{
-		Editor* editor = new Editor(path->c_str());
-		editorView = new EditorView(editor);
-		this->elements.push_back(editorView);
+		auto editor = std::make_unique<Editor>(path->c_str());
+		auto editorViewPtr = std::make_unique<EditorView>(editor.release());
+		editorView = editorViewPtr.get();
+		this->addNode(std::move(editorViewPtr));
 	}
 }
 
@@ -57,27 +60,31 @@ void MainDisplay::closeEditor()
 		// The file browser was never created, so let's leave the whole app
 		// (single file mode)
 
-		if (callbackPath != "") {
+		if (callbackPath != "")
+		{
 			std::cout << "Launching " << callbackPath << std::endl;
 			bool success = false;
 
-			#ifdef __WIIU__
+#ifdef __WIIU__
 			RPXLoaderStatus ret = RPXLoader_InitLibrary();
-			if (ret == RPX_LOADER_RESULT_SUCCESS) {
+			if (ret == RPX_LOADER_RESULT_SUCCESS)
+			{
 				auto res = RPXLoader_LaunchHomebrew(callbackPath.c_str());
 				success = res == RPX_LOADER_RESULT_SUCCESS;
 			}
-			#endif
+#endif
 
-			#ifdef SWITCH
+#ifdef SWITCH
 			// use envSetNextLoad to set the path to the app to launch
-			if (envHasNextLoad()) {
+			if (envHasNextLoad())
+			{
 				auto res = envSetNextLoad(callbackPath.c_str(), editorView->editor->filename); // give it the filename of the file we edited
 				success = R_SUCCEEDED(res);
 			}
-			#endif
+#endif
 
-			if (!success) {
+			if (!success)
+			{
 				std::cout << "Failed to launch " << callbackPath << std::endl;
 			}
 		}
@@ -86,8 +93,7 @@ void MainDisplay::closeEditor()
 	}
 
 	// otherwise, we'll go back to the file browser (this is _probably_ safe)
-	elements.erase(elements.begin() + 1); // second element should be the editor (TODO: something smarter)
-	editorView->wipeAll(); // destroy subelements
-	delete editorView;
-	editorView = NULL;
+	elements.erase(editorView);
+
+	editorView = NULL; // TODO: is this still needed?
 }
