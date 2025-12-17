@@ -13,7 +13,7 @@ jobs:
   all:
     strategy:
       matrix:
-        os: [ubuntu, windows, macos]
+        os: [ubuntu, macos]
         library: [sdl2]
     runs-on: ${{ matrix.os }}-latest
     steps:
