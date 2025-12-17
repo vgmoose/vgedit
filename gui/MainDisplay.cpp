@@ -93,7 +93,6 @@ void MainDisplay::closeEditor()
 	}
 
 	// otherwise, we'll go back to the file browser (this is _probably_ safe)
-	elements.erase(editorView);
-
+	remove(editorView);
 	editorView = NULL; // TODO: is this still needed?
 }
